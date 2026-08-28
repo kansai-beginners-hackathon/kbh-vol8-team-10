@@ -1,0 +1,76 @@
+import Link from "next/link";
+
+const STEPS = [
+  { no: "01", title: "最寄り駅を入れる", body: "メンバー全員の帰る駅を入れる。名前はあってもなくてもいい。" },
+  { no: "02", title: "候補地を選ぶ", body: "四条・京都駅・烏丸御池……今夜どこで飲むか、候補を複数えらぶ。" },
+  { no: "03", title: "いちばん長くいられる場所が出る", body: "全員が終電で帰れる中で、解散が一番遅くなる場所を順位で出す。" },
+];
+
+const DEMO_HREF = "/app?m=田中:鞍馬,佐藤:びわ湖浜大津,鈴木:大阪梅田,高橋:国際会館&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi";
+
+export default function LandingPage() {
+  return (
+    <main className="shell">
+      <header className="topbar">
+        <Link href="/" className="brand">もうちょっと</Link>
+        <nav className="topbar-nav">
+          <span className="status"><i />京都・平日ダイヤ</span>
+          <Link href="/app" className="btn btn-primary">始める</Link>
+        </nav>
+      </header>
+
+      <section className="hero">
+        <p className="eyebrow">TONIGHT&apos;S GROUP DECISION</p>
+        <h1>みんなでいられる時間を、<em>もうちょっと。</em></h1>
+        <p className="lede">
+          最寄り駅と候補地を入れるだけで、この人数が<b>一番長く一緒にいられる場所</b>がわかります。<br />
+          ログイン不要、30秒。
+        </p>
+        <div className="hero-actions">
+          <Link href="/app" className="btn btn-primary btn-lg">始める</Link>
+          <Link href={DEMO_HREF} className="btn btn-ghost btn-lg">例を見る</Link>
+        </div>
+      </section>
+
+      <section className="steps">
+        {STEPS.map((step) => (
+          <div className="panel step-card" key={step.no}>
+            <span className="step">{step.no}</span>
+            <h2>{step.title}</h2>
+            <p>{step.body}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="insight panel">
+        <div>
+          <p className="eyebrow">THE LAST TRAIN TRUTH</p>
+          <h2>「終電」は、駅ごとに違う。</h2>
+          <p>
+            駅に掲示されている最終列車は、途中の駅までしか行かないことがある。
+            出町柳の掲示は 23:50 でも、鞍馬まで帰る人の本当の最終は 22:30。
+            <b>80分</b> の差がある。乗換案内は行き先を入れれば正しく答えるが、人は「終電」を駅単位で覚えている。
+          </p>
+        </div>
+        <div className="truth">
+          <span>出町柳・叡山電車</span>
+          <b>掲示されている最終</b>
+          <s className="mono">23:50</s>
+          <b>鞍馬に着く最終</b>
+          <strong className="mono">22:30</strong>
+        </div>
+      </section>
+
+      <section className="closing">
+        <h2>もうちょっといたいなら、<br />終電が遅くなる場所で遊べばいいやん。</h2>
+        <p>誰かの終電に合わせて解散するんじゃなくて、今日のメンツでいちばん長くいられる場所を選ぶ。それだけで、あと30分。</p>
+        <Link href="/app" className="btn btn-primary btn-lg">始める</Link>
+      </section>
+
+      <footer>
+        <span>データ: 京都市交通局ほか各社公開時刻表（モック段階ではダミー値）</span>
+        <span>※ 遅延・運休・臨時ダイヤには対応しません</span>
+      </footer>
+    </main>
+  );
+}

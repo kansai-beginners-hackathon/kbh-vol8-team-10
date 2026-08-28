@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>モウチョット — この人数が一番長くいられる場所</title>
+<meta name="description" content="メンバーの最寄り駅と候補地を入れると、一番長くいられる場所が出ます。">
+<meta name="theme-color" content="#07080C">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@500;700;900&family=Geist:wght@400;500;600;800&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   トークン
+   ============================================================ */
+:root{
+  --bg:#07080C;
+  --surface:rgba(255,255,255,.035);
+  --surface-hi:rgba(255,255,255,.07);
+  --line:rgba(255,255,255,.08);
+  --line-hi:rgba(255,255,255,.16);
+  --fg:#F4F5F9;
+  --muted:#8A90A3;
+  --dim:#5B6172;
+
+  --accent:#FF9F1C;
+  --accent-2:#FF3D81;
+  --accent-3:#8B5CF6;
+  --grad:linear-gradient(115deg,#FFD166 0%,#FF9F1C 35%,#FF3D81 75%,#8B5CF6 100%);
+  --danger:#FF5470;
+
+  --font-jp:"Zen Kaku Gothic New", system-ui, -apple-system, sans-serif;
+  --font-num:"Geist", "Zen Kaku Gothic New", system-ui, sans-serif;
+
+  --r-xl:28px; --r-lg:20px; --r-md:14px; --r-pill:999px;
+  --ease:cubic-bezier(.2,.8,.2,1);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--fg);
+  font-family:var(--font-jp);font-size:15px;line-height:1.7;font-weight:500;
+  -webkit-font-smoothing:antialiased;
+  min-height:100dvh;position:relative;overflow-x:hidden;
+}
+/* 夜のグロー（backdrop-filterは使わない。gradientだけ） */
+body::before{
+  content:"";position:fixed;inset:-20% -10% auto -10%;height:70vh;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(60% 55% at 18% 20%, rgba(255,159,28,.28), transparent 60%),
+    radial-gradient(45% 45% at 78% 10%, rgba(255,61,129,.22), transparent 60%),
+    radial-gradient(50% 50% at 60% 45%, rgba(139,92,246,.18), transparent 60%);
+  filter:blur(10px);
+}
+/* ノイズ（SVG data URI・軽い） */
+body::after{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.num{font-family:var(--font-num);font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1;letter-spacing:-.01em}
+.wrap{max-width:1200px;margin:0 auto;padding:0 20px 96px}
+
+/* ---------- ヘッダー ---------- */
+header{display:flex;align-items:center;justify-content:space-between;padding:22px 0 34px}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:17px;letter-spacing:.02em}
+.logo i{width:10px;height:10px;border-radius:50%;background:var(--grad);box-shadow:0 0 18px rgba(255,159,28,.8)}
+.logo span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font-family:var(--font-num);font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+
+button{font-family:inherit;cursor:pointer;color:inherit;transition:all .18s var(--ease)}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 18px;
+  background:var(--fg);color:#0A0B10;border:none;border-radius:var(--r-pill);
+  font-size:14px;font-weight:700;
+}
+.btn:hover{transform:translateY(-1px);box-shadow:0 10px 30px -10px rgba(255,255,255,.35)}
+.btn:active{transform:translateY(0)}
+
+/* ---------- 見出し ---------- */
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.eyebrow .no{font-family:var(--font-num);font-size:11px;font-weight:600;letter-spacing:.14em;color:var(--accent)}
+.eyebrow .t{font-size:13px;font-weight:700;color:var(--muted);letter-spacing:.04em}
+
+/* ---------- 入力パネル ---------- */
+.panel{
+  display:grid;gap:28px;padding:26px;margin-bottom:22px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+}
+@media(min-width:960px){.panel{grid-template-columns:1.2fr 1fr .8fr;gap:36px;padding:30px 34px}}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 6px 0 16px;
+  background:var(--surface-hi);border:1px solid var(--line);border-radius:var(--r-pill);
+  font-size:14px;font-weight:700;
+}
+.chip .x{width:30px;height:30px;border-radius:50%;background:transparent;border:none;color:var(--muted);font-size:16px;line-height:1;display:grid;place-items:center}
+.chip .x:hover{background:rgba(255,84,112,.15);color:var(--danger)}
+.chip.bottleneck{border-color:rgba(255,84,112,.6);box-shadow:0 0 0 3px rgba(255,84,112,.12)}
+.chip.bottleneck .name{color:var(--danger)}
+
+.chip-toggle{
+  height:42px;padding:0 16px;border-radius:var(--r-pill);
+  background:transparent;border:1px solid var(--line);color:var(--muted);font-size:14px;font-weight:700;
+}
+.chip-toggle:hover{border-color:var(--line-hi);color:var(--fg)}
+.chip-toggle[aria-pressed="true"]{background:var(--fg);color:#0A0B10;border-color:var(--fg)}
+
+.add{display:flex;gap:8px;margin-top:10px;max-width:440px}
+.add input{
+  flex:1;height:44px;padding:0 16px;background:rgba(0,0,0,.35);color:var(--fg);
+  border:1px solid var(--line);border-radius:var(--r-pill);font:inherit;font-size:14px;
+}
+.add input::placeholder{color:var(--dim)}
+.add input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(255,159,28,.18)}
+.add button{height:44px;padding:0 18px;border-radius:var(--r-pill);background:var(--surface-hi);border:1px solid var(--line);font-size:14px;font-weight:700}
+.add button:hover{background:var(--fg);color:#0A0B10;border-color:var(--fg)}
+.hint{font-size:13px;color:var(--muted);margin-top:8px}
+.hint.warn{color:var(--accent)}
+
+.cond{display:grid;gap:14px}
+.cond .row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted)}
+.cond input[type=time]{height:38px;background:rgba(0,0,0,.35);color:var(--fg);border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;font-weight:700}
+.cond input[type=range]{accent-color:var(--accent);width:120px}
+.cond b{color:var(--fg);font-weight:700}
+.cond .pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:var(--r-pill);background:var(--surface-hi);font-size:12px;font-weight:700;color:var(--fg)}
+.cond .pill i{width:6px;height:6px;border-radius:50%;background:#35D07F}
+
+/* ============================================================
+   ベント
+   ============================================================ */
+.bento{display:grid;gap:14px}
+@media(min-width:960px){
+  .t-winner{min-height:360px}
+  .bento{grid-template-columns:repeat(12,1fr);grid-auto-rows:minmax(0,auto)}
+  .t-winner{grid-column:1/8;grid-row:1/3}
+  .t-reason{grid-column:8/13;grid-row:1}
+  .t-lie{grid-column:8/13;grid-row:2}
+  .t-rank{grid-column:1/8;grid-row:3/5}
+  .t-tl{grid-column:8/13;grid-row:3}
+  .t-taxi{grid-column:8/13;grid-row:4}
+}
+.tile{
+  position:relative;padding:26px;
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--r-xl);
+  transition:border-color .2s var(--ease),transform .2s var(--ease);
+}
+.tile:hover{border-color:var(--line-hi)}
+
+/* 1位タイル：グラデの縁光 */
+.t-winner{
+  overflow:hidden;padding:30px 30px 28px;display:flex;flex-direction:column;justify-content:space-between;
+  background:
+    radial-gradient(90% 70% at 100% 100%, rgba(139,92,246,.22), transparent 60%),
+    radial-gradient(70% 60% at 0% 0%, rgba(255,159,28,.20), transparent 60%),
+    var(--surface);
+}
+.t-winner::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;padding:1px;pointer-events:none;
+  background:var(--grad);opacity:.55;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;
+}
+.rank-head{font-size:14px;font-weight:700;color:var(--muted)}
+.rank-head b{color:var(--fg)}
+.winner-crown{
+  display:inline-flex;align-items:center;gap:8px;height:28px;padding:0 12px;margin:18px 0 10px;
+  border-radius:var(--r-pill);background:rgba(255,159,28,.14);color:var(--accent);
+  font-family:var(--font-num);font-size:11px;font-weight:600;letter-spacing:.14em;
+}
+.winner-name{
+  display:block;font-weight:900;line-height:.95;letter-spacing:-.02em;
+  font-size:clamp(64px,14vw,148px);
+  background:var(--grad);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 6s linear infinite;
+}
+@keyframes shine{to{background-position:200% 0}}
+.winner-time{display:flex;align-items:baseline;gap:10px;margin-top:22px;font-size:15px;color:var(--muted);font-weight:700}
+.winner-time b{font-family:var(--font-num);font-size:clamp(30px,6vw,44px);font-weight:600;color:var(--fg);letter-spacing:-.03em}
+.winner-meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:10px;font-size:13px;color:var(--muted)}
+.winner-meta b{color:var(--danger);font-weight:700}
+
+/* 理由タイル */
+.reason{font-size:clamp(18px,3.2vw,22px);font-weight:700;line-height:1.45;letter-spacing:-.01em}
+.reason b{font-family:var(--font-num);font-weight:800;font-size:2.2em;line-height:1;letter-spacing:-.04em;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.reason .place{color:var(--fg)}
+
+/* ランキング */
+.rank-list{display:grid;gap:8px}
+.rank-row{
+  display:grid;grid-template-columns:36px 1fr auto;align-items:center;gap:14px;width:100%;
+  padding:14px 16px;border-radius:var(--r-lg);text-align:left;
+  background:transparent;border:1px solid transparent;font-family:inherit;
+}
+.rank-row:hover{background:var(--surface-hi)}
+.rank-row[aria-pressed="true"]{background:var(--surface-hi);border-color:var(--line-hi)}
+.rank-no{font-family:var(--font-num);font-size:13px;font-weight:600;color:var(--dim);
+  width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:rgba(0,0,0,.35)}
+.rank-main{min-width:0}
+.rank-name{display:block;font-size:16px;font-weight:900;letter-spacing:-.01em}
+.rank-bar{display:block;height:4px;margin-top:8px;border-radius:var(--r-pill);background:rgba(255,255,255,.06);overflow:hidden}
+.rank-bar i{display:block;height:100%;border-radius:var(--r-pill);background:var(--muted);transition:width .6s var(--ease)}
+.rank-row[aria-pressed="true"] .rank-bar i{background:var(--grad)}
+.rank-who{display:block;font-size:12px;color:var(--muted);margin-top:6px}
+.rank-right{text-align:right;white-space:nowrap}
+.rank-time{display:block;font-family:var(--font-num);font-size:18px;font-weight:600;letter-spacing:-.02em}
+.rank-diff{display:block;font-family:var(--font-num);font-size:12px;font-weight:500;color:var(--danger);margin-top:2px}
+.rank-dead{opacity:.45}
+.rank-dead .rank-time{color:var(--danger);font-size:13px}
+.flat{margin-top:12px;padding:12px 16px;border:1px dashed rgba(255,159,28,.5);border-radius:var(--r-md);color:var(--accent);font-size:13px;font-weight:700}
+
+/* 終電の嘘 */
+.lie-name{font-size:13px;color:var(--muted);font-weight:700}
+.lie-name b{color:var(--fg)}
+.lie-row{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:6px}
+.lie-think{font-family:var(--font-num);font-size:20px;font-weight:500;color:var(--dim);text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--danger)}
+.lie-real{font-family:var(--font-num);font-size:clamp(40px,8vw,56px);font-weight:800;line-height:1;letter-spacing:-.04em}
+.lie-gap{margin-top:12px;font-size:13px;color:var(--muted)}
+.lie-gap b{color:var(--fg);font-family:var(--font-num);font-weight:800;font-size:15px}
+.lie-others{margin-top:16px;padding-top:14px;border-top:1px solid var(--line);display:grid;gap:8px}
+.lie-other{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted)}
+.lie-other b{color:var(--fg);font-weight:700}
+
+/* タイムライン */
+.tl{display:grid;gap:12px}
+.tl-row{display:grid;grid-template-columns:96px 1fr 54px;align-items:center;gap:12px;font-size:13px}
+.tl-name{color:var(--muted);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tl-track{height:8px;border-radius:var(--r-pill);background:rgba(255,255,255,.06);overflow:hidden}
+.tl-bar{height:100%;border-radius:var(--r-pill);background:var(--muted);transition:width .6s var(--ease)}
+.tl-row.is-bottleneck .tl-name,.tl-row.is-bottleneck .tl-time{color:var(--danger)}
+.tl-row.is-bottleneck .tl-bar{background:var(--danger);box-shadow:0 0 14px rgba(255,84,112,.6)}
+.tl-time{text-align:right;color:var(--muted);font-family:var(--font-num);font-weight:600}
+.tl-axis{display:flex;justify-content:space-between;font-size:11px;color:var(--dim);margin-top:10px;font-family:var(--font-num);font-weight:500}
+
+/* タクシー */
+.taxi{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-top:6px}
+.taxi b{font-family:var(--font-num);font-size:30px;font-weight:800;letter-spacing:-.03em;
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.taxi .sep{color:var(--dim)}
+
+footer{margin-top:40px;font-size:12px;color:var(--dim);line-height:1.8;max-width:760px}
+footer p+p{margin-top:4px}
+
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);
+  background:var(--fg);color:#0A0B10;font-size:13px;font-weight:700;padding:12px 20px;border-radius:var(--r-pill);
+  opacity:0;pointer-events:none;transition:opacity .2s var(--ease),transform .2s var(--ease)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.rise{animation:rise .5s var(--ease) both}
+.rise:nth-child(2){animation-delay:.05s}.rise:nth-child(3){animation-delay:.1s}
+.rise:nth-child(4){animation-delay:.15s}.rise:nth-child(5){animation-delay:.2s}.rise:nth-child(6){animation-delay:.25s}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo"><i></i>モウ<span>チョット</span></div>
+    <button class="btn" id="share">リンクをコピー</button>
+  </header>
+
+  <!-- 入力 -->
+  <div class="panel">
+    <div>
+      <div class="eyebrow"><span class="no">01</span><span class="t">メンバーの最寄り駅</span></div>
+      <div class="chips" id="members"></div>
+      <div class="add">
+        <input id="stationInput" list="stationList" placeholder="駅名を入れる（例：鞍馬）" autocomplete="off">
+        <datalist id="stationList"></datalist>
+        <button id="addBtn">追加</button>
+      </div>
+      <div class="hint" id="addHint"></div>
+    </div>
+    <div>
+      <div class="eyebrow"><span class="no">02</span><span class="t">候補地（複数えらべる）</span></div>
+      <div class="chips" id="venues"></div>
+    </div>
+    <div class="cond">
+      <div class="eyebrow" style="margin-bottom:0"><span class="no">03</span><span class="t">条件</span></div>
+      <div class="row"><span>集合</span><input type="time" id="meetAt" value="19:00"></div>
+      <div class="row"><span>店から駅まで</span><span style="display:flex;align-items:center;gap:10px"><input type="range" id="walk" min="0" max="15" step="1" value="5"><b class="num" id="walkVal">5分</b></span></div>
+      <div class="row"><span>ダイヤ</span><span class="pill"><i></i>平日</span></div>
+    </div>
+  </div>
+
+  <div class="bento">
+    <div class="tile t-winner rise" id="rankCard">
+      <div>
+        <div class="rank-head" id="rankHead"></div>
+        <div class="winner" id="winner"></div>
+      </div>
+    </div>
+    <div class="tile t-reason rise"><div class="reason" id="reason"></div></div>
+    <div class="tile t-lie rise">
+      <div class="eyebrow"><span class="no">—</span><span class="t">終電の嘘</span></div>
+      <div id="lieBody"></div>
+    </div>
+    <div class="tile t-rank rise">
+      <div class="eyebrow"><span class="no">RANK</span><span class="t">2位以下</span></div>
+      <div class="rank-list" id="rankList"></div>
+      <div id="flatNote"></div>
+    </div>
+    <div class="tile t-tl rise">
+      <div class="eyebrow"><span class="no">—</span><span class="t" id="tlLabel">誰が何時まで居られるか</span></div>
+      <div class="tl" id="timeline"></div>
+      <div class="tl-axis" id="tlAxis"></div>
+    </div>
+    <div class="tile t-taxi rise">
+      <div class="eyebrow"><span class="no">—</span><span class="t">時間を金で買う</span></div>
+      <div id="taxi"></div>
+    </div>
+  </div>
+
+  <footer>
+    <p><b>このページはモックです。</b>時刻はデモ用のダミー値で、実際の時刻表とは一致しません。</p>
+    <p>本番では各社の公開時刻表と Yahoo!乗換案内の終電検索から写した値を使い、そのURLと取得日をここに出します。</p>
+    <p>徒歩・乗換は概算で、必ず安全側（早め）に倒しています。臨時ダイヤ・遅延には対応しません。平日ダイヤのみ。</p>
+  </footer>
+
+</div>
+<div class="toast" id="toast">リンクをコピーしました</div>
+<script>
+/* ============================================================
+   データ（要件定義 §5・§6 の構造。値はすべてダミー）
+   ============================================================ */
+
+// ハブ = 支線に乗り換える駅
+const HUBS = {
+  demachiyanagi:"出町柳", sanjo:"三条", kawaramachi:"京都河原町",
+  karasumaoike:"烏丸御池", shijo:"四条", kyoto:"京都", shijoomiya:"四条大宮"
+};
+
+// 駅 = 帰着経路の集合。routes が複数ある人は「一番遅くなる経路」が採用される
+const STATIONS = {
+  "鞍馬":        {routes:[{hub:"demachiyanagi",transferMin:5,last:"22:30",posted:"23:50",postedTo:"修学院"}]},
+  "八瀬比叡山口":{routes:[{hub:"demachiyanagi",transferMin:5,last:"23:02",posted:"23:50",postedTo:"修学院"}]},
+  "市原":        {routes:[{hub:"demachiyanagi",transferMin:5,last:"23:15",posted:"23:50",postedTo:"修学院"}]},
+  "宝ヶ池":      {routes:[{hub:"demachiyanagi",transferMin:5,last:"23:30",posted:"23:50",postedTo:"修学院"}]},
+  "大阪梅田":    {routes:[{hub:"kawaramachi",transferMin:3,last:"23:15",posted:"23:50",postedTo:"正雀"},
+                          {hub:"kyoto",transferMin:8,last:"23:58",posted:"23:58",postedTo:"大阪"}]},
+  "桂":          {routes:[{hub:"kawaramachi",transferMin:3,last:"23:40",posted:"23:50",postedTo:"正雀"}]},
+  "長岡天神":    {routes:[{hub:"kawaramachi",transferMin:3,last:"23:28",posted:"23:50",postedTo:"正雀"}]},
+  "びわ湖浜大津":{routes:[{hub:"karasumaoike",transferMin:3,last:"23:12",posted:"23:55",postedTo:"六地蔵"}]},
+  "太秦天神川":  {routes:[{hub:"karasumaoike",transferMin:3,last:"23:50",posted:"23:55",postedTo:"六地蔵"}]},
+  "山科":        {routes:[{hub:"karasumaoike",transferMin:3,last:"23:47",posted:"23:55",postedTo:"六地蔵"},
+                          {hub:"kyoto",transferMin:8,last:"23:52",posted:"23:52",postedTo:"米原"}]},
+  "国際会館":    {routes:[{hub:"shijo",transferMin:3,last:"23:47",posted:"23:59",postedTo:"竹田"}]},
+  "北大路":      {routes:[{hub:"shijo",transferMin:3,last:"23:54",posted:"23:59",postedTo:"竹田"}]},
+  "竹田":        {routes:[{hub:"shijo",transferMin:3,last:"23:59",posted:"23:59",postedTo:"竹田"},
+                          {hub:"kyoto",transferMin:8,last:"23:40",posted:"23:40",postedTo:"奈良"}]},
+  "枚方市":      {routes:[{hub:"sanjo",transferMin:5,last:"23:47",posted:"24:05",postedTo:"樟葉"}]},
+  "中書島":      {routes:[{hub:"sanjo",transferMin:5,last:"23:58",posted:"24:05",postedTo:"樟葉"}]},
+  "嵐山":        {routes:[{hub:"shijoomiya",transferMin:5,last:"23:10",posted:"23:30",postedTo:"帷子ノ辻"}]},
+  "亀岡":        {routes:[{hub:"kyoto",transferMin:8,last:"23:11",posted:"23:58",postedTo:"高槻"}]},
+  "草津":        {routes:[{hub:"kyoto",transferMin:8,last:"23:34",posted:"24:00",postedTo:"野洲"}]}
+};
+
+// 候補地 → ハブ：Yahoo!終電検索から写す2数字（lastDepart / transitMin）
+// null = 候補地がハブそのもの（無制限）
+const V = (id,name,toHub)=>({id,name,toHub});
+const VENUES = [
+  V("shijo","四条",{
+    shijo:{t:0,d:null}, karasumaoike:{t:5,d:"23:55"}, kawaramachi:{t:6,d:"24:10"},
+    sanjo:{t:12,d:"23:50"}, demachiyanagi:{t:18,d:"23:35"}, kyoto:{t:8,d:"23:47"}, shijoomiya:{t:12,d:"23:50"}}),
+  V("kyoto","京都駅",{
+    kyoto:{t:0,d:null}, shijo:{t:7,d:"23:47"}, karasumaoike:{t:12,d:"23:47"},
+    kawaramachi:{t:15,d:"23:40"}, sanjo:{t:18,d:"23:35"}, demachiyanagi:{t:26,d:"23:25"}, shijoomiya:{t:18,d:"23:35"}}),
+  V("karasumaoike","烏丸御池",{
+    karasumaoike:{t:0,d:null}, shijo:{t:5,d:"24:00"}, kawaramachi:{t:10,d:"23:55"},
+    sanjo:{t:9,d:"23:50"}, demachiyanagi:{t:16,d:"23:40"}, kyoto:{t:11,d:"23:50"}, shijoomiya:{t:13,d:"23:45"}}),
+  V("sanjo","三条",{
+    sanjo:{t:0,d:null}, karasumaoike:{t:8,d:"23:55"}, shijo:{t:11,d:"23:52"},
+    kawaramachi:{t:9,d:"23:55"}, demachiyanagi:{t:8,d:"23:52"}, kyoto:{t:17,d:"23:45"}, shijoomiya:{t:17,d:"23:40"}}),
+  V("demachiyanagi","出町柳",{
+    demachiyanagi:{t:0,d:null}, sanjo:{t:8,d:"23:55"}, karasumaoike:{t:16,d:"23:45"},
+    shijo:{t:19,d:"23:42"}, kawaramachi:{t:17,d:"23:45"}, kyoto:{t:26,d:"23:35"}, shijoomiya:{t:25,d:"23:30"}}),
+  V("kitaoji","北大路",{
+    shijo:{t:9,d:"23:50"}, karasumaoike:{t:12,d:"23:47"}, demachiyanagi:{t:17,d:"23:40"},
+    sanjo:{t:20,d:"23:35"}, kawaramachi:{t:15,d:"23:45"}, kyoto:{t:18,d:"23:40"}, shijoomiya:{t:22,d:"23:32"}}),
+  V("yamashina","山科",{
+    karasumaoike:{t:10,d:"23:53"}, kyoto:{t:8,d:"23:55"}, sanjo:{t:16,d:"23:45"},
+    shijo:{t:15,d:"23:45"}, kawaramachi:{t:20,d:"23:38"}, demachiyanagi:{t:24,d:"23:30"}, shijoomiya:{t:24,d:"23:30"}}),
+  V("katsura","桂",{
+    kawaramachi:{t:13,d:"23:50"}, shijo:{t:20,d:"23:38"}, karasumaoike:{t:22,d:"23:35"},
+    kyoto:{t:22,d:"23:35"}, sanjo:{t:26,d:"23:28"}, demachiyanagi:{t:32,d:"23:20"}, shijoomiya:{t:16,d:"23:42"}})
+];
+
+const TAXI_KM = {"鞍馬":17,"八瀬比叡山口":11,"市原":13,"宝ヶ池":7,"大阪梅田":45,"桂":9,"長岡天神":14,
+  "びわ湖浜大津":13,"太秦天神川":6,"山科":7,"国際会館":9,"北大路":4,"竹田":7,"枚方市":30,
+  "中書島":9,"嵐山":13,"亀岡":22,"草津":30};
+
+/* ---------- 時刻（24時台も分に直して比較する・§6 決定5） ---------- */
+const toMin = t => {const [h,m]=t.split(":").map(Number); return h*60+m;};
+const toStr = m => {const h=Math.floor(m/60)%24, mm=((m%60)+60)%60;
+  return String(h).padStart(2,"0")+":"+String(mm).padStart(2,"0");};
+
+/* ============================================================
+   計算（要件定義 §6 の式）
+   最遅出発(v,m) = max over 経路( min(支線最終 − transitMin − transferMin, lastDepart) ) − walk
+   ============================================================ */
+function latestLeave(stationName, venue, walk){
+  const st = STATIONS[stationName];
+  if(!st) return null;
+  let best = null;
+  for(const r of st.routes){
+    const cell = venue.toHub[r.hub];
+    if(!cell) continue;                                   // この経路は使えない → 除外
+    const viaSub  = toMin(r.last) - cell.t - r.transferMin;  // ① 支線が縛る
+    const viaMain = cell.d ? toMin(cell.d) : Infinity;       // ② 幹線が縛る
+    const v = Math.min(viaSub, viaMain);
+    if(best === null || v > best) best = v;               // 一番遅くなる経路を採る
+  }
+  if(best === null) return null;                          // 全経路が除外 → 帰れない
+  return best - walk;
+}
+
+function resultFor(venue, members, walk){
+  const rows = [];
+  for(const n of members){
+    const leave = latestLeave(n, venue, walk);
+    if(leave === null) return {dead:true, deadWho:n};
+    rows.push({name:n, leave});
+  }
+  rows.sort((a,b)=>a.leave-b.leave);
+  return {dead:false, rows, dissolve:rows.length?rows[0].leave:null, bottleneck:rows.length?rows[0].name:null};
+}
+
+// 深夜割増込みのタクシー概算（1kmまで500円・以降246mごと100円・22-5時は2割増）
+function taxiFare(station){
+  const km = (TAXI_KM[station] ?? 8) * 1.3;
+  return Math.round((500 + Math.max(0,km-1)/0.246*100) * 1.2 / 100) * 100;
+}
+
+/* ---------- 状態（すべてURLに入れる） ---------- */
+let members = [], venueIds = [], selectedId = null, meetAt = "19:00", walk = 5;
+let prevWinnerMin = null;
+
+function readURL(){
+  const p = new URLSearchParams(location.search);
+  const m = (p.get("m")||"").split(",").map(s=>s.trim()).filter(s=>STATIONS[s]);
+  members = m.length ? m : ["鞍馬","びわ湖浜大津","大阪梅田","国際会館","太秦天神川","枚方市"];
+  const v = (p.get("v")||"").split(",").filter(id=>VENUES.some(x=>x.id===id));
+  venueIds = v.length ? v : ["shijo","kyoto","karasumaoike","sanjo","demachiyanagi"];
+  meetAt = /^\d{1,2}:\d{2}$/.test(p.get("t")||"") ? p.get("t") : "19:00";
+  walk = Math.min(15, Math.max(0, Number(p.get("w")) || 5));
+}
+function writeURL(){
+  const p = new URLSearchParams();
+  p.set("m", members.join(",")); p.set("v", venueIds.join(","));
+  p.set("t", meetAt); p.set("w", String(walk));
+  history.replaceState(null, "", location.pathname + "?" + p.toString());
+}
+
+const $ = id => document.getElementById(id);
+
+/* ---------- 数字を数えながら変える（順位が入れ替わる瞬間を見せる） ---------- */
+let animId=null;
+function setWinnerTime(el, target){
+  const cur = el.dataset.min ? Number(el.dataset.min) : target;
+  const paint = m => el.textContent = toStr(m);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches || cur===target){
+    el.dataset.min=target; paint(target); return;
+  }
+  cancelAnimationFrame(animId);
+  const t0=performance.now(), dur=400;
+  const step=now=>{
+    const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
+    paint(Math.round(cur+(target-cur)*e));
+    if(p<1) animId=requestAnimationFrame(step); else el.dataset.min=target;
+  };
+  animId=requestAnimationFrame(step);
+}
+
+/* ============================================================
+   描画
+   ============================================================ */
+function render(){
+  const chosen = VENUES.filter(v=>venueIds.includes(v.id));
+  const results = chosen.map(v=>({v, r:resultFor(v, members, walk)}));
+  const alive = results.filter(x=>!x.r.dead && x.r.dissolve!=null).sort((a,b)=>b.r.dissolve-a.r.dissolve);
+  const dead  = results.filter(x=>x.r.dead);
+
+  if(selectedId===null || !alive.some(x=>x.v.id===selectedId)) selectedId = alive.length? alive[0].v.id : null;
+  const sel = alive.find(x=>x.v.id===selectedId);
+
+  /* 1. メンバー（選択中の候補地で詰む人を赤くする） */
+  const bn = sel ? sel.r.bottleneck : null;
+  $("members").innerHTML = members.map(n=>`
+    <span class="chip ${n===bn?"bottleneck":""}">
+      <span class="name">${n}</span>
+      <button class="x" data-remove="${n}" aria-label="${n} を削除">×</button>
+    </span>`).join("") || `<span class="hint">駅を追加してください</span>`;
+
+  /* 2. 候補地 */
+  $("venues").innerHTML = VENUES.map(v=>`
+    <button class="chip-toggle" aria-pressed="${venueIds.includes(v.id)}" data-venue="${v.id}">${v.name}</button>`).join("");
+
+  $("walkVal").textContent = walk + "分";
+
+  /* 3. ランキング（主役） */
+  if(alive.length===0){
+    $("rankHead").textContent = "";
+    $("winner").innerHTML = `<div class="hint">メンバーと候補地を選ぶとランキングが出ます</div>`;
+    $("rankList").innerHTML = ""; $("flatNote").innerHTML = "";
+    $("reason").textContent = ""; $("lieBody").innerHTML = "";
+    $("timeline").innerHTML = ""; $("tlAxis").innerHTML = ""; $("taxi").innerHTML = "";
+    prevWinnerMin = null;
+    writeURL(); return;
+  }
+
+  const top = alive[0], worst = alive[alive.length-1];
+  const spread = top.r.dissolve - worst.r.dissolve;
+
+  $("rankHead").innerHTML = `この<b>${members.length}人</b>が一番長くいられる場所`;
+
+  const stay = top.r.dissolve - toMin(meetAt);
+  $("winner").innerHTML = `
+    <div class="winner-crown">#1 BEST PLACE</div>
+    <span class="winner-name">${top.v.name}</span>
+    <div class="winner-time"><b class="num" id="winTime">${toStr(top.r.dissolve)}</b><span>まで一緒にいられる</span></div>
+    <div class="winner-meta">
+      <span><span class="num">${meetAt}</span> から <span class="num">${Math.floor(stay/60)}h${String(stay%60).padStart(2,"0")}</span></span>
+      <span>最初に詰むのは <b>${top.r.bottleneck}の人</b></span>
+    </div>`;
+  const wt = $("winTime");
+  // 順位が入れ替わった瞬間を数字の動きで見せる
+  if(prevWinnerMin !== null && prevWinnerMin !== top.r.dissolve){
+    wt.dataset.min = prevWinnerMin;
+    setWinnerTime(wt, top.r.dissolve);
+  } else {
+    wt.dataset.min = top.r.dissolve;
+  }
+  prevWinnerMin = top.r.dissolve;
+
+  /* 2位以下（クリックで詳細を切り替え） */
+  $("rankList").innerHTML = alive.slice(1).map((x,i)=>{
+    const diff = x.r.dissolve - top.r.dissolve;                     // 1位との差（マイナス）
+    const w = spread>0 ? ((x.r.dissolve-worst.r.dissolve)/spread)*100 : 100;
+    return `<button class="rank-row" aria-pressed="${x.v.id===selectedId}" data-select="${x.v.id}">
+      <span class="rank-no num">${i+2}</span>
+      <span class="rank-main">
+        <span class="rank-name">${x.v.name}</span>
+        <span class="rank-bar"><i style="width:${Math.max(4,w)}%"></i></span>
+        <span class="rank-who">${x.r.bottleneck}の人が <span class="num">${toStr(x.r.dissolve)}</span> で詰む</span>
+      </span>
+      <span class="rank-right">
+        <span class="rank-time num">${toStr(x.r.dissolve)}</span>
+        <span class="rank-diff num">${diff===0?"±0":"−"+Math.abs(diff)}分</span>
+      </span>
+    </button>`;
+  }).join("")
+  + dead.map(x=>`<div class="rank-row rank-dead">
+      <span class="rank-no">–</span>
+      <span class="rank-main"><span class="rank-name">${x.v.name}</span>
+      <span class="rank-who">${x.r.deadWho}の人が帰れません</span></span>
+      <span class="rank-right"><span class="rank-time">帰れない</span></span>
+    </div>`).join("");
+
+  // 差が10分以内なら正直に言う（§6 エッジケース）
+  $("flatNote").innerHTML = (alive.length>1 && spread<=10)
+    ? `<div class="flat">このメンバーなら、どこでもほぼ同じです（差は ${spread}分）</div>` : "";
+
+  /* 4. 1位の理由 */
+  $("reason").innerHTML = alive.length>1
+    ? `<span class="place">${top.v.name}</span>なら、<br>${worst.v.name}より<br><b class="num">+${spread}</b><span class="place">分</span> 長くいられる。`
+    : `候補地をもう1つ足すと、差が出ます。`;
+
+  /* 6. 終電の嘘（選択中の候補地の詰む人を主役にする） */
+  const lieOf = n => {
+    const r = STATIONS[n].routes.reduce((a,b)=> toMin(b.last)>toMin(a.last)?b:a);
+    return {name:n, posted:r.posted, postedTo:r.postedTo, real:r.last, gap:toMin(r.posted)-toMin(r.last)};
+  };
+  const lies = members.map(lieOf).sort((a,b)=>b.gap-a.gap);
+  const main = lies.find(l=>l.name===sel.r.bottleneck) || lies[0];
+  $("lieBody").innerHTML = `
+    <div class="lie-name"><b>${main.name}</b>まで帰る人</div>
+    <div class="lie-row">
+      <span class="lie-think num">${main.posted}</span>
+      <span class="lie-real num">${main.real}</span>
+    </div>
+    <div class="lie-gap">駅の掲示は <span class="num">${main.posted}</span> ${main.postedTo}行き。
+      ${main.name}に着く最後の電車は <b class="num">${main.gap}分</b> 早い。</div>
+    <div class="lie-others">
+      ${lies.filter(l=>l.name!==main.name).slice(0,3)
+        .map(l=>`<div class="lie-other"><b>${l.name}</b><span class="num">${l.posted} → ${l.real}（${l.gap}分）</span></div>`).join("")}
+    </div>`;
+
+  /* 7. タイムライン（選択中の候補地について） */
+  $("tlLabel").textContent = `${sel.v.name}なら、誰が何時まで居られるか`;
+  const T0 = Math.floor((sel.r.rows[0].leave-20)/30)*30;
+  const T1 = Math.ceil((sel.r.rows[sel.r.rows.length-1].leave+20)/30)*30;
+  $("timeline").innerHTML = sel.r.rows.map(row=>{
+    const w = Math.max(2, Math.min(100, (row.leave-T0)/(T1-T0)*100));
+    return `<div class="tl-row ${row.name===sel.r.bottleneck?"is-bottleneck":""}">
+      <div class="tl-name">${row.name}</div>
+      <div class="tl-track"><div class="tl-bar" style="width:${w}%"></div></div>
+      <div class="tl-time num">${toStr(row.leave)}</div>
+    </div>`;
+  }).join("");
+  $("tlAxis").innerHTML = `<span class="num">${toStr(T0)}</span><span class="num">${toStr((T0+T1)/2)}</span><span class="num">${toStr(T1)}</span>`;
+
+  /* 8. タクシー */
+  if(sel.r.rows.length>=2){
+    const ext = sel.r.rows[1].leave - sel.r.dissolve;
+    const fare = taxiFare(sel.r.bottleneck);
+    $("taxi").innerHTML = `
+      <div class="hint" style="margin:0 0 var(--s2)">${sel.v.name}で、${sel.r.bottleneck}の人がタクシーで帰るなら</div>
+      <div class="taxi"><b class="num">+${ext}分</b><span class="sep">/</span><b class="num">約${fare.toLocaleString()}円</b></div>
+      <div class="hint" style="margin-top:var(--s2)">解散は <span class="num">${toStr(sel.r.rows[1].leave)}</span> まで延びます</div>`;
+  } else {
+    $("taxi").innerHTML = `<div class="hint">メンバーが2人以上必要です</div>`;
+  }
+
+  writeURL();
+}
+
+/* ---------- 操作 ---------- */
+
+$("members").addEventListener("click", e=>{
+  const n = e.target.dataset.remove; if(!n) return;
+  members = members.filter(x=>x!==n); selectedId = null; render();
+});
+$("venues").addEventListener("click", e=>{
+  const id = e.target.dataset.venue; if(!id) return;
+  venueIds = venueIds.includes(id) ? venueIds.filter(x=>x!==id) : [...venueIds, id];
+  render();
+});
+$("rankList").addEventListener("click", e=>{
+  const b = e.target.closest("[data-select]"); if(!b) return;
+  selectedId = b.dataset.select; render();
+});
+$("meetAt").addEventListener("change", e=>{ meetAt = e.target.value || "19:00"; render(); });
+$("walk").addEventListener("input", e=>{ walk = Number(e.target.value); render(); });
+
+function addStation(){
+  const input = $("stationInput"), hint = $("addHint"), n = input.value.trim();
+  if(!n) return;
+  if(!STATIONS[n]){
+    hint.className="hint warn";
+    hint.textContent = `「${n}」はまだ入っていません。モックでは主要18駅のみ対応しています。`;
+    return;
+  }
+  if(members.includes(n)){ hint.className="hint"; hint.textContent = `${n} はもう入っています。`; return; }
+  members.push(n); input.value=""; hint.textContent=""; selectedId=null; render();
+}
+$("addBtn").addEventListener("click", addStation);
+$("stationInput").addEventListener("keydown", e=>{ if(e.key==="Enter") addStation(); });
+
+$("share").addEventListener("click", async ()=>{
+  writeURL();
+  try{ await navigator.clipboard.writeText(location.href); }catch(_){}
+  const t=$("toast"); t.classList.add("show"); setTimeout(()=>t.classList.remove("show"),1800);
+});
+
+/* ---------- 起動 ---------- */
+$("stationList").innerHTML = Object.keys(STATIONS).map(n=>`<option value="${n}">`).join("");
+readURL();
+$("meetAt").value = meetAt; $("walk").value = walk;
+render();
+
+</script>
+</body>
+</html>
