@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "next build",
+    "data:export": "node scripts/main.js --export-static",
+    "serve:static": "npx serve out",
     "start": "next start"
   },
   "dependencies": {
@@ -17,9 +20,9 @@
     "react-dom": "latest"
   },
   "devDependencies": {
-    "@types/node": "^26.4.0",
-    "@types/react": "^19.2.18",
+    "@types/node": "26.4.0",
+    "@types/react": "19.2.18",
     "@types/react-dom": "^19.2.5",
-    "typescript": "^7.0.2"
+    "typescript": "7.0.2"
   }
 }
