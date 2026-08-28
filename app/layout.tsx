@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Mono, Shippori_Mincho, Zen_Kaku_Gothic_New } from "next/font/google";
+import { Klee_One, Zen_Kaku_Gothic_New, Zen_Old_Mincho } from "next/font/google";
 import "./globals.css";
 
 const sans = Zen_Kaku_Gothic_New({ weight: ["400", "500", "700", "900"], subsets: ["latin"], variable: "--font-sans", display: "swap" });
-const serif = Shippori_Mincho({ weight: ["500", "600", "700"], subsets: ["latin"], variable: "--font-serif", display: "swap" });
-const mono = DM_Mono({ weight: ["400", "500"], subsets: ["latin"], variable: "--font-mono", display: "swap" });
+const serif = Zen_Old_Mincho({ weight: ["400", "700", "900"], subsets: ["latin"], variable: "--font-serif", display: "swap" });
+const hand = Klee_One({ weight: ["400", "600"], subsets: ["latin"], variable: "--font-hand", display: "swap" });
 
 export const metadata: Metadata = {
   title: "もうちょっと｜この人数が一番長くいられる場所",
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ja" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
+    <html lang="ja" className={`${sans.variable} ${serif.variable} ${hand.variable}`}>
       <body>{children}</body>
     </html>
   );

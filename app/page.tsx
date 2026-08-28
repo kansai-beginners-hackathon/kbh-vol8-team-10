@@ -1,9 +1,9 @@
 import Link from "next/link";
 
 const STEPS = [
-  { no: "01", title: "最寄り駅を入れる", body: "メンバー全員の帰る駅を入れる。名前はあってもなくてもいい。" },
-  { no: "02", title: "候補地を選ぶ", body: "四条・京都駅・烏丸御池……今夜どこで飲むか、候補を複数えらぶ。" },
-  { no: "03", title: "いちばん長くいられる場所が出る", body: "全員が終電で帰れる中で、解散が一番遅くなる場所を順位で出す。" },
+  { no: "まず", title: "みんなの帰る駅を入れる", body: "名前はあってもなくてもいい。駅だけでも動く。" },
+  { no: "つぎに", title: "今夜の候補地を選ぶ", body: "四条か、京都駅か、烏丸御池か。迷ってる候補をぜんぶ入れる。" },
+  { no: "すると", title: "いちばん長くいられる場所が出る", body: "全員が終電で帰れる中で、解散がいちばん遅くなる場所から順に並ぶ。" },
 ];
 
 const DEMO_HREF = "/app?m=田中:鞍馬,佐藤:びわ湖浜大津,鈴木:大阪梅田,高橋:国際会館&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi";
@@ -20,8 +20,8 @@ export default function LandingPage() {
       </header>
 
       <section className="hero">
-        <p className="eyebrow">TONIGHT&apos;S GROUP DECISION</p>
-        <h1>みんなでいられる時間を、<em>もうちょっと。</em></h1>
+        <p className="eyebrow">今夜、どこで飲む？</p>
+        <h1>みんなでいられる時間を、<em>もうちょっと<span className="maru">。</span></em></h1>
         <p className="lede">
           最寄り駅と候補地を入れるだけで、この人数が<b>一番長く一緒にいられる場所</b>がわかります。<br />
           ログイン不要、30秒。
@@ -44,7 +44,7 @@ export default function LandingPage() {
 
       <section className="insight panel">
         <div>
-          <p className="eyebrow">THE LAST TRAIN TRUTH</p>
+          <p className="eyebrow">たとえば、出町柳</p>
           <h2>「終電」は、駅ごとに違う。</h2>
           <p>
             駅に掲示されている最終列車は、途中の駅までしか行かないことがある。
@@ -55,9 +55,9 @@ export default function LandingPage() {
         <div className="truth">
           <span>出町柳・叡山電車</span>
           <b>掲示されている最終</b>
-          <s className="mono">23:50</s>
+          <s className="num">23:50</s>
           <b>鞍馬に着く最終</b>
-          <strong className="mono">22:30</strong>
+          <strong className="num">22:30</strong>
         </div>
       </section>
 

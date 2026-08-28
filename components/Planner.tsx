@@ -109,8 +109,8 @@ export default function Planner() {
         {/* 01 メンバー */}
         <div className="panel pad">
           <div className="heading">
-            <div><span className="step">01</span><h2>メンバーの最寄り駅</h2></div>
-            <span className="mono note">{members.length} / {MAX_MEMBERS}人</span>
+            <div><span className="step">①</span><h2>メンバーの最寄り駅</h2></div>
+            <span className="num note">{members.length} / {MAX_MEMBERS}人</span>
           </div>
           <div className="member-list">
             <div className="member member-head" aria-hidden="true">
@@ -146,16 +146,16 @@ export default function Planner() {
 
         {/* 02 候補地 ＋ 03 条件 */}
         <div className="panel pad">
-          <div className="heading"><div><span className="step">02</span><h2>候補地（複数えらべる）</h2></div></div>
+          <div className="heading"><div><span className="step">②</span><h2>候補地（複数えらべる）</h2></div></div>
           <div className="pills">
             {VENUES.map((v) => (
               <button key={v.id} className="pill" aria-pressed={venueIds.includes(v.id)} onClick={() => toggleVenue(v.id)}>{v.name}</button>
             ))}
           </div>
-          <div className="heading" style={{ marginTop: 28 }}><div><span className="step">03</span><h2>条件</h2></div></div>
+          <div className="heading" style={{ marginTop: 28 }}><div><span className="step">③</span><h2>条件</h2></div></div>
           <div className="cond">
             <label><span>集合</span><input type="time" value={meetAt} onChange={(e) => setMeetAt(e.target.value || "19:00")} /></label>
-            <label><span>店から駅までの距離（帰り）</span><input type="range" min={0} max={15} value={walk} onChange={(e) => setWalk(Number(e.target.value))} /><b className="mono">{walk}分</b></label>
+            <label><span>店から駅までの距離（帰り）</span><input type="range" min={0} max={15} value={walk} onChange={(e) => setWalk(Number(e.target.value))} /><b className="num">{walk}分</b></label>
           </div>
         </div>
       </section>
@@ -167,8 +167,8 @@ export default function Planner() {
         ) : (
           <>
             <div className="heading">
-              <div><span className="step">RESULT</span><h2>この<b>{members.length}人</b>が一番長くいられる場所</h2></div>
-              <span className="mono note">全員の最終列車から計算</span>
+              <div><span className="step">結果</span><h2>この<b>{members.length}人</b>が一番長くいられる場所</h2></div>
+              <span className="num note">全員の最終列車から計算</span>
             </div>
 
             <div className="winner">
@@ -176,17 +176,17 @@ export default function Planner() {
                 <p className="eyebrow">1位</p>
                 <p className="winner-name">{top.venue.name}</p>
                 <p className="winner-time">
-                  <strong className="mono">{toStr(top.dissolve)}</strong><small>までに出れば、全員帰れます</small>
+                  <strong className="num">{toStr(top.dissolve)}</strong><small>までに出れば、全員帰れます</small>
                 </p>
                 <p className="note">
-                  <span className="mono">{meetAt}</span> 集合なら <span className="mono">{Math.floor((top.dissolve - toMin(meetAt)) / 60)}時間{(top.dissolve - toMin(meetAt)) % 60}分</span> いられる
+                  <span className="num">{meetAt}</span> 集合なら <span className="num">{Math.floor((top.dissolve - toMin(meetAt)) / 60)}時間{(top.dissolve - toMin(meetAt)) % 60}分</span> いられる
                 </p>
               </div>
               <div className="winner-side">
                 {alive.length > 1 && worst.ok && (
-                  <p className="reason">{worst.venue.name}より<strong className="mono">+{spread}</strong>分<br />長くいられます</p>
+                  <p className="reason">{worst.venue.name}より<strong className="num">+{spread}</strong>分<br />長くいられます</p>
                 )}
-                <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="mono">{toStr(top.dissolve)}</span> です。</span></div>
+                <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="num">{toStr(top.dissolve)}</span> です。</span></div>
               </div>
             </div>
 
@@ -195,21 +195,21 @@ export default function Planner() {
                 {alive.slice(1).map((r, i) => r.ok && (
                   <li key={r.venue.id}>
                     <button className="rank-row" aria-pressed={selected?.venue.id === r.venue.id} onClick={() => setSelectedId(r.venue.id)}>
-                      <span className="rank-no mono">{i + 2}</span>
+                      <span className="rank-no num">{i + 2}</span>
                       <span className="rank-main">
                         <b>{r.venue.name}</b>
-                        <small><span className="mono">{toStr(r.dissolve)}</span> までに出れば、全員帰れます</small>
+                        <small><span className="num">{toStr(r.dissolve)}</span> までに出れば、全員帰れます</small>
                       </span>
                       <span className="rank-right">
-                        <b className="mono">{toStr(r.dissolve)}</b>
-                        <small className="mono diff">−{top.dissolve - r.dissolve}分</small>
+                        <b className="num">{toStr(r.dissolve)}</b>
+                        <small className="num diff">−{top.dissolve - r.dissolve}分</small>
                       </span>
                     </button>
                   </li>
                 ))}
                 {dead.map((r) => !r.ok && (
                   <li key={r.venue.id} className="rank-dead">
-                    <span className="rank-no mono">–</span>
+                    <span className="rank-no num">–</span>
                     <span className="rank-main"><b>{r.venue.name}</b><small>{r.deadMember.name}さんは終電で帰れません。</small></span>
                     <span className="rank-right"><small className="diff">帰れない</small></span>
                   </li>
@@ -227,7 +227,7 @@ export default function Planner() {
         <section className="detail">
           {/* タイムライン */}
           <div className="panel pad">
-            <div className="heading"><div><span className="step">—</span><h2>{selected.venue.name}なら、誰が何時まで</h2></div></div>
+            <div className="heading"><div><h2>{selected.venue.name}なら、誰が何時まで</h2></div></div>
             {(() => {
               const t0 = Math.floor((selected.rows[0].leave - 20) / 30) * 30;
               const t1 = Math.ceil((selected.rows[selected.rows.length - 1].leave + 20) / 30) * 30;
@@ -238,11 +238,11 @@ export default function Planner() {
                       <div className={`tl-row${row.member === selected.bottleneck ? " is-bottleneck" : ""}`} key={row.member.station + row.member.name}>
                         <span className="tl-name">{row.member.name}</span>
                         <span className="tl-track"><i style={{ width: `${Math.max(2, ((row.leave - t0) / (t1 - t0)) * 100)}%` }} /></span>
-                        <span className="tl-time mono">{toStr(row.leave)}</span>
+                        <span className="tl-time num">{toStr(row.leave)}</span>
                       </div>
                     ))}
                   </div>
-                  <div className="tl-axis mono"><span>{toStr(t0)}</span><span>{toStr((t0 + t1) / 2)}</span><span>{toStr(t1)}</span></div>
+                  <div className="tl-axis num"><span>{toStr(t0)}</span><span>{toStr((t0 + t1) / 2)}</span><span>{toStr(t1)}</span></div>
                 </>
               );
             })()}
