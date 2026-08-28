@@ -11,6 +11,11 @@ const PATTERNS = [
   { dayType: "holiday", tr: "tr.time.holtime", hour: "td.kyujitsu-tt h3", min: "span.disptnhol" },
 ];
 
+function toMinutes(value) {
+  const [hour, minute] = value.split(":").map(Number);
+  return hour * 60 + minute;
+}
+
 function getSupabase() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -20,7 +25,7 @@ function getSupabase() {
   return createClient(url, key);
 }
 
-export function parsePage(html, url, lineId, stationId, direction) {
+export function parsePage(html, url, lineId, stationId, direction, minimumHour = 21) {
   const $ = cheerio.load(html);
   const diaDate = $("span.timetable-date").first().text().trim();
   const note = $("body").text().replace(/\s+/g, " ").match(/備考.{0,200}/)?.[0] ?? "";
@@ -29,7 +34,7 @@ export function parsePage(html, url, lineId, stationId, direction) {
   for (const pattern of PATTERNS) {
     $(pattern.tr).each((_, tr) => {
       const hour = $(tr).find(pattern.hour).text().trim();
-      if (!hour || Number(hour) < 21) return;
+      if (!hour || Number(hour) < minimumHour) return;
 
       $(tr).find(pattern.min).each((__, span) => {
         const raw = $(span).text().trim();
@@ -52,6 +57,67 @@ export function parsePage(html, url, lineId, stationId, direction) {
   }
 
   return rows;
+}
+
+function destinationName(lineId, direction, marker) {
+  if (lineId === "karasuma") {
+    if (direction === "down") {
+      return marker.includes("奈") ? "近鉄奈良" : marker.includes("新") ? "新田辺" : "竹田";
+    }
+    return "国際会館";
+  }
+
+  if (direction === "up") {
+    return marker.includes("浜") ? "びわ湖浜大津" : "六地蔵";
+  }
+  return "太秦天神川";
+}
+
+function createStaticDataset(rows) {
+  const stations = LINES.flatMap((line) => line.stations.map((station) => ({
+    id: station.stationId,
+    name: station.name,
+    lines: [],
+  })));
+  const stationMap = new Map(stations.map((station) => [station.id, station]));
+
+  for (const line of LINES) {
+    for (const station of line.stations) {
+      const lineRows = rows.filter((row) => row.line_id === line.lineId && row.station_id === station.stationId);
+      const destinations = new Map();
+
+      for (const row of lineRows) {
+        const name = destinationName(line.lineId, row.direction, row.marker);
+        const destination = destinations.get(name) ?? { name, weekday: null, weekend: null };
+        const dayKey = row.day_type === "weekday" ? "weekday" : "weekend";
+        if (!destination[dayKey] || toMinutes(row.depart_time) > toMinutes(destination[dayKey])) destination[dayKey] = row.depart_time;
+        destinations.set(name, destination);
+      }
+
+      const sourceRow = lineRows.find((row) => row.source_url);
+      stationMap.get(station.stationId).lines.push({
+        lineId: line.lineId,
+        lineName: line.lineName,
+        destinations: [...destinations.values()].filter((destination) => destination.weekday && destination.weekend),
+        sourceUrl: sourceRow?.source_url ?? `${BASE_URL}${station.down || station.up}.htm`,
+      });
+    }
+  }
+
+  const diaDate = rows.find((row) => row.dia_date)?.dia_date || "確認中";
+
+  return {
+    dataset: "kyoto-city-subway-last-trains",
+    updatedAt: new Date().toISOString().slice(0, 10),
+    timetableEffectiveFrom: diaDate,
+    source: {
+      name: "京都市交通局 京都市営地下鉄時刻表",
+      url: "https://www2.city.kyoto.lg.jp/kotsu/tikadia/tikatime.htm",
+      retrievedAt: new Date().toISOString().slice(0, 10),
+      note: "公式HTMLから各駅・方向・行き先別の最終便を抽出。24時台は24時表記を維持する。",
+    },
+    stations: [...stationMap.values()],
+  };
 }
 
 async function fetchPage(url) {
@@ -101,7 +167,26 @@ function createJobs() {
   ].filter(Boolean)));
 }
 
+async function exportStatic() {
+  const jobs = createJobs();
+  const rows = [];
+  for (let index = 0; index < jobs.length; index += 1) {
+    const job = jobs[index];
+    const url = `${BASE_URL}${job.file}.htm`;
+    const html = await fetchPage(url);
+    rows.push(...parsePage(html, url, job.line.lineId, job.station.stationId, job.direction, 0));
+    console.log(`[${index + 1}/${jobs.length}] ${job.line.lineName} ${job.station.name} (${job.direction})`);
+  }
+  fs.writeFileSync("data/subway-last-trains.json", `${JSON.stringify(createStaticDataset(rows), null, 2)}\n`);
+  console.log(`静的データを書き出しました: ${rows.length}件`);
+}
+
 async function main() {
+  if (process.argv.includes("--export-static")) {
+    await exportStatic();
+    return;
+  }
+
   if (process.argv.includes("--fetch-sample")) {
     const url = `${BASE_URL}022100.htm`;
     const html = await fetchPage(url);
