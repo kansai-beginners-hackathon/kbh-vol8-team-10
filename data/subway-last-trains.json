@@ -1,0 +1,74 @@
+{
+  "dataset": "kyoto-city-subway-last-trains",
+  "updatedAt": "2026-08-28",
+  "timetableEffectiveFrom": "2026-03-14",
+  "source": {
+    "name": "京都市交通局 京都市営地下鉄時刻表",
+    "url": "https://www2.city.kyoto.lg.jp/kotsu/tikadia/tikatime.htm",
+    "retrievedAt": "2026-08-28",
+    "note": "各駅ページの始終発時刻表に記載された終発時刻。24時を超える便は24:01のように表記する。"
+  },
+  "stations": [
+    {
+      "id": "K11",
+      "name": "京都",
+      "lines": [
+        {
+          "lineId": "karasuma",
+          "lineName": "烏丸線",
+          "destinations": [
+            { "name": "国際会館", "weekday": "23:47", "weekend": "23:47" },
+            { "name": "竹田", "weekday": "24:01", "weekend": "24:01" },
+            { "name": "新田辺", "weekday": "21:40", "weekend": "21:40" },
+            { "name": "近鉄奈良", "weekday": "18:40", "weekend": "18:39" }
+          ],
+          "sourceUrl": "https://www2.city.kyoto.lg.jp/kotsu/tikadia/hyperdia/menu0221.htm"
+        }
+      ]
+    },
+    {
+      "id": "K09",
+      "name": "四条",
+      "lines": [
+        {
+          "lineId": "karasuma",
+          "lineName": "烏丸線",
+          "destinations": [
+            { "name": "国際会館", "weekday": "23:50", "weekend": "23:50" },
+            { "name": "竹田", "weekday": "23:57", "weekend": "23:57" },
+            { "name": "新田辺", "weekday": "21:36", "weekend": "21:36" },
+            { "name": "近鉄奈良", "weekday": "18:35", "weekend": "18:34" }
+          ],
+          "sourceUrl": "https://www2.city.kyoto.lg.jp/kotsu/tikadia/hyperdia/menu0219.htm"
+        }
+      ]
+    },
+    {
+      "id": "K08",
+      "name": "烏丸御池",
+      "lines": [
+        {
+          "lineId": "karasuma",
+          "lineName": "烏丸線",
+          "destinations": [
+            { "name": "国際会館", "weekday": "23:55", "weekend": "23:55" },
+            { "name": "竹田", "weekday": "23:55", "weekend": "23:55" },
+            { "name": "新田辺", "weekday": "21:34", "weekend": "21:34" },
+            { "name": "近鉄奈良", "weekday": "18:33", "weekend": "18:32" }
+          ],
+          "sourceUrl": "https://www2.city.kyoto.lg.jp/kotsu/tikadia/hyperdia/menu0218.htm"
+        },
+        {
+          "lineId": "tozai",
+          "lineName": "東西線",
+          "destinations": [
+            { "name": "六地蔵", "weekday": "23:55", "weekend": "23:55" },
+            { "name": "太秦天神川", "weekday": "23:55", "weekend": "23:55" },
+            { "name": "びわ湖浜大津", "weekday": "23:12", "weekend": "23:12" }
+          ],
+          "sourceUrl": "https://www2.city.kyoto.lg.jp/kotsu/tikadia/hyperdia/menu0135.htm"
+        }
+      ]
+    }
+  ]
+}

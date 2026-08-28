@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>もうちょっと｜みんなでいられる時間</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Shippori+Mincho:wght@500;600;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink:#1f2926; --muted:#718079; --paper:#f2f0e9; --panel:#fbfaf6; --line:#d9ded8; --moss:#315f52; --coral:#d7644f; --yellow:#e5bd58; --blue:#6d8aa0; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:'Zen Kaku Gothic New',sans-serif; }
+    button,input,select { font:inherit; } button { cursor:pointer; }
+    .shell { max-width:1120px; margin:0 auto; padding:28px 34px 38px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line); padding-bottom:20px; }
+    .brand { color:var(--moss); font:700 25px 'Shippori Mincho',serif; letter-spacing:1px; }
+    .status { color:var(--muted); font:11px 'DM Mono',monospace; }.status i { display:inline-block; width:7px; height:7px; border-radius:50%; background:#70a575; margin-right:7px; }
+    .intro { padding:67px 0 45px; max-width:780px; }.eyebrow { color:var(--coral); font:500 11px 'DM Mono',monospace; letter-spacing:1.5px; margin:0 0 15px; }.intro h1 { font:600 clamp(34px,5vw,61px)/1.2 'Shippori Mincho',serif; margin:0; }.intro h1 em { color:var(--coral); font-style:normal; }.lede { color:var(--muted); font-size:15px; margin:19px 0 0; }
+    .workspace { display:grid; grid-template-columns:1.08fr .92fr; gap:16px; }.panel { background:var(--panel); border:1px solid var(--line); border-radius:5px; }.members,.result { padding:25px; min-height:358px; }
+    .heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; }.heading > div { display:flex; align-items:center; gap:13px; }.heading h2 { font-size:16px; margin:0; }.step { color:var(--coral); font:500 12px 'DM Mono',monospace; }.count,.note { color:var(--muted); font:11px 'DM Mono',monospace; }
+    .member-list { display:grid; gap:9px; }.member { display:grid; grid-template-columns:29px 1fr 1.15fr 25px; gap:9px; align-items:center; }.avatar { display:grid; place-items:center; width:29px; height:29px; border-radius:50%; background:#dce4de; color:var(--moss); font-size:12px; }.member input,.member select,.add select { min-width:0; padding:9px 10px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:3px; }.remove { border:0; background:none; color:#a8b2ad; font-size:20px; }.remove:hover { color:var(--coral); }
+    .add { display:flex; gap:9px; margin-top:20px; }.add select { flex:1; }.add button { padding:0 16px; border:0; border-radius:3px; color:#fff; background:var(--moss); }.add button:hover { background:#244a40; }
+    .venue-tabs { display:flex; gap:7px; margin-bottom:28px; }.venue-tabs button { padding:8px 14px; border:1px solid var(--line); border-radius:20px; color:var(--muted); background:transparent; font-size:13px; }.venue-tabs button.active { border-color:var(--moss); color:#fff; background:var(--moss); }
+    .answer { border-left:3px solid var(--yellow); padding:3px 0 3px 18px; }.answer-label { color:var(--muted); font-size:13px; margin:0 0 4px; }.answer strong { font:500 49px 'DM Mono',monospace; letter-spacing:-2px; }.answer strong small { font:500 17px 'Zen Kaku Gothic New'; letter-spacing:0; }.answer > p:last-child { display:inline; margin-left:7px; font-size:14px; }.bottleneck { display:flex; flex-wrap:wrap; align-items:center; gap:7px; margin-top:27px; padding:12px; color:#87564b; background:#f5e5df; font-size:13px; }.alert { width:8px; height:8px; border-radius:50%; background:var(--coral); }.bottleneck b { color:var(--coral); }
+    .comparison { margin-top:16px; padding:25px; }.comparison-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }.comparison-item { display:grid; gap:6px; padding:16px; text-align:left; border:1px solid var(--line); border-radius:4px; background:transparent; }.comparison-item:hover,.comparison-item.selected { border-color:var(--moss); background:#eef2ed; }.comparison-item span { font-size:13px; }.comparison-item b { font:500 25px 'DM Mono',monospace; }.comparison-item small { color:var(--coral); font:11px 'DM Mono',monospace; }.comparison-item.selected small { color:var(--muted); }
+    .insight { display:grid; grid-template-columns:1fr auto; gap:30px; align-items:center; margin-top:16px; padding:27px 30px; color:#f8f4e9; background:var(--moss); }.insight .eyebrow { color:var(--yellow); }.insight h2 { font:600 25px 'Shippori Mincho',serif; margin:0 0 9px; }.insight p:last-child { max-width:590px; color:#d4e1d8; font-size:13px; margin:0; }.truth { min-width:190px; padding-left:25px; border-left:1px solid #709082; display:grid; gap:3px; }.truth span,.truth small { color:#b7ccc0; font-size:11px; }.truth b { font-size:14px; }.truth strong { color:var(--yellow); font:500 29px 'DM Mono',monospace; }
+    .lie-card { display:flex; align-items:center; justify-content:space-between; gap:15px; margin-top:16px; padding:18px 25px; border:1px solid #ead9bd; border-radius:5px; background:#fffaf0; }.lie-card h3 { margin:0 0 5px; font-size:14px; }.lie-card p { margin:0; color:var(--muted); font-size:12px; }.lie-card strong { color:var(--coral); font:500 23px 'DM Mono',monospace; white-space:nowrap; }.arrow { color:var(--yellow); font-size:20px; }
+    footer { display:flex; justify-content:space-between; padding-top:25px; color:var(--muted); font:10px 'DM Mono',monospace; }
+    @media (max-width:700px) { .shell{padding:18px 16px 28px}.topbar{align-items:flex-start;flex-direction:column;gap:10px}.intro{padding:46px 0 31px}.intro h1{font-size:37px}.workspace{grid-template-columns:1fr}.members,.result{padding:19px;min-height:auto}.member{grid-template-columns:29px 1fr 1.2fr 20px}.heading{margin-bottom:19px}.comparison{padding:19px}.comparison-grid{grid-template-columns:1fr}.comparison-item{grid-template-columns:1fr auto auto;align-items:center;padding:12px}.insight{grid-template-columns:1fr;gap:23px;padding:22px 20px}.truth{padding:17px 0 0;border-top:1px solid #709082;border-left:0}footer{flex-direction:column;gap:7px}.lie-card{align-items:flex-start;flex-direction:column}.lie-card strong{font-size:20px} }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div class="brand">もうちょっと</div><div class="status"><i></i>京都市営地下鉄・平日ダイヤ</div></header>
+    <section class="intro"><p class="eyebrow">TONIGHT'S GROUP DECISION</p><h1>みんなでいられる時間を、<em>もうちょっと。</em></h1><p class="lede">最寄り駅を入れると、全員が終電で帰れる解散時刻がわかります。</p></section>
+
+    <section class="workspace">
+      <div class="panel members">
+        <div class="heading"><div><span class="step">01</span><h2>メンバーの最寄り駅</h2></div><span class="count" id="member-count"></span></div>
+        <div class="member-list" id="member-list"></div>
+        <form class="add" id="add-form"><select id="new-station" aria-label="追加する駅"><option value="">駅を追加する</option></select><button type="submit">＋ 追加</button></form>
+      </div>
+      <div class="panel result">
+        <div class="heading"><div><span class="step">02</span><h2>候補地を比べる</h2></div></div>
+        <div class="venue-tabs" id="venue-tabs"></div>
+        <div class="answer"><p class="answer-label" id="answer-label"></p><strong id="answer-time"></strong><small> まで</small><p>に出れば、全員が帰れます。</p></div>
+        <div class="bottleneck"><span class="alert"></span><span>最初に詰むのは</span><b id="bottleneck-name"></b><span id="bottleneck-time"></span></div>
+      </div>
+    </section>
+
+    <section class="panel comparison"><div class="heading"><div><span class="step">03</span><h2>場所を変えると、あとどれくらい？</h2></div><span class="note">全員の最終列車から計算</span></div><div class="comparison-grid" id="comparison-grid"></div></section>
+    <section class="panel lie-card"><div><h3>終電の「思い込み」に注意</h3><p id="lie-copy"></p></div><span class="arrow">→</span><strong id="lie-time"></strong></section>
+    <section class="insight panel"><div><p class="eyebrow">THE LAST TRAIN TRUTH</p><h2>「終電」は、駅ごとに違う。</h2><p>行き先によって最終列車が変わるから、駅で見た時刻だけでは帰れる時間を判断できません。</p></div><div class="truth"><span>今回のボトルネック</span><b id="truth-name"></b><strong id="truth-time"></strong><small id="truth-destination"></small></div></section>
+    <footer><span>データ: 京都市交通局・2026年3月14日改正</span><span>※ 遅延・運休・乗換時間の変動は含みません</span></footer>
+  </main>
+
+  <script>
+    const stations = {
+      京都: { time:'24:01', destination:'竹田', lie:'23:47' },
+      四条: { time:'23:57', destination:'竹田', lie:'23:50' },
+      烏丸御池: { time:'23:55', destination:'六地蔵', lie:'23:55' },
+    };
+    const venues = [
+      { id:'shijo', name:'四条', buffer:8 },
+      { id:'kyoto', name:'京都駅', buffer:12 },
+      { id:'karasuma-oike', name:'烏丸御池', buffer:5 },
+    ];
+    let members = [
+      { name:'田中さん', station:'京都' },
+      { name:'佐藤さん', station:'四条' },
+      { name:'鈴木さん', station:'烏丸御池' },
+    ];
+    let selectedVenue = 'karasuma-oike';
+    const toMinutes = (value) => { const [hour, minute] = value.split(':').map(Number); return hour * 60 + minute; };
+    const timeText = (value) => `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`;
+    const currentVenue = () => venues.find((venue) => venue.id === selectedVenue);
+    const resultFor = (member, venue) => ({ ...member, ...stations[member.station], leave: toMinutes(stations[member.station].time) - venue.buffer });
+    const bottleneckFor = (venue) => members.map((member) => resultFor(member, venue)).reduce((earliest, item) => item.leave < earliest.leave ? item : earliest);
+
+    function render() {
+      const venue = currentVenue();
+      const bottleneck = bottleneckFor(venue);
+      document.querySelector('#member-count').textContent = `${members.length} / 6人`;
+      document.querySelector('#member-list').innerHTML = members.map((member, index) => `<div class="member"><span class="avatar">${member.name.slice(0, 1)}</span><input value="${member.name}" data-name="${index}" aria-label="${member.name}の名前"><select data-station="${index}" aria-label="${member.name}の駅">${Object.keys(stations).map((station) => `<option ${station === member.station ? 'selected' : ''}>${station}</option>`).join('')}</select><button class="remove" data-remove="${index}" aria-label="${member.name}を削除">×</button></div>`).join('');
+      document.querySelector('#new-station').innerHTML = `<option value="">駅を追加する</option>${Object.keys(stations).map((station) => `<option>${station}</option>`).join('')}`;
+      document.querySelector('#venue-tabs').innerHTML = venues.map((item) => `<button class="${item.id === selectedVenue ? 'active' : ''}" data-venue="${item.id}">${item.name}</button>`).join('');
+      document.querySelector('#answer-label').textContent = `${venue.name}で解散するなら`;
+      document.querySelector('#answer-time').textContent = timeText(bottleneck.leave);
+      document.querySelector('#bottleneck-name').textContent = bottleneck.name;
+      document.querySelector('#bottleneck-time').textContent = `・${timeText(bottleneck.leave)}`;
+      document.querySelector('#truth-name').textContent = bottleneck.name;
+      document.querySelector('#truth-time').textContent = bottleneck.time;
+      document.querySelector('#truth-destination').textContent = `${bottleneck.destination} 行き`;
+      document.querySelector('#lie-copy').textContent = `${bottleneck.name}が思っている終電 ${stations[bottleneck.station].lie} → 本当の最終`;
+      document.querySelector('#lie-time').textContent = `${bottleneck.time} ${bottleneck.destination}行き`;
+      document.querySelector('#comparison-grid').innerHTML = venues.map((item) => { const leave = bottleneckFor(item).leave; const difference = leave - bottleneck.leave; return `<button class="comparison-item ${item.id === selectedVenue ? 'selected' : ''}" data-venue="${item.id}"><span>${item.name}</span><b>${timeText(leave)}</b><small>${difference > 0 ? `+${difference}分` : 'いまの場所'}</small></button>`; }).join('');
+      bindEvents();
+    }
+    function bindEvents() {
+      document.querySelectorAll('[data-venue]').forEach((button) => button.addEventListener('click', () => { selectedVenue = button.dataset.venue; render(); }));
+      document.querySelectorAll('[data-remove]').forEach((button) => button.addEventListener('click', () => { if (members.length > 1) { members.splice(Number(button.dataset.remove), 1); render(); } }));
+      document.querySelectorAll('[data-station]').forEach((input) => input.addEventListener('change', () => { members[Number(input.dataset.station)].station = input.value; render(); }));
+      document.querySelectorAll('[data-name]').forEach((input) => input.addEventListener('change', () => { members[Number(input.dataset.name)].name = input.value || 'メンバー'; render(); }));
+    }
+    document.querySelector('#add-form').addEventListener('submit', (event) => { event.preventDefault(); const station = document.querySelector('#new-station').value; if (station && members.length < 6) { members.push({ name:`メンバー${members.length + 1}`, station }); render(); } });
+    render();
+  </script>
+</body>
+</html>
