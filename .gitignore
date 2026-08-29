@@ -7,6 +7,9 @@ data/*.htm
 .env*.local
 .DS_Store
 
+# Generated data
+data/kyoto-city-bus-last-two-timetables.json
+
 # TypeScript / Next
 next-env.d.ts
 tsconfig.tsbuildinfo
