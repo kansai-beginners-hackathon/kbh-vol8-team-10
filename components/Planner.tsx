@@ -19,10 +19,13 @@ const STATION_CANDIDATES = [
 
 const normalizeStation = (raw: string) => raw.trim().replace(/駅$/, "");
 
-/** URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる。駅の存在チェックはしない（無い駅は「対応予定」表示で受ける） */
+/**
+ * URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる。駅の存在チェックはしない（無い駅は「対応予定」表示で受ける）。
+ * m= が無ければ空で始める（「始める」から来た人はメンバー 0 人から）。サンプル入りは LP の「例を見る」が URL に載せる。
+ */
 function parseMembers(raw: string | null): Member[] {
-  if (!raw) return DEFAULT_MEMBERS;
-  const members = raw
+  if (!raw) return [];
+  return raw
     .split(",")
     .map((token) => {
       const [a, b] = token.split(":");
@@ -31,7 +34,6 @@ function parseMembers(raw: string | null): Member[] {
       return { name: name || station, station };
     })
     .filter((m) => m.station);
-  return members.length ? members : DEFAULT_MEMBERS;
 }
 
 function parseVenueIds(raw: string | null): string[] {
@@ -248,7 +250,9 @@ export default function Planner() {
               ? "終電を調べています…"
               : ranked.length === 0 && members.length > 0
                 ? "終電データのある駅のメンバーがいません。駅名を変えてみてください。"
-                : "メンバーと候補地を選ぶと、一番長くいられる場所が出ます。"}
+                : members.length === 0
+                  ? "①でメンバーの最寄り駅を追加すると、一番長くいられる場所が出ます。"
+                  : "メンバーと候補地を選ぶと、一番長くいられる場所が出ます。"}
           </p>
         ) : (
           <>
