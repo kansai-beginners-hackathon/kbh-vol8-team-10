@@ -9,6 +9,7 @@ import prebuiltJson from "@/data/prebuilt-stations.json";
 import subwayLastTrains from "@/data/subway-last-trains.json";
 import { buildStations } from "@/lib/buildStations";
 import type { DayType } from "@/lib/lastTrain";
+import { HUB_BY_ID } from "@/data/hubs";
 import { bestRoute, rankVenues } from "@/lib/calc";
 import { isHHMM, toMin, toStr } from "@/lib/time";
 import type { Member, Station, VenueResult } from "@/lib/types";
@@ -172,6 +173,26 @@ export default function Planner() {
   const worst = alive[alive.length - 1];
   const spread = top && worst && top.ok && worst.ok && Number.isFinite(top.dissolve - worst.dissolve) ? top.dissolve - worst.dissolve : 0;
   const selected = alive.find((r) => r.venue.id === selectedId) ?? top;
+
+  /**
+   * その候補地で最初に詰む人の「終電」そのもの（固定値。徒歩スライダーで動かない）。
+   * 経路の値は min(ハブ発の最終 − 移動 − 乗換, 候補地発の最終) なので、縛っている側を出す。
+   *   - 支線側が縛る → 「京都 23:37 発」（ハブ発・自宅駅方面の最終）
+   *   - 幹線側が縛る → 「四条 23:55 発」（候補地の駅を出る、ハブ行きの最終）
+   */
+  const lastTrainOf = (r: VenueResult): { at: string; time: string } | null => {
+    if (!r.ok) return null;
+    const station = stations[r.bottleneck.station];
+    const best = station ? bestRoute(station, r.venue) : null;
+    if (!best) return null;
+    const cell = r.venue.toHub[best.route.hub];
+    const hubName = HUB_BY_ID[best.route.hub]?.name ?? best.route.hub;
+    const viaBranch = best.route.last === null ? Infinity : toMin(best.route.last) - (cell?.transitMin ?? 0) - best.route.transferMin;
+    const viaTrunk = cell?.lastDepart ? toMin(cell.lastDepart) : Infinity;
+    if (viaBranch <= viaTrunk && best.route.last !== null) return { at: hubName, time: best.route.last };
+    if (cell?.lastDepart) return { at: r.venue.name, time: cell.lastDepart };
+    return null;
+  };
 
   /** その候補地のボトルネックが Transit の乗換 2 回以上の経路で決まっている → 参考値 */
   const isReference = (r: VenueResult) => {
@@ -370,7 +391,10 @@ export default function Planner() {
                   <p className="reason">{worst.venue.name}より<strong className="num">+{spread}</strong>分<br />長くいられます</p>
                 )}
                 {Number.isFinite(top.dissolve) && (
-                  <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="num">{toStr(top.dissolve)}</span> です。</span></div>
+                  <div className="bottleneck"><span className="alert" /><span>
+                    <b>{top.bottleneck.name}</b>さんの終電は{(() => { const lt = lastTrainOf(top); return lt ? <> {lt.at} <span className="num">{lt.time}</span> 発</> : null; })()}。
+                    店を <span className="num">{toStr(top.dissolve)}</span> に出れば間に合います。
+                  </span></div>
                 )}
               </div>
             </div>
