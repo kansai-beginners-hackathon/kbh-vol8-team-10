@@ -5,7 +5,8 @@
   "source": {
     "name": "叡山電鉄 公式時刻表",
     "url": "https://eizandensha.co.jp/guide/",
-    "retrievedAt": "2026-08-29"
+    "retrievedAt": "2026-08-29",
+    "note": "鞍馬線は全列車が出町柳発着の直通運転なので、private-lines.json では出町柳〜鞍馬を1本の路線として扱う。共用区間（出町柳〜宝ケ池）の駅は、叡山本線・鞍馬線の両方に同じ時刻を持つ（行き先はそれぞれの路線上のものだけ）。"
   },
   "stations": [
     {
@@ -21,6 +22,33 @@
               "weekday": "23:02",
               "weekend": "23:02"
             },
+            {
+              "name": "鞍馬",
+              "weekday": "22:30",
+              "weekend": "22:30"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:15",
+              "weekend": "23:15"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:30",
+              "weekend": "23:30"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:50",
+              "weekend": "23:50"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/demachiyanagi/?di=2"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
+          "destinations": [
             {
               "name": "鞍馬",
               "weekday": "22:30",
@@ -59,6 +87,38 @@
               "weekday": "23:04",
               "weekend": "23:04"
             },
+            {
+              "name": "鞍馬",
+              "weekday": "22:32",
+              "weekend": "22:32"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:17",
+              "weekend": "23:17"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:32",
+              "weekend": "23:32"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/mototanaka/?di=1"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
+          "destinations": [
             {
               "name": "鞍馬",
               "weekday": "22:32",
@@ -129,6 +189,38 @@
             }
           ],
           "sourceUrl": "https://eizandensha.co.jp/information/chayama/?di=1"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:33",
+              "weekend": "22:33"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:18",
+              "weekend": "23:18"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:53",
+              "weekend": "23:53"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:36",
+              "weekend": "23:36"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/chayama/?di=1"
         }
       ]
     },
@@ -172,6 +264,38 @@
             }
           ],
           "sourceUrl": "https://eizandensha.co.jp/information/ichijoji/?di=1"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:35",
+              "weekend": "22:35"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:20",
+              "weekend": "23:20"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:35",
+              "weekend": "23:35"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:55",
+              "weekend": "23:55"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:34",
+              "weekend": "23:34"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/ichijoji/?di=1"
         }
       ]
     },
@@ -188,6 +312,33 @@
               "weekday": "23:09",
               "weekend": "23:09"
             },
+            {
+              "name": "鞍馬",
+              "weekday": "22:37",
+              "weekend": "22:37"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:22",
+              "weekend": "23:22"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/syugakuin/?di=1"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
+          "destinations": [
             {
               "name": "鞍馬",
               "weekday": "22:37",
@@ -256,7 +407,7 @@
         },
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -335,7 +486,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -373,7 +524,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -411,7 +562,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -449,7 +600,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -487,7 +638,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -520,7 +671,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -548,7 +699,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -571,7 +722,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "鞍馬",
@@ -594,7 +745,7 @@
       "lines": [
         {
           "lineId": "eizan-kurama",
-          "lineName": "鞍馬線",
+          "lineName": "鞍馬線（出町柳〜鞍馬）",
           "destinations": [
             {
               "name": "出町柳",

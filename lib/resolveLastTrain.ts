@@ -19,9 +19,8 @@
  *  - Transit の呼び出しは 300ms 以上空ける（7 ハブ × N 人を直列で回す前提）
  */
 import { hubGeo, hubNames, type Hub } from "../data/hubs.ts";
-import linesJson from "../data/subway-lines.json" with { type: "json" };
-import lastTrainsJson from "../data/subway-last-trains.json" with { type: "json" };
 import { lastTrainBetween, type DayType, type LastTrainsData, type LinesData, type LocalLastTrain } from "./lastTrain.ts";
+import { ALL_LAST_TRAINS, ALL_LINES, isSubwayStation } from "./localData.ts";
 import { toMin } from "./time.ts";
 import {
   boardingSecs,
@@ -84,8 +83,8 @@ export function todayYYYYMMDD(now: Date = new Date()): string {
 }
 
 export const defaultDeps: ResolveDeps = {
-  lines: linesJson as unknown as LinesData,
-  lastTrains: lastTrainsJson as unknown as LastTrainsData,
+  lines: ALL_LINES,
+  lastTrains: ALL_LAST_TRAINS,
   planLastArrival: (from, to, date, originNames) => planLastArrivalDetailed(from, to, date, fetch, { originNames }),
   suggestStationId: (name, preferFeeds) => suggestStationId(name, fetch, { preferFeeds }),
   today: () => todayYYYYMMDD(),
@@ -209,8 +208,9 @@ export async function resolveLastTrain(
     }
     if (local.kind === "noTrainNeeded") return { kind: "noTrainNeeded" };
     if (!homeName) return { kind: "unavailable", reason: "駅名が空" };
-    if (local.kind === "needsTransfer" && hub.subwayOnly) {
+    if (local.kind === "needsTransfer" && hub.subwayOnly && isSubwayStation(homeName)) {
       // 両駅とも地下鉄収録・同一路線に無い。地下鉄 feed の経路検索は壊れているので Transit に任せない
+      // （lastTrains には私鉄も入っているので、needsTransfer だけでは「地下鉄同士」と言えない）
       return { kind: "unavailable", reason: `地下鉄同士の乗換は対応予定: ${hub.name}→${homeName}` };
     }
 
@@ -233,9 +233,8 @@ export async function resolveLastTrain(
         let lookup = suggestInFlight.get(homeName);
         if (!lookup) {
           lookup = (async () => {
-            const isSubway = deps.lastTrains.stations.some((s) => s.name === homeName);
             await throttle(interval);
-            const id = await deps.suggestStationId(homeName, isSubway ? [SUBWAY_FEED] : []);
+            const id = await deps.suggestStationId(homeName, isSubwayStation(homeName) ? [SUBWAY_FEED] : []);
             if (id) stationIdCache.set(homeName, id);
             return id;
           })().finally(() => suggestInFlight.delete(homeName));

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import ChatImport, { type ParsedChat } from "@/components/ChatImport";
 import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "@/data/network";
 import prebuiltJson from "@/data/prebuilt-stations.json";
 import subwayLastTrains from "@/data/subway-last-trains.json";
@@ -179,6 +180,42 @@ export default function Planner() {
     setNewName("");
     setNewStation("");
   }
+  /**
+   * 貼り付けたテキストから読み取った結果を反映する（仮）。
+   * メンバーは今いる人に追記（同じ名前＋駅は飛ばす、上限 MAX_MEMBERS 人まで）、集合時刻と候補地は読めたときだけ上書き・追加。
+   * 戻り値は ChatImport が表示する一言。
+   */
+  function applyParsed(parsed: ParsedChat): string {
+    const incoming = parsed.members
+      .map((m) => ({ station: normalizeStation(m.station), name: m.name.trim() }))
+      .filter((m) => m.station)
+      .map((m) => ({ ...m, name: m.name || m.station }));
+    const isDup = (a: Member, b: Member) => a.station === b.station && a.name === b.name;
+    const added: Member[] = [];
+    for (const m of incoming) {
+      if (members.length + added.length >= MAX_MEMBERS) break;
+      if (members.some((x) => isDup(x, m)) || added.some((x) => isDup(x, m))) continue;
+      added.push(m);
+    }
+    if (added.length) setMembers([...members, ...added]);
+
+    // "9:00" → "09:00"。<input type="time"> は 2 桁でないと空欄になる
+    const meet = parsed.meetAt?.replace(/^(\d):/, "0$1:") ?? null;
+    const meetOk = isHHMM(meet) && /^\d{2}:\d{2}$/.test(meet);
+    if (meetOk) setMeetAt(meet);
+
+    const venueName = parsed.venue ? normalizeStation(parsed.venue) : "";
+    const venue = venueName ? VENUES.find((v) => normalizeStation(v.name) === venueName) : undefined;
+    if (venue && !venueIds.includes(venue.id)) setVenueIds([...venueIds, venue.id]);
+
+    const parts: string[] = [];
+    parts.push(added.length ? `${added.map((m) => m.name).join("・")} を追加` : "追加できる人はいませんでした");
+    if (incoming.length > added.length) parts.push(`${incoming.length - added.length}人は重複か上限（${MAX_MEMBERS}人）で入れていません`);
+    if (meetOk) parts.push(`集合 ${meet}`);
+    if (venue) parts.push(`候補地に${venue.name}`);
+    else if (parsed.venue) parts.push(`「${parsed.venue}」は候補地に無いので選んでいません`);
+    return parts.join("。");
+  }
   function toggleVenue(id: string) {
     setVenueIds(venueIds.includes(id) ? venueIds.filter((v) => v !== id) : [...venueIds, id]);
   }
@@ -250,6 +287,7 @@ export default function Planner() {
             <button type="submit" className="btn btn-primary" disabled={!newStation.trim() || members.length >= MAX_MEMBERS}>追加</button>
           </form>
           <datalist id="station-list">{STATION_CANDIDATES.map((name) => <option key={name} value={name} />)}</datalist>
+          <ChatImport onApply={applyParsed} />
         </div>
 
         {/* 02 候補地 ＋ 03 条件 */}
