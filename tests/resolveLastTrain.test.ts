@@ -300,3 +300,62 @@ test("geo: で見つかればハブ駅 ID は試さない", async () => {
   await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
   assert.equal(calls.plan, 1);
 });
+
+test("同じ問い合わせが同時に 2 つ来ても Transit は 1 回（進行中の結果を共有）", async () => {
+  const { deps, calls } = makeDeps({
+    suggestStationId: async () => "scrape-keihan:京阪電気鉄道-宇治線-宇治",
+    planLastArrival: async () => { await new Promise((r) => setTimeout(r, 10)); return ujiJourney; },
+  });
+  const [a, b] = await Promise.all([
+    resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps),
+    resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps),
+  ]);
+  assert.equal(a.kind, "found");
+  assert.deepEqual(a, b);
+  assert.equal(calls.plan, 1);
+  assert.equal(calls.suggest, 1);
+});
+
+test("同じ自宅駅を別ハブから同時に問い合わせても suggest は 1 回", async () => {
+  const { deps, calls } = makeDeps({
+    suggestStationId: async () => { await new Promise((r) => setTimeout(r, 10)); return "scrape-keihan:京阪電気鉄道-宇治線-宇治"; },
+    planLastArrival: async () => ujiJourney,
+  });
+  await Promise.all([
+    resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps),
+    resolveLastTrain(HUB_BY_ID.demachiyanagi, "宇治", "weekday", deps),
+    resolveLastTrain(HUB_BY_ID.kyoto, "宇治", "weekday", deps),
+  ]);
+  assert.equal(calls.suggest, 1);
+  assert.equal(calls.plan, 3);
+});
+
+test("geo: が「200 で経路 0 件」なら駅 ID でのやり直しをしない（plan は 1 回）", async () => {
+  const { deps, calls } = makeDeps({
+    suggestStationId: async () => "eizan-rail:叡山電鉄-鞍馬線-鞍馬",
+    planLastArrival: async () => ({ journey: null, outcome: "noJourneys" as const }),
+  });
+  const r = await resolveLastTrain(HUB_BY_ID.kyoto, "鞍馬", "weekday", deps);
+  assert.equal(r.kind, "unavailable");
+  assert.equal(calls.plan, 1);
+});
+
+test("geo: が HTTP エラー（422 など）なら駅 ID で順にやり直す", async () => {
+  const { deps, calls } = makeDeps({
+    suggestStationId: async () => "x:y",
+    planLastArrival: async () => ({ journey: null, outcome: "error" as const }),
+  });
+  await resolveLastTrain(HUB_BY_ID.kyoto, "鞍馬", "weekday", deps);
+  assert.equal(calls.plan, 1 + HUB_BY_ID.kyoto.stationIds.length);
+});
+
+test("geo: の経路が全部弾かれた（rejected）ときも駅 ID でやり直し、そこで出れば found", async () => {
+  const { deps, calls } = makeDeps({
+    suggestStationId: async () => "x:y",
+    planLastArrival: async (from) =>
+      from.startsWith("geo:") ? { journey: null, outcome: "rejected" as const } : { journey: ujiJourney, outcome: "found" as const },
+  });
+  const r = await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
+  assert.equal(r.kind, "found");
+  assert.equal(calls.plan, 1 + HUB_BY_ID.sanjo.stationIds.length);
+});

@@ -26,7 +26,8 @@ import { toMin } from "./time.ts";
 import {
   boardingSecs,
   firstHeadsign,
-  planLastArrival,
+  planLastArrivalDetailed,
+  type PlanResult,
   secsToHHMM,
   suggestStationId,
   type TransitJourney,
@@ -57,7 +58,16 @@ export interface ResolveDeps {
   lines: LinesData;
   lastTrains: LastTrainsData;
   /** originNames: 最初の乗車区間の出発駅として受け入れる駅名（ハブ名 + 別名） */
-  planLastArrival: (from: string, to: string, date: string, originNames: readonly string[]) => Promise<TransitJourney | null>;
+  /**
+   * plan。PlanResult（結果の種別付き）を返すのが標準。
+   * 互換のため TransitJourney | null も受け付ける（null は「出発駅を変えてやり直す」扱い）
+   */
+  planLastArrival: (
+    from: string,
+    to: string,
+    date: string,
+    originNames: readonly string[],
+  ) => Promise<PlanResult | TransitJourney | null>;
   /** preferFeeds: 優先する feed ID（地下鉄収録駅なら地下鉄） */
   suggestStationId: (name: string, preferFeeds: readonly string[]) => Promise<string | null>;
   /** "YYYYMMDD"（ローカル時刻） */
@@ -76,7 +86,7 @@ export function todayYYYYMMDD(now: Date = new Date()): string {
 export const defaultDeps: ResolveDeps = {
   lines: linesJson as unknown as LinesData,
   lastTrains: lastTrainsJson as unknown as LastTrainsData,
-  planLastArrival: (from, to, date, originNames) => planLastArrival(from, to, date, fetch, { originNames }),
+  planLastArrival: (from, to, date, originNames) => planLastArrivalDetailed(from, to, date, fetch, { originNames }),
   suggestStationId: (name, preferFeeds) => suggestStationId(name, fetch, { preferFeeds }),
   today: () => todayYYYYMMDD(),
   minIntervalMs: 300,
@@ -85,6 +95,10 @@ export const defaultDeps: ResolveDeps = {
 // ---- キャッシュ（メモリ + localStorage）
 
 const memCache = new Map<string, Resolved>();
+/** 進行中の Transit 問い合わせ（キー → Promise）。完了したら消す */
+const inFlight = new Map<string, Promise<Resolved>>();
+/** 進行中の駅 ID 検索（自宅駅名 → Promise）。同じ自宅駅の 7 ハブ分をまとめる */
+const suggestInFlight = new Map<string, Promise<string | null>>();
 /** 自宅駅名 → Transit 駅 ID。同じ人を 7 ハブ分回すので suggest は 1 回で済ませる。null（失敗）は覚えない */
 const stationIdCache = new Map<string, string>();
 
@@ -94,6 +108,9 @@ function hasLocalStorage(): boolean {
   return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
 }
 
+/** unavailable を localStorage に残す時間。一時障害を長く引きずらない程度に短く、リロード連打で同じ失敗を繰り返さない程度に長く */
+const UNAVAILABLE_TTL_MS = 30 * 60 * 1000;
+
 function readCache(key: string): Resolved | null {
   const hit = memCache.get(key);
   if (hit) return hit;
@@ -101,21 +118,29 @@ function readCache(key: string): Resolved | null {
   try {
     const raw = window.localStorage.getItem(key);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as Resolved;
-    if (parsed.kind !== "found") return null; // 古い形式や unavailable が残っていても使わない
-    memCache.set(key, parsed);
-    return parsed;
+    const parsed = JSON.parse(raw) as Resolved & { expiresAt?: number };
+    if (parsed.kind === "found") {
+      memCache.set(key, parsed);
+      return parsed;
+    }
+    if (parsed.kind === "unavailable" && typeof parsed.expiresAt === "number" && parsed.expiresAt > Date.now()) {
+      const value: Resolved = { kind: "unavailable", reason: parsed.reason };
+      memCache.set(key, value);
+      return value;
+    }
+    return null; // 古い形式・期限切れ
   } catch {
     return null;
   }
 }
 
-/** found は localStorage にも書く。unavailable はメモリだけ（一時障害を翌リロードまで持ち越さない） */
+/** found は localStorage に無期限で、unavailable は UNAVAILABLE_TTL_MS だけ書く（出せない駅の再検索を毎リロード繰り返さない） */
 function writeCache(key: string, value: Resolved): void {
   memCache.set(key, value);
-  if (value.kind !== "found" || !hasLocalStorage()) return;
+  if (value.kind === "noTrainNeeded" || !hasLocalStorage()) return;
   try {
-    window.localStorage.setItem(key, JSON.stringify(value));
+    const stored = value.kind === "unavailable" ? { ...value, expiresAt: Date.now() + UNAVAILABLE_TTL_MS } : value;
+    window.localStorage.setItem(key, JSON.stringify(stored));
   } catch {
     // 容量超過・プライベートモードなどは無視
   }
@@ -195,48 +220,78 @@ export async function resolveLastTrain(
     const cached = readCache(key);
     if (cached) return cached;
 
-    const interval = deps.minIntervalMs ?? 300;
+    // 2'. 同じ問い合わせが進行中なら、その結果を待つ（React 開発モードの 2 重実行や並列化で同じキーが重なる）
+    const pending = inFlight.get(key);
+    if (pending) return await pending;
+    const task = (async (): Promise<Resolved> => {
+      const interval = deps.minIntervalMs ?? 300;
 
-    // 3. 駅 ID（地下鉄収録駅なら地下鉄の ID を優先。山科 = JR / 地下鉄 / 湖西線）
-    let stationId = stationIdCache.get(homeName) ?? null;
-    if (stationId === null) {
-      const isSubway = deps.lastTrains.stations.some((s) => s.name === homeName);
-      await throttle(interval);
-      stationId = await deps.suggestStationId(homeName, isSubway ? [SUBWAY_FEED] : []);
-      if (stationId) stationIdCache.set(homeName, stationId);
-    }
-    if (!stationId) {
-      return remember(key, { kind: "unavailable", reason: `駅IDが見つからない: ${homeName}` });
-    }
-
-    // 4. Transit。まず geo:（駅の選択を Transit に任せる）。出発駅がハブ以外にスナップされた経路は planLastArrival 側で弾く
-    await throttle(interval);
-    let journey: TransitJourney | null = await deps.planLastArrival(hubGeo(hub), stationId, date, hubNames(hub));
-
-    // 4'. geo: が出せなかったら（422 searchWindowTooDense / 0 件 / スナップ違い）ハブの駅 ID を順に試し、最も遅く乗れる便
-    if (!journey) {
-      for (const fromId of hub.stationIds) {
-        await throttle(interval);
-        const j = await deps.planLastArrival(fromId, stationId, date, hubNames(hub));
-        if (j && (journey === null || boardingSecs(j) > boardingSecs(journey))) journey = j;
+      // 3. 駅 ID（地下鉄収録駅なら地下鉄の ID を優先。山科 = JR / 地下鉄 / 湖西線）
+      //    同じ自宅駅の 7 ハブ分が並列で来るので、進行中の suggest は共有して 1 回にする
+      let stationId = stationIdCache.get(homeName) ?? null;
+      if (stationId === null) {
+        let lookup = suggestInFlight.get(homeName);
+        if (!lookup) {
+          lookup = (async () => {
+            const isSubway = deps.lastTrains.stations.some((s) => s.name === homeName);
+            await throttle(interval);
+            const id = await deps.suggestStationId(homeName, isSubway ? [SUBWAY_FEED] : []);
+            if (id) stationIdCache.set(homeName, id);
+            return id;
+          })().finally(() => suggestInFlight.delete(homeName));
+          suggestInFlight.set(homeName, lookup);
+        }
+        stationId = await lookup;
       }
-    }
-    if (!journey) {
-      return remember(key, { kind: "unavailable", reason: `Transitに経路なし: ${hub.name}→${homeName}` });
-    }
+      if (!stationId) {
+        return remember(key, { kind: "unavailable", reason: `駅IDが見つからない: ${homeName}` });
+      }
 
-    // 5. 整形（時刻は最初の乗車区間の発時刻。先頭の徒歩は transferMin が持つ）
-    return remember(key, {
-      kind: "found",
-      time: secsToHHMM(boardingSecs(journey)),
-      via: "transit",
-      transferCount: journey.transferCount,
-      headsign: firstHeadsign(journey),
-    });
+      // 4. Transit。まず geo:（駅の選択を Transit に任せる）。出発駅がハブ以外にスナップされた経路は planLastArrival 側で弾く
+      await throttle(interval);
+      const first = toPlanResult(await deps.planLastArrival(hubGeo(hub), stationId, date, hubNames(hub)));
+      let journey: TransitJourney | null = first.journey;
+
+      // 4'. geo: が出せなかったらハブの駅 ID を順に試し、最も遅く乗れる便。
+      //     ただし「200 で経路 0 件」は目的地側に経路が無いということなので、出発駅を変えても出ない → やり直さない
+      //     （出せない駅 1 人につき最大 15 回の無駄な問い合わせを省く。Transit サーバーは 1 秒 2〜3 件しか処理できない）
+      if (!journey && first.outcome !== "noJourneys") {
+        for (const fromId of hub.stationIds) {
+          await throttle(interval);
+          const j = toPlanResult(await deps.planLastArrival(fromId, stationId, date, hubNames(hub))).journey;
+          if (j && (journey === null || boardingSecs(j) > boardingSecs(journey))) journey = j;
+        }
+      }
+      if (!journey) {
+        return remember(key, { kind: "unavailable", reason: `Transitに経路なし: ${hub.name}→${homeName}` });
+      }
+
+      // 5. 整形（時刻は最初の乗車区間の発時刻。先頭の徒歩は transferMin が持つ）
+      return remember(key, {
+        kind: "found",
+        time: secsToHHMM(boardingSecs(journey)),
+        via: "transit",
+        transferCount: journey.transferCount,
+        headsign: firstHeadsign(journey),
+      });
+    })();
+    inFlight.set(key, task);
+    try {
+      return await task;
+    } finally {
+      inFlight.delete(key);
+    }
   } catch (e) {
     // 6. 何が起きても Resolved を返す
     return { kind: "unavailable", reason: e instanceof Error ? e.message : String(e) };
   }
+}
+
+/** deps.planLastArrival の互換形（TransitJourney | null）を PlanResult に揃える。null は「やり直す価値あり」扱い */
+function toPlanResult(r: PlanResult | TransitJourney | null): PlanResult {
+  if (r === null) return { journey: null, outcome: "rejected" };
+  if ("outcome" in r) return r;
+  return { journey: r, outcome: "found" };
 }
 
 function remember(key: string, value: Resolved): Resolved {

@@ -170,3 +170,32 @@ test("resultFor: stations に無い駅のメンバーは deadMember（呼び出�
 test("rankVenues: メンバー 0 人なら空配列（rows[0] を読んで落ちない）", () => {
   assert.deepEqual(rankVenues([venue], [], {}, 5), []);
 });
+
+// ---- 並列化・進捗通知
+test("自宅駅 2 件 × 7 ハブを並列に投げ、3 件目以降は待つ", async () => {
+  let started = 0;
+  let release!: () => void;
+  const gate = new Promise<void>((r) => { release = r; });
+  const resolve: Resolver = async () => { started++; await gate; return found("23:30"); };
+  const p = buildStations([tanaka, { name: "佐藤", station: "山科" }, { name: "鞍馬さん", station: "鞍馬" }, { name: "D", station: "宇治" }], "weekday", resolve);
+  await new Promise((r) => setTimeout(r, 0));
+  assert.equal(started, 14); // 同時に進める自宅駅は 2 件 → 2 駅 × 7 ハブ。3 駅目以降は待つ
+  release();
+  const r = await p;
+  assert.equal(started, 28);
+  assert.equal(Object.keys(r.stations).length, 4);
+});
+
+test("onProgress: 自宅駅ごとに解けた順で呼ばれる。対応予定は null", async () => {
+  const delays: Record<string, number> = { 五条: 30, 山科: 5, 鞍馬: 15 };
+  const resolve: Resolver = async (_hub, home) => {
+    await new Promise((r) => setTimeout(r, delays[home]));
+    return home === "鞍馬" ? unavailable : found("23:30");
+  };
+  const events: [string, boolean][] = [];
+  const members: Member[] = [tanaka, { name: "佐藤", station: "山科" }, { name: "鞍馬さん", station: "鞍馬" }];
+  const r = await buildStations(members, "weekday", resolve, HUBS, (home, st) => events.push([home, st !== null]));
+  assert.deepEqual(events, [["山科", true], ["鞍馬", false], ["五条", true]]);
+  assert.deepEqual(Object.keys(r.stations).sort(), ["五条", "山科"]);
+  assert.deepEqual(r.unavailable.map((m) => m.station), ["鞍馬"]);
+});

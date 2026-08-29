@@ -8,6 +8,7 @@ import {
   boardingSecs,
   isSane,
   planLastArrival,
+  planLastArrivalDetailed,
   secsToHHMM,
   startsAt,
   suggestStationId,
@@ -202,4 +203,14 @@ test("suggestStationId: preferFeeds に該当が無ければ完全一致の先�
     await suggestStationId("宇治", fetcher, { preferFeeds: ["scrape-kyoto-subway"] }),
     "scrape-keihan:京阪電気鉄道-宇治線-宇治",
   );
+});
+
+test("planLastArrivalDetailed: 0 件は noJourneys、422 は error、三条→宇治は found", async () => {
+  const empty = await planLastArrivalDetailed("a", "b", "20260829", fakeFetch(load("transit-empty.json")).fetcher);
+  assert.deepEqual(empty, { journey: null, outcome: "noJourneys" });
+  const err = await planLastArrivalDetailed("a", "b", "20260829", fakeFetch(load("transit-422.json"), 422).fetcher);
+  assert.deepEqual(err, { journey: null, outcome: "error" });
+  const ok = await planLastArrivalDetailed("geo:35.00879,135.772337", "x", "20260829", fakeFetch(load("transit-sanjo-uji.json")).fetcher);
+  assert.equal(ok.outcome, "found");
+  assert.equal(ok.journey?.departureSecs, 85260);
 });
