@@ -12,7 +12,7 @@
  */
 import { HUBS, type Hub } from "../data/hubs.ts";
 import type { DayType } from "./lastTrain.ts";
-import { resolveLastTrain, type Resolved } from "./resolveLastTrain.ts";
+import { dayTypeOf, resolveLastTrain, type Resolved } from "./resolveLastTrain.ts";
 import type { Member, Route, Station } from "./types.ts";
 
 /** 同時に進める自宅駅の数 */
@@ -30,10 +30,9 @@ export interface BuildResult {
   unavailable: Member[];
 }
 
-/** 今日が土日なら weekend。祝日は見ない（Planner に日付入力が無い） */
+/** 今日が土日なら weekend（土休日ダイヤ）。祝日は見ない。Planner のトグルの初期値に使う（ユーザーが切り替えられる） */
 export function todayType(now = new Date()): DayType {
-  const day = now.getDay();
-  return day === 0 || day === 6 ? "weekend" : "weekday";
+  return dayTypeOf(now);
 }
 
 export async function buildStations(

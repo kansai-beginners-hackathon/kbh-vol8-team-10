@@ -7,6 +7,8 @@ import path from "node:path";
 import {
   boardingSecs,
   isSane,
+  isShinkansenLeg,
+  usesShinkansen,
   planLastArrival,
   planLastArrivalDetailed,
   secsToHHMM,
@@ -184,9 +186,10 @@ test("planLastArrival: 三条→宇治 fixture は originNames=[三条] を通�
 });
 
 // ---- suggestStationId の feed 優先
-test("suggestStationId: 山科は JR / 地下鉄 / 湖西線 の 3 件。既定は先頭（JR）", async () => {
+test("suggestStationId: 山科は JR / 地下鉄 / 湖西線 の 3 件。suggest の先頭は JR だが FEED_PRIORITY で地下鉄", async () => {
   const { fetcher } = fakeFetch(load("suggest-yamashina.json"));
-  assert.equal(await suggestStationId("山科", fetcher), "jrwest-tokaido:jrwest-tokaido.station.JR西日本-東海道線-山科");
+  assert.equal(load("suggest-yamashina.json").stations[0].id, "jrwest-tokaido:jrwest-tokaido.station.JR西日本-東海道線-山科");
+  assert.equal(await suggestStationId("山科", fetcher), "scrape-kyoto-subway:京都市-東西線-山科");
 });
 
 test("suggestStationId: preferFeeds=[scrape-kyoto-subway] なら地下鉄山科", async () => {
@@ -213,4 +216,60 @@ test("planLastArrivalDetailed: 0 件は noJourneys、422 は error、三条→�
   const ok = await planLastArrivalDetailed("geo:35.00879,135.772337", "x", "20260829", fakeFetch(load("transit-sanjo-uji.json")).fetcher);
   assert.equal(ok.outcome, "found");
   assert.equal(ok.journey?.departureSecs, 85260);
+});
+
+// ---- 新幹線の除外
+test("isShinkansenLeg: feed ID（tokaido-shinkansen）または列車名（のぞみ）で判定。在来線は false", () => {
+  assert.equal(isShinkansenLeg({ kind: "transit", routeName: "のぞみ", headsign: "のぞみ95号 姫路", from: { id: "tokaido-shinkansen:tokaido.Kyoto" }, departureSecs: 0, arrivalSecs: 0 }), true);
+  assert.equal(isShinkansenLeg({ kind: "transit", headsign: "こだま977号 岡山", departureSecs: 0, arrivalSecs: 0 }), true, "列車名だけでも弾く");
+  assert.equal(isShinkansenLeg({ kind: "transit", headsign: "新快速 西明石", from: { id: "jrwest-tokaido:x" }, departureSecs: 0, arrivalSecs: 0 }), false);
+  assert.equal(isShinkansenLeg({ kind: "walk", from: { id: "tokaido-shinkansen:tokaido.Shin-Osaka" }, departureSecs: 0, arrivalSecs: 0 }), false, "徒歩は対象外");
+});
+
+test("planLastArrival: 京都→姫路 fixture は全部新幹線 → null（rejected）", async () => {
+  const fx = load("transit-kyoto-himeji.json");
+  assert.ok((fx.journeys as TransitJourney[]).every(usesShinkansen), "fixture は 6 件とも新幹線を含む");
+  const j = await planLastArrival("geo:34.985729,135.758523", "x", "20260831", fakeFetch(fx).fetcher, { originNames: ["京都"] });
+  assert.equal(j, null);
+});
+
+test("planLastArrival: 新幹線の経路と在来線の経路が混ざっていたら在来線を選ぶ", async () => {
+  const jr = journey({ departureSecs: 82980, legs: [{ kind: "transit", headsign: "新快速 姫路", from: { id: "jrwest-tokaido:k", name: "京都" }, departureSecs: 82980, arrivalSecs: 88000 }] });
+  const sk = journey({ departureSecs: 83100, legs: [{ kind: "transit", routeName: "のぞみ", headsign: "のぞみ95号 姫路", from: { id: "tokaido-shinkansen:tokaido.Kyoto", name: "京都" }, departureSecs: 83100, arrivalSecs: 85860 }] });
+  const j = await planLastArrival("a", "b", "20260831", fakeFetch({ journeys: [sk, jr] }).fetcher);
+  assert.equal(j?.departureSecs, 82980, "新幹線の方が遅く出るが選ばない");
+});
+
+// ---- suggestStationId: 新幹線除外と事業者の優先順
+test("suggestStationId: 姫路は JR山陽線（新幹線の駅は除外）", async () => {
+  const { fetcher } = fakeFetch(load("suggest-himeji.json"));
+  assert.equal(await suggestStationId("姫路", fetcher), "jrwest-sanyo-east:jrwest-sanyo-east.station.JR西日本-山陽線-姫路");
+});
+
+test("suggestStationId: 新大阪は御堂筋線が先頭でも JR京都線を選ぶ（FEED_PRIORITY）", async () => {
+  const { fetcher } = fakeFetch({
+    stations: [
+      { id: "osakametro-rail:大阪市高速電気軌道-御堂筋線-新大阪", name: "新大阪", kind: "station" },
+      { id: "jrwest-tokaido:jrwest-tokaido.station.JR西日本-東海道線-新大阪", name: "新大阪", kind: "station" },
+      { id: "sanyo-shinkansen:sanyo.station.Shin-Osaka", name: "新大阪", kind: "station" },
+      { id: "tokaido-shinkansen:tokaido.station.Shin-Osaka", name: "新大阪", kind: "station" },
+      { id: "jrwest-osaka-higashi:jrwest-osaka-higashi.station.JR西日本-おおさか東線-新大阪", name: "新大阪", kind: "station" },
+    ],
+  });
+  assert.equal(await suggestStationId("新大阪", fetcher), "jrwest-tokaido:jrwest-tokaido.station.JR西日本-東海道線-新大阪");
+});
+
+test("suggestStationId: 大阪梅田は阪神が先頭でも阪急を選ぶ", async () => {
+  const { fetcher } = fakeFetch({
+    stations: [
+      { id: "hanshin-rail-part-01:阪神電気鉄道-本線-大阪梅田", name: "大阪梅田", kind: "station" },
+      { id: "scrape-hankyu:阪急電鉄-京都線-大阪梅田", name: "大阪梅田", kind: "station" },
+    ],
+  });
+  assert.equal(await suggestStationId("大阪梅田", fetcher), "scrape-hankyu:阪急電鉄-京都線-大阪梅田");
+});
+
+test("suggestStationId: 新幹線の駅しか無ければ null", async () => {
+  const { fetcher } = fakeFetch({ stations: [{ id: "tokaido-shinkansen:tokaido.station.Gifu-Hashima", name: "岐阜羽島", kind: "station" }] });
+  assert.equal(await suggestStationId("岐阜羽島", fetcher), null);
 });

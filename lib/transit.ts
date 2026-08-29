@@ -26,6 +26,9 @@ export interface TransitLeg {
   kind: "transit" | "walk";
   headsign?: string;
   routeName?: string;
+  trainType?: string;
+  mode?: string;
+  tripId?: string;
   from?: TransitPlace;
   to?: TransitPlace;
   departureSecs: number;
@@ -99,6 +102,54 @@ export function startsAt(journey: TransitJourney, originNames: readonly string[]
   return typeof name === "string" && originNames.includes(name);
 }
 
+/** 新幹線の列車名。routeName / trainType / headsign の先頭に付く */
+const SHINKANSEN_NAME =
+  /^(のぞみ|ひかり|こだま|みずほ|さくら|つばめ|はやぶさ|はやて|やまびこ|なすの|とき|たにがわ|かがやき|はくたか|つるぎ|あさま|こまち|つばさ)/;
+
+/** feed ID（駅 ID / tripId の ":" より前）が新幹線か。tokaido-shinkansen / sanyo-shinkansen など */
+export function isShinkansenFeed(id: string | undefined): boolean {
+  return typeof id === "string" && id.split(":")[0].includes("shinkansen");
+}
+
+/**
+ * 新幹線の乗車区間か。「帰りの終電」に新幹線は出さない（京都→姫路 が「23:05 のぞみ95号」になる）。
+ * feed ID か列車名のどちらかで判定する
+ */
+export function isShinkansenLeg(leg: TransitLeg): boolean {
+  if (leg.kind !== "transit") return false;
+  if (isShinkansenFeed(leg.from?.id) || isShinkansenFeed(leg.to?.id) || isShinkansenFeed(leg.tripId)) return true;
+  return [leg.routeName, leg.trainType, leg.headsign].some((t) => typeof t === "string" && SHINKANSEN_NAME.test(t));
+}
+
+/** 新幹線を 1 区間でも使う経路か */
+export function usesShinkansen(journey: TransitJourney): boolean {
+  return journey.legs.some(isShinkansenLeg);
+}
+
+/**
+ * 同名駅が複数事業者にあるときの優先順（feed ID の前方一致）。
+ * 京都近郊で使う事業者を先に。新幹線は除外（自宅駅にならない。宛先が新幹線駅だと経路も新幹線になる）。
+ * 例: 新大阪 = 御堂筋線 / JR京都線 / 新幹線×2 / おおさか東線 → JR京都線。姫路 = JR山陽線 / 新幹線 / 播但線 → JR山陽線
+ */
+export const FEED_PRIORITY: readonly string[] = [
+  "scrape-kyoto-subway",
+  "scrape-keihan",
+  "scrape-hankyu",
+  "eizan-rail",
+  "scrape-randen",
+  "kintetsu-",
+  "jrwest-tokaido",
+  "jrwest-",
+  "hanshin-",
+  "osakametro-",
+];
+
+function feedRank(id: string): number {
+  const feed = id.split(":")[0];
+  const i = FEED_PRIORITY.findIndex((p) => feed.startsWith(p));
+  return i < 0 ? FEED_PRIORITY.length : i;
+}
+
 /** fetch を投げずに JSON を取る。失敗はすべて null */
 async function getJson(url: string, fetcher: Fetcher): Promise<unknown | null> {
   try {
@@ -121,9 +172,9 @@ export interface SuggestOptions {
 /**
  * 駅名 → Transit の駅 ID。
  * suggest は部分一致で同名・類似駅を複数返す（宇治 → 宇治, 宇治山田, ... / 山科 → JR, 地下鉄, 湖西線）ので、
- *  1. kind==="station" だけ残す
+ *  1. kind==="station" だけ残す。新幹線の駅は除く
  *  2. 名前が完全一致するもののうち preferFeeds の feed を優先
- *  3. 完全一致の先頭
+ *  3. 完全一致を FEED_PRIORITY（京都近郊の事業者が先）で並べた先頭
  *  4. station の先頭
  * の順で選ぶ。見つからなければ null。
  * 同名駅の事業者違い（出町柳 = 京阪 / 叡電）は乗換ありの目的地なので Transit 側が吸収する。
@@ -140,7 +191,9 @@ export async function suggestStationId(
   url.searchParams.set("limit", "10");
 
   const data = (await getJson(url.toString(), fetcher)) as { stations?: SuggestStation[] } | null;
-  const stations = (data?.stations ?? []).filter((s) => s && s.kind === "station" && typeof s.id === "string");
+  const stations = (data?.stations ?? []).filter(
+    (s) => s && s.kind === "station" && typeof s.id === "string" && !isShinkansenFeed(s.id),
+  );
   if (stations.length === 0) return null;
 
   const exact = stations.filter((s) => s.name === q);
@@ -148,7 +201,9 @@ export async function suggestStationId(
     const hit = exact.find((s) => s.id.split(":")[0] === feed);
     if (hit) return hit.id;
   }
-  return (exact[0] ?? stations[0]).id;
+  // 完全一致が複数なら FEED_PRIORITY 順（同順位なら suggest の並び = score 順）
+  const ranked = [...exact].map((s, i) => ({ s, i })).sort((a, b) => feedRank(a.s.id) - feedRank(b.s.id) || a.i - b.i);
+  return (ranked[0]?.s ?? stations[0]).id;
 }
 
 export interface PlanOptions {
@@ -168,7 +223,7 @@ export interface PlanOptions {
  * plan の結果の種別。呼び出し側が「別の出発駅でやり直す価値があるか」を判断するのに使う。
  *  - found      : 採用できる経路があった
  *  - noJourneys : サーバーは 200 で答えたが経路が 0 件（この目的地へは出せない。やり直しても出ない）
- *  - rejected   : 経路はあったが isSane / 出発駅チェックで全部弾いた（出発駅を変えれば出るかもしれない）
+ *  - rejected   : 経路はあったが isSane / 出発駅チェック / 新幹線除外で全部弾いた（出発駅を変えれば出るかもしれない）
  *  - error      : HTTP エラー（422 searchWindowTooDense など）・通信失敗・JSON 不正
  */
 export type PlanOutcome = "found" | "noJourneys" | "rejected" | "error";
@@ -213,6 +268,7 @@ export async function planLastArrivalDetailed(
   for (const j of journeys) {
     if (!isJourneyShape(j) || !isSane(j)) continue;
     if (!startsAt(j, opts.originNames ?? [])) continue;
+    if (usesShinkansen(j)) continue; // 帰りの終電に新幹線は出さない
     if (best === null || boardingSecs(j) > boardingSecs(best)) best = j;
   }
   return best ? { journey: best, outcome: "found" } : { journey: null, outcome: "rejected" };
