@@ -38,7 +38,7 @@ npm run build
 npm run start
 ```
 
-`/api/parse`（LINE の会話の読み取り）と `/api/return-home` はサーバー側で動く Route Handler のため、静的エクスポート（`output: "export"`）は使えません。デプロイ先は Vercel（Next.js サーバー実行）で、`OPENAI_API_KEY` を Environment Variables に設定します。ローカルは `.env.local` に同じキーを置きます（`.env.example` 参照）。
+`/api/parse`（貼り付けたテキストの読み取り）と `/api/return-home` はサーバー側で動く Route Handler のため、静的エクスポート（`output: "export"`）は使えません。デプロイ先は Vercel（Next.js サーバー実行）で、`OPENAI_API_KEY` を Environment Variables に設定します。ローカルは `.env.local` に同じキーを置きます（`.env.example` 参照）。
 
 ## チーム
 | 役割 | 名前 | GitHub |
