@@ -52,14 +52,14 @@ export const HUBS: Hub[] = [
     id: "kawaramachi", name: "京都河原町", lat: 35.00378, lon: 135.76868, transferMin: 3, aliases: [],
     stationIds: ["scrape-hankyu:阪急電鉄-京都線-京都河原町"],
   },
-  // 地下鉄（烏丸線・東西線）
+  // 地下鉄（烏丸線・東西線）。東西線 ↔ 烏丸線 は階をまたぐので 5 分（2026-08-30 に 3 → 5）
   {
-    id: "karasumaoike", name: "烏丸御池", lat: 35.00999, lon: 135.75963, transferMin: 3, aliases: [], subwayOnly: true,
+    id: "karasumaoike", name: "烏丸御池", lat: 35.00999, lon: 135.75963, transferMin: 5, aliases: [], subwayOnly: true,
     stationIds: ["scrape-kyoto-subway:京都市-烏丸線-烏丸御池"],
   },
-  // 地下鉄（阪急は「烏丸」）
+  // 地下鉄（阪急は「烏丸」）。地下鉄四条 ↔ 阪急烏丸 は地下通路を歩くので 5 分（2026-08-30 に 3 → 5）
   {
-    id: "shijo", name: "四条", lat: 35.00275, lon: 135.759673, transferMin: 3, aliases: ["烏丸"], subwayOnly: true,
+    id: "shijo", name: "四条", lat: 35.00275, lon: 135.759673, transferMin: 5, aliases: ["烏丸"], subwayOnly: true,
     stationIds: ["scrape-hankyu:阪急電鉄-京都線-烏丸", "scrape-kyoto-subway:京都市-烏丸線-四条"],
   },
   // JR（地下鉄・近鉄も「京都」、100m 以内）

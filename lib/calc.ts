@@ -1,17 +1,48 @@
 import { toMin } from "./time.ts";
-import type { Member, MemberLeave, Route, Station, Venue, VenueResult } from "./types.ts";
+import type { HubCell, Member, MemberLeave, Route, Station, Venue, VenueResult } from "./types.ts";
 
 /**
  * 要件定義 §6 の式。
  *
  * 最遅出発(v, m) =
  *   max over m の各帰着経路 r:                         ← 一番遅くなる経路を採る
- *     min( 支線最終 − transitMin − transferMin,          ← ① 支線が縛る
+ *     min( ①支線に間に合う候補地発の最終,
  *          lastDepart )                                  ← ② 幹線が縛る
  *   − walkToStationMin
  *
+ * ① は cell.trains（候補地→ハブの実在の便）があればそこから選び、無ければ
+ * 従来どおり `支線最終 − transitMin − transferMin` で逆算する。branchLimit を参照。
+ *
  * 端数は切り捨て。結果は必ず安全側（早め）に倒れる。
  */
+
+/**
+ * trains は「その区間の全便」ではなく飛び飛びの標本なので、収録に穴があると
+ * 実際よりずっと早い便を掴んでしまう（桂 → 京都 で 23:27 の次が 21:19 しか無く、
+ * 逆算 23:30 に対して 21:19 を返した例）。逆算からこれ以上離れたら穴とみなして逆算に戻す。
+ * 収録した便の運転間隔は中央値 13 分・9 割が 30 分以内なので、60 分空くのは穴。
+ */
+const TRAIN_GAP_LIMIT_MIN = 60;
+
+/**
+ * ① 支線の最終に間に合うために、候補地を何時までに出ればよいか（分）。
+ *
+ * cell.trains がある区間では「ハブ着 + 乗換 ≤ 支線最終」を満たす**実在の便**の中で一番遅い発時刻。
+ * 逆算だと電車が走っていない時刻を返してしまうため（lib/types.ts の HubCell.trains 参照）。
+ * 該当する便が無い（＝収録している時間帯より前が締め切り）か、逆算から離れすぎている
+ * （＝収録の穴）ときは逆算に戻す。
+ */
+function branchLimit(cell: HubCell, route: Route, branchLast: string): number {
+  const byFormula = toMin(branchLast) - cell.transitMin - route.transferMin;
+  if (!cell.trains?.length) return byFormula;
+  const limit = toMin(branchLast) - route.transferMin;
+  let latest = -Infinity;
+  for (const [depart, arrive] of cell.trains) {
+    if (toMin(arrive) <= limit && toMin(depart) > latest) latest = toMin(depart);
+  }
+  if (latest === -Infinity || byFormula - latest > TRAIN_GAP_LIMIT_MIN) return byFormula;
+  return latest;
+}
 
 /** 候補地 venue から station へ帰るとき、一番遅くなる経路とその値（徒歩を引く前・分） */
 export function bestRoute(station: Station, venue: Venue): { route: Route; value: number } | null {
@@ -20,7 +51,7 @@ export function bestRoute(station: Station, venue: Venue): { route: Route; value
     const cell = venue.toHub[route.hub];
     if (!cell) continue; // この候補地からそのハブへ行けない → 経路を除外
     // last === null は電車不要（自宅駅がハブそのもの）。支線は縛らず、候補地→ハブの最終だけが効く
-    const viaBranch = route.last === null ? Infinity : toMin(route.last) - cell.transitMin - route.transferMin;
+    const viaBranch = route.last === null ? Infinity : branchLimit(cell, route, route.last);
     const viaTrunk = cell.lastDepart ? toMin(cell.lastDepart) : Infinity;
     const value = Math.min(viaBranch, viaTrunk);
     if (best === null || value > best.value) best = { route, value };

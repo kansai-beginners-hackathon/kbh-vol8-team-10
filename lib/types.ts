@@ -22,12 +22,23 @@ export interface Station {
   taxiKm: number;
 }
 
-/** 候補地 → ハブ。Yahoo!乗換案内の終電検索から写す 2 数字 */
+/** 候補地 → ハブ。Yahoo!乗換案内の終電検索から写す */
 export interface HubCell {
-  /** 所要時間 + 3 分（安全側） */
+  /** 所要時間 + 3 分（安全側）。最短ルートの所要を使う（最終便の大回りではない） */
   transitMin: number;
   /** 候補地発・そのハブまで行く最終の発時刻。候補地がハブそのものなら null（無制限） */
   lastDepart: string | null;
+  /**
+   * 候補地 → ハブに実際に走っている便。`[発, 着]` を新しい順に。data/venue-hub-trains.json から入る。
+   *
+   * 深夜は 15〜20 分に 1 本しか無いので、`支線最終 − transitMin − transferMin` で逆算すると
+   * 「その時刻に電車が無い」答えになることがある（出町柳 → 桂: 逆算 23:52 だが乗れる最終は 23:42）。
+   * これがあるときは、ハブに間に合って着く**実在の便**の中から一番遅いものを採る。
+   *
+   * 収録はおよそ 22 時以降の 6 本だけ。それより早い時間帯が締め切りになる人（叡電の鞍馬など）には
+   * 該当便が無いので、その場合は従来どおり transitMin の逆算に戻る。
+   */
+  trains?: readonly (readonly [string, string])[];
 }
 
 export interface Venue {
