@@ -1,0 +1,610 @@
+{
+  "dataset": "eizan-last-trains",
+  "updatedAt": "2026-08-29",
+  "timetableEffectiveFrom": "2026年8月22日変更",
+  "source": {
+    "name": "叡山電鉄 公式時刻表",
+    "url": "https://eizandensha.co.jp/guide/",
+    "retrievedAt": "2026-08-29"
+  },
+  "stations": [
+    {
+      "id": "demachiyanagi",
+      "name": "出町柳",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:02",
+              "weekend": "23:02"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:30",
+              "weekend": "22:30"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:15",
+              "weekend": "23:15"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:30",
+              "weekend": "23:30"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:50",
+              "weekend": "23:50"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/demachiyanagi/?di=2"
+        }
+      ]
+    },
+    {
+      "id": "mototanaka",
+      "name": "元田中",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:04",
+              "weekend": "23:04"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:32",
+              "weekend": "22:32"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:17",
+              "weekend": "23:17"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:32",
+              "weekend": "23:32"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/mototanaka/?di=1"
+        }
+      ]
+    },
+    {
+      "id": "chayama-kyotogeijutsudaigaku",
+      "name": "茶山・京都芸術大学",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:05",
+              "weekend": "23:05"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:33",
+              "weekend": "22:33"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:18",
+              "weekend": "23:18"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:53",
+              "weekend": "23:53"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:36",
+              "weekend": "23:36"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/chayama/?di=1"
+        }
+      ]
+    },
+    {
+      "id": "ichijoji",
+      "name": "一乗寺",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:07",
+              "weekend": "23:07"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:35",
+              "weekend": "22:35"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:20",
+              "weekend": "23:20"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:35",
+              "weekend": "23:35"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:55",
+              "weekend": "23:55"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:34",
+              "weekend": "23:34"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/ichijoji/?di=1"
+        }
+      ]
+    },
+    {
+      "id": "shugakuin",
+      "name": "修学院",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:09",
+              "weekend": "23:09"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:37",
+              "weekend": "22:37"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:22",
+              "weekend": "23:22"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/syugakuin/?di=1"
+        }
+      ]
+    },
+    {
+      "id": "takaragaike",
+      "name": "宝ケ池",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:11",
+              "weekend": "23:11"
+            },
+            {
+              "name": "鞍馬",
+              "weekday": "22:39",
+              "weekend": "22:39"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:24",
+              "weekend": "23:24"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:39",
+              "weekend": "23:39"
+            },
+            {
+              "name": "修学院",
+              "weekday": "24:03",
+              "weekend": "24:03"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/takaragaike/?di=1"
+        },
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:39",
+              "weekend": "22:39"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:24",
+              "weekend": "23:24"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:39",
+              "weekend": "23:39"
+            },
+            {
+              "name": "修学院",
+              "weekday": "24:03",
+              "weekend": "24:03"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/takaragaike/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "miyakehachiman",
+      "name": "三宅八幡",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "八瀬比叡山口",
+              "weekday": "23:13",
+              "weekend": "23:13"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:29",
+              "weekend": "23:29"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/miyake-hachiman/?di=3"
+        }
+      ]
+    },
+    {
+      "id": "yase-hieizanguchi",
+      "name": "八瀬比叡山口",
+      "lines": [
+        {
+          "lineId": "eizan-main",
+          "lineName": "叡山本線",
+          "destinations": [
+            {
+              "name": "出町柳",
+              "weekday": "23:27",
+              "weekend": "23:27"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/yase-hieizanguchi/?di=5"
+        }
+      ]
+    },
+    {
+      "id": "hachiman-mae",
+      "name": "八幡前",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:41",
+              "weekend": "22:41"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:26",
+              "weekend": "23:26"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:41",
+              "weekend": "23:41"
+            },
+            {
+              "name": "修学院",
+              "weekday": "24:00",
+              "weekend": "24:00"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:22",
+              "weekend": "23:22"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/hachiman-mae/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "iwakura",
+      "name": "岩倉",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:43",
+              "weekend": "22:43"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:28",
+              "weekend": "23:28"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:43",
+              "weekend": "23:43"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:58",
+              "weekend": "23:58"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:20",
+              "weekend": "23:20"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/iwakura/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "kino",
+      "name": "木野",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:45",
+              "weekend": "22:45"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:30",
+              "weekend": "23:30"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:45",
+              "weekend": "23:45"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:56",
+              "weekend": "23:56"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:18",
+              "weekend": "23:18"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/kino/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "kyoto-seikadaimae",
+      "name": "京都精華大前",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:47",
+              "weekend": "22:47"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:32",
+              "weekend": "23:32"
+            },
+            {
+              "name": "二軒茶屋",
+              "weekday": "23:47",
+              "weekend": "23:47"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:55",
+              "weekend": "23:55"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:17",
+              "weekend": "23:17"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/kyoto-seikadai-mae/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "nikenchaya",
+      "name": "二軒茶屋",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:49",
+              "weekend": "22:49"
+            },
+            {
+              "name": "市原",
+              "weekday": "23:34",
+              "weekend": "23:34"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:53",
+              "weekend": "23:53"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:15",
+              "weekend": "23:15"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/nikenchaya/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "ichihara",
+      "name": "市原",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:52",
+              "weekend": "22:52"
+            },
+            {
+              "name": "修学院",
+              "weekday": "23:40",
+              "weekend": "23:40"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:12",
+              "weekend": "23:12"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/ichihara/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "ninose",
+      "name": "二ノ瀬",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:55",
+              "weekend": "22:55"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:09",
+              "weekend": "23:09"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/ninose/?di=4"
+        }
+      ]
+    },
+    {
+      "id": "kibuneguchi",
+      "name": "貴船口",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "鞍馬",
+              "weekday": "22:58",
+              "weekend": "22:58"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:06",
+              "weekend": "23:06"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/kibuneguchi/?di=5"
+        }
+      ]
+    },
+    {
+      "id": "kurama",
+      "name": "鞍馬",
+      "lines": [
+        {
+          "lineId": "eizan-kurama",
+          "lineName": "鞍馬線",
+          "destinations": [
+            {
+              "name": "出町柳",
+              "weekday": "23:04",
+              "weekend": "23:04"
+            }
+          ],
+          "sourceUrl": "https://eizandensha.co.jp/information/kurama/?di=5"
+        }
+      ]
+    }
+  ]
+}
