@@ -1,4 +1,4 @@
-import lastTrainDirectRange from "../data/last-train-direct-range.json" with { type: "json" };
+import lastTrainDirectRange from "../data/last-train-direct-range.json";
 
 type RouteRecord = {
   mode: string;

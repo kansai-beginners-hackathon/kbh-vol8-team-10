@@ -1,0 +1,726 @@
+{
+  "dataset": "kintetsu-last-trains",
+  "updatedAt": "2026-08-29",
+  "timetableEffectiveFrom": "2026年3月14日現在",
+  "source": {
+    "name": "近畿日本鉄道 駅時刻表",
+    "url": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-0",
+    "retrievedAt": "2026-08-29",
+    "note": "近鉄公式の駅時刻表（eki.kintetsu.co.jp、slCode=360-<駅順>、d=方面、dw=0平日/1土休日）から各方向の最終便を抽出。2026年3月14日現在のダイヤ。各駅停車（普通）のみ収録：急行・準急・特急は途中駅を通過するため不収録（平日深夜は新田辺以南へ直通する普通が早く終わり、以降は急行のみのため、京都方面/大和西大寺方面とも実際の最終はこれより遅い場合がある）。行き先: 京都方面は『京都』と『新田辺』（新田辺止まり）、大和西大寺方面は『新田辺』（新田辺止まり）と『大和西大寺』（through で奈良方面まで対応）。24時台は24時表記（公式表記の0:05を24:05へ変換）。"
+  },
+  "stations": [
+    {
+      "id": "kyoto",
+      "name": "京都",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "新田辺",
+              "weekday": "24:00",
+              "weekend": "24:00"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:36",
+              "weekend": "23:32"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-0&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "toji",
+      "name": "東寺",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:02",
+              "weekend": "24:02"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:38",
+              "weekend": "23:34"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-1&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "jujo",
+      "name": "十条",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:51",
+              "weekend": "23:51"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:03",
+              "weekend": "24:03"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:39",
+              "weekend": "23:36"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-2&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kamitobaguchi",
+      "name": "上鳥羽口",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:49",
+              "weekend": "23:49"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:05",
+              "weekend": "24:05"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:41",
+              "weekend": "23:38"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-3&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "takeda",
+      "name": "竹田",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:47",
+              "weekend": "23:47"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:08",
+              "weekend": "24:08"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:44",
+              "weekend": "23:40"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-4&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "fushimi",
+      "name": "伏見",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:45",
+              "weekend": "23:45"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:10",
+              "weekend": "24:10"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:46",
+              "weekend": "23:42"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-5&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kintetsu-tanbabashi",
+      "name": "近鉄丹波橋",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:43",
+              "weekend": "23:43"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:12",
+              "weekend": "24:12"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:48",
+              "weekend": "23:44"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-6&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "momoyama-goryomae",
+      "name": "桃山御陵前",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:41",
+              "weekend": "23:41"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:14",
+              "weekend": "24:14"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:50",
+              "weekend": "23:45"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-7&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "mukaijima",
+      "name": "向島",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:38",
+              "weekend": "23:38"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:17",
+              "weekend": "24:17"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:53",
+              "weekend": "23:49"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-8&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "ogura",
+      "name": "小倉",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:35",
+              "weekend": "23:35"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:20",
+              "weekend": "24:20"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:56",
+              "weekend": "23:52"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-9&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "iseda",
+      "name": "伊勢田",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:22",
+              "weekend": "24:22"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "22:58",
+              "weekend": "23:54"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-10&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "okubo",
+      "name": "大久保",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:24",
+              "weekend": "24:24"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "23:03",
+              "weekend": "23:59"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-11&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kutsukawa",
+      "name": "久津川",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:29",
+              "weekend": "23:29"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:26",
+              "weekend": "24:26"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "23:05",
+              "weekend": "24:01"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-12&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "terada",
+      "name": "寺田",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:27",
+              "weekend": "23:27"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:28",
+              "weekend": "24:28"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "23:07",
+              "weekend": "24:03"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-13&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "tonosho",
+      "name": "富野荘",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:25",
+              "weekend": "23:25"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:30",
+              "weekend": "24:30"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "23:09",
+              "weekend": "24:05"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-14&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "shin-tanabe",
+      "name": "新田辺",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:23",
+              "weekend": "23:23"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:08",
+              "weekend": "24:08"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-15&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kodo",
+      "name": "興戸",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:15",
+              "weekend": "23:16"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:41",
+              "weekend": "24:41"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:10",
+              "weekend": "24:10"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-16&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "miyamaki",
+      "name": "三山木",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:13",
+              "weekend": "23:14"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:39",
+              "weekend": "24:39"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:12",
+              "weekend": "24:12"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-17&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kintetsu-miyazu",
+      "name": "近鉄宮津",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:12",
+              "weekend": "23:12"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:38",
+              "weekend": "24:38"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:14",
+              "weekend": "24:14"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-18&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "komada",
+      "name": "狛田",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:10",
+              "weekend": "23:10"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:36",
+              "weekend": "24:36"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:16",
+              "weekend": "24:16"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-19&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "shin-hosono",
+      "name": "新祝園",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:07",
+              "weekend": "23:08"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:33",
+              "weekend": "24:33"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:19",
+              "weekend": "24:19"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-20&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "kizugawadai",
+      "name": "木津川台",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:05",
+              "weekend": "23:05"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:31",
+              "weekend": "24:31"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:21",
+              "weekend": "24:21"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-21&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "yamadagawa",
+      "name": "山田川",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:03",
+              "weekend": "23:03"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:29",
+              "weekend": "24:29"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:23",
+              "weekend": "24:23"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-22&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "takanohara",
+      "name": "高の原",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "23:01",
+              "weekend": "23:01"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:27",
+              "weekend": "24:27"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:26",
+              "weekend": "24:25"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-23&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "heijo",
+      "name": "平城",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "22:57",
+              "weekend": "22:58"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:23",
+              "weekend": "24:23"
+            },
+            {
+              "name": "大和西大寺",
+              "weekday": "24:29",
+              "weekend": "24:29"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-24&dw=0"
+        }
+      ]
+    },
+    {
+      "id": "yamato-saidaiji",
+      "name": "大和西大寺",
+      "lines": [
+        {
+          "lineId": "kintetsu-kyoto",
+          "lineName": "近鉄京都線",
+          "destinations": [
+            {
+              "name": "京都",
+              "weekday": "22:55",
+              "weekend": "22:56"
+            },
+            {
+              "name": "新田辺",
+              "weekday": "24:21",
+              "weekend": "24:21"
+            }
+          ],
+          "sourceUrl": "https://eki.kintetsu.co.jp/norikae/T5?USR=PC&slCode=360-25&dw=0"
+        }
+      ]
+    }
+  ]
+}

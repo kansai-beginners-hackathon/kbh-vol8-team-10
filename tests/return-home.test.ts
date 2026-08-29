@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { calculateLatestDepartureForLocation } from "../lib/return-home.ts";
+import { calculateLatestDepartureForLocation } from "../lib/return-home.js";
 
 test("四条の最終帰宅時間が計算できる", () => {
   const result = calculateLatestDepartureForLocation("四条", 5, 3);
