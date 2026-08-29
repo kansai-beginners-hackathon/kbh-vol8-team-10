@@ -14,6 +14,7 @@ import {
   todayYYYYMMDD,
   type ResolveDeps,
 } from "../lib/resolveLastTrain.ts";
+import { ALL_LAST_TRAINS, ALL_LINES } from "../lib/localData.ts";
 import type { TransitJourney } from "../lib/transit.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -402,4 +403,29 @@ test("Transit には dayType に対応する日付が渡る（土曜に weekday 
   await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
   await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekend", deps);
   assert.deepEqual(seen, ["20260831", "20260829"]);
+});
+
+test("平日と土休日で違う終電が返る（ローカル JSON: 京都 → 大和西大寺。近鉄は土休日の方が遅い）", async () => {
+  // 近鉄は私鉄 JSON に入っているので、全社を束ねた ALL_* を使う（Transit は呼ばれない）
+  const { deps } = makeDeps({ lines: ALL_LINES, lastTrains: ALL_LAST_TRAINS });
+  const wd = await resolveLastTrain(HUB_BY_ID.kyoto, "大和西大寺", "weekday", deps);
+  const we = await resolveLastTrain(HUB_BY_ID.kyoto, "大和西大寺", "weekend", deps);
+  assert.equal(wd.kind, "found");
+  assert.equal(we.kind, "found");
+  assert.equal(wd.kind === "found" && wd.via, "local");
+  assert.equal(wd.kind === "found" && wd.time, "22:36");
+  assert.equal(we.kind === "found" && we.time, "23:32");
+});
+
+test("平日と土休日で Transit の答えが違えばそのまま別々に返る（キャッシュキーが dayType・日付で分かれている）", async () => {
+  const weekdayJourney: TransitJourney = { ...ujiJourney, departureSecs: 84000, legs: [{ ...ujiJourney.legs[0], departureSecs: 84000 }] };
+  const { deps } = makeDeps({
+    dateFor: (dayType) => dateForDayType(dayType, new Date(2026, 7, 29)),
+    suggestStationId: async () => "scrape-keihan:京阪電気鉄道-宇治線-宇治",
+    planLastArrival: async (_from, _to, date) => (date === "20260831" ? weekdayJourney : ujiJourney),
+  });
+  const wd = await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
+  const we = await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekend", deps);
+  assert.equal(wd.kind === "found" && wd.time, "23:20");
+  assert.equal(we.kind === "found" && we.time, "23:41");
 });
