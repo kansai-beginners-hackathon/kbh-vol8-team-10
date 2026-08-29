@@ -6,7 +6,8 @@ import { useEffect, useMemo, useState } from "react";
 import ChatImport, { type ParsedChat } from "@/components/ChatImport";
 import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "@/data/network";
 import prebuiltJson from "@/data/prebuilt-stations.json";
-import subwayLastTrains from "@/data/subway-last-trains.json";
+import { ALL_LAST_TRAINS } from "@/lib/localData";
+import { normalizeStationName } from "@/lib/stationAliases";
 import { buildStations, todayType } from "@/lib/buildStations";
 import type { DayType } from "@/lib/lastTrain";
 import { bestRoute, rankVenues } from "@/lib/calc";
@@ -15,12 +16,13 @@ import type { Member, Station, VenueResult } from "@/lib/types";
 
 const MAX_MEMBERS = 8;
 
-/** 自宅駅の入力候補。ローカル JSON に入っている駅 + デモ用の駅。候補に無い駅名も入力できる（Transit に回る） */
+/** 自宅駅の入力候補。ローカル JSON に入っている 125 駅 + デモ用の駅。候補に無い駅名も入力できる（Transit に回る） */
 const STATION_CANDIDATES = [
-  ...new Set([...subwayLastTrains.stations.map((s) => s.name), ...DEFAULT_MEMBERS.map((m) => m.station)]),
+  ...new Set([...ALL_LAST_TRAINS.stations.map((s) => s.name), ...DEFAULT_MEMBERS.map((m) => m.station)]),
 ];
 
-const normalizeStation = (raw: string) => raw.trim().replace(/駅$/, "");
+/** 駅名の表記ゆれを正式名称に（lib/stationAliases.ts）。手入力も貼り付け読み取りの結果もここを通る */
+const normalizeStation = normalizeStationName;
 
 /**
  * 事前に解いておいた自宅駅（scripts/export-prebuilt-stations.ts）。
