@@ -1,0 +1,10 @@
+{
+  "dataset": "kyoto-city-bus-direct-last-trains-8stations",
+  "part": 1,
+  "records": [
+    { "from": "四条", "to": "三条", "lastDepart": "23:50", "travelMin": 12, "mode": "京都市営バス", "via": "三条", "note": "四条から三条へ最終の市営バスで直行する。" },
+    { "from": "京都駅", "to": "三条", "lastDepart": "23:35", "travelMin": 18, "mode": "京都市営バス", "via": "三条", "note": "京都駅から三条へ直通する最後のバス。" },
+    { "from": "烏丸御池", "to": "三条", "lastDepart": "23:50", "travelMin": 9, "mode": "京都市営バス", "via": "三条", "note": "烏丸御池から三条へ直行できる最終便。" },
+    { "from": "三条", "to": "四条", "lastDepart": "23:55", "travelMin": 8, "mode": "京都市営バス", "via": "四条", "note": "三条から四条へ直通する市営バスの最終。" }
+  ]
+}

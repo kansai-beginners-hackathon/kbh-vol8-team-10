@@ -4,6 +4,16 @@
 
 `last-train-direct-range.json` は、四条・京都駅・烏丸御池・三条・出町柳・北大路・山科・桂の8地点から、京都市営地下鉄・叡電・阪急・近鉄・京阪・嵐電・京都市営バスで一本で行ける範囲の終電情報を静的JSONとして残したものです。
 
+`hankyu-direct-8stations.json` は、上記8地点から阪急へ一本だけで繋がる駅ごとの直通最終時刻を、データ量が大きくなりすぎないように圧縮したJSONです。詳細は `hankyu-direct-8stations/part-01.json` と `part-02.json` に分割して保存しています。
+
+`kintetsu-direct-8stations.json` は、上記8地点から近鉄へ一本だけで繋がる駅ごとの最終時刻を、対象が京都駅のみのため極限まで圧縮したJSONです。`kintetsu-direct-8stations/part-01.json` に該当レコードを保持し、増えすぎを防ぐため分割数を最小限にしています。
+
+`keihan-direct-8stations.json` は、上記8地点から京阪へ一本だけで繋がる駅ごとの直通最終時刻を、8駅すべてが直通接続可能なため4駅ずつ2ファイルに分割したJSONです。詳細は `keihan-direct-8stations/part-01.json`（四条～三条）と `part-02.json`（出町柳～桂）に保存しています。複数の路線（本線・鴨東線・東山線）を記録し、各駅から直通で乗車可能な終電時刻を収集しています。
+
+`arashiden-direct-8stations.json` は、上記8地点から嵐電へ一本だけで繋がる駅ごとの終電時刻を、四条大宮を中心ハブとして4駅ずつ2ファイルに分割したJSONです。詳細は `arashiden-direct-8stations/part-01.json`（四条～三条）と `part-02.json`（出町柳～桂）に保存しています。データ量を抑えるため、行き先別の詳細時刻は省略して各起点の最終発車時刻と所要時間だけを残します。
+
+`kyoto-city-bus-direct-8stations.json` は、上記8地点から京都市営バスで一本だけで繋がる駅ごとの最終便を、3つの中心ハブ（三条・四条・京都駅）に集約して残した最小圧縮JSONです。詳細は `kyoto-city-bus-direct-8stations/part-01.json` と `part-02.json` の2分割にして、1ファイルあたり4件までに抑えています。データ量の増加を防ぎつつ、最短で確認できる終電だけを保持します。
+
 ## 現在の収録内容
 
 - 京都市営地下鉄

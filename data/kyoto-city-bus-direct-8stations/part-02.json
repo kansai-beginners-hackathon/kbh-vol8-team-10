@@ -1,0 +1,10 @@
+{
+  "dataset": "kyoto-city-bus-direct-last-trains-8stations",
+  "part": 2,
+  "records": [
+    { "from": "出町柳", "to": "京都駅", "lastDepart": "23:35", "travelMin": 26, "mode": "京都市営バス", "via": "京都駅", "note": "出町柳から京都駅へ直通する最終便。" },
+    { "from": "北大路", "to": "三条", "lastDepart": "23:35", "travelMin": 20, "mode": "京都市営バス", "via": "三条", "note": "北大路から三条へ直通する最終バス。" },
+    { "from": "山科", "to": "三条", "lastDepart": "23:45", "travelMin": 16, "mode": "京都市営バス", "via": "三条", "note": "山科から三条へ直通できる最終バス。" },
+    { "from": "桂", "to": "三条", "lastDepart": "23:28", "travelMin": 26, "mode": "京都市営バス", "via": "三条", "note": "桂から三条へ直通する最終便。" }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "dataset": "kyoto-city-subway-direct-last-trains-8stations",
+  "part": 1,
+  "records": [
+    { "from": "四条", "to": "烏丸御池", "lastDepart": "23:55", "travelMin": 5 },
+    { "from": "四条", "to": "京都駅", "lastDepart": "23:47", "travelMin": 8 },
+    { "from": "京都駅", "to": "四条", "lastDepart": "23:47", "travelMin": 7 },
+    { "from": "京都駅", "to": "烏丸御池", "lastDepart": "23:47", "travelMin": 12 },
+    { "from": "烏丸御池", "to": "四条", "lastDepart": "24:00", "travelMin": 5 },
+    { "from": "烏丸御池", "to": "京都駅", "lastDepart": "23:50", "travelMin": 11 },
+    { "from": "三条", "to": "烏丸御池", "lastDepart": "23:55", "travelMin": 8 },
+    { "from": "三条", "to": "四条", "lastDepart": "23:52", "travelMin": 11 },
+    { "from": "出町柳", "to": "三条", "lastDepart": "23:55", "travelMin": 8 }
+  ]
+}

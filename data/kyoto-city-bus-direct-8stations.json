@@ -1,0 +1,42 @@
+{
+  "dataset": "kyoto-city-bus-direct-last-trains-8stations",
+  "version": "2026-08-29",
+  "mode": "京都市営バス",
+  "description": "四条・京都駅・烏丸御池・三条・出町柳・北大路・山科・桂の8地点から、京都市営バスで一本だけで繋がる駅だけを圧縮したJSON。対象の8地点に対して、最終発車時刻が最も遅い1本だけを残す。",
+  "targetStations": [
+    "四条",
+    "京都駅",
+    "烏丸御池",
+    "三条",
+    "出町柳",
+    "北大路",
+    "山科",
+    "桂"
+  ],
+  "stationCount": 8,
+  "hubStations": [
+    "三条",
+    "四条",
+    "京都駅"
+  ],
+  "edgeCount": 8,
+  "parts": [
+    { "file": "kyoto-city-bus-direct-8stations/part-01.json", "start": 1, "end": 4 },
+    { "file": "kyoto-city-bus-direct-8stations/part-02.json", "start": 5, "end": 8 }
+  ],
+  "stations": [
+    { "id": "shijo", "name": "四条", "viaHub": "三条", "lastToHub": "23:50", "travelMin": 12 },
+    { "id": "kyoto", "name": "京都駅", "viaHub": "三条", "lastToHub": "23:35", "travelMin": 18 },
+    { "id": "karasumaoike", "name": "烏丸御池", "viaHub": "三条", "lastToHub": "23:50", "travelMin": 9 },
+    { "id": "sanjo", "name": "三条", "viaHub": "四条", "lastToHub": "23:55", "travelMin": 8 },
+    { "id": "demachiyanagi", "name": "出町柳", "viaHub": "京都駅", "lastToHub": "23:35", "travelMin": 26 },
+    { "id": "kitaoji", "name": "北大路", "viaHub": "三条", "lastToHub": "23:35", "travelMin": 20 },
+    { "id": "yamashina", "name": "山科", "viaHub": "三条", "lastToHub": "23:45", "travelMin": 16 },
+    { "id": "katsura", "name": "桂", "viaHub": "三条", "lastToHub": "23:28", "travelMin": 26 }
+  ],
+  "notes": [
+    "京都市営バスは一つの中心ハブに集約しづらく、実際には三条・四条・京都駅を中心に終発時刻が分散している。",
+    "各駅ごとに『本件の8地点の中で一本で行ける最終接続』だけを残すことで、データ量を抑えて静的に扱えるようにしている。",
+    "詳細な系統ごとの終発は data/kyoto-city-bus-last-two-timetables.json に保持し、ここでは最小圧縮表を用意している。"
+  ]
+}

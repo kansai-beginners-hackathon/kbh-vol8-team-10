@@ -1,0 +1,32 @@
+{
+  "dataset": "kyoto-city-subway-direct-last-trains-8stations",
+  "version": "2026-08-29",
+  "mode": "京都市営地下鉄",
+  "description": "四条・京都駅・烏丸御池・三条・出町柳・北大路・山科・桂の8駅だけを対象に、京都市営地下鉄で一本でつながる駅の最終発車時刻を圧縮したJSON。乗り換えを含まない直通関係のみを保持する。",
+  "targetStations": [
+    "四条",
+    "京都駅",
+    "烏丸御池",
+    "三条",
+    "出町柳",
+    "北大路",
+    "山科",
+    "桂"
+  ],
+  "stationCount": 8,
+  "edgeCount": 17,
+  "parts": [
+    { "file": "subway-direct-8stations/part-01.json", "start": 1, "end": 9 },
+    { "file": "subway-direct-8stations/part-02.json", "start": 10, "end": 17 }
+  ],
+  "stations": [
+    { "id": "shijo", "name": "四条", "directConnections": ["烏丸御池", "京都駅"] },
+    { "id": "kyoto", "name": "京都駅", "directConnections": ["四条", "烏丸御池"] },
+    { "id": "karasumaoike", "name": "烏丸御池", "directConnections": ["四条", "京都駅"] },
+    { "id": "sanjo", "name": "三条", "directConnections": ["烏丸御池", "四条"] },
+    { "id": "demachiyanagi", "name": "出町柳", "directConnections": ["三条", "烏丸御池", "四条"] },
+    { "id": "kitaoji", "name": "北大路", "directConnections": ["四条", "烏丸御池"] },
+    { "id": "yamashina", "name": "山科", "directConnections": ["烏丸御池", "京都駅"] },
+    { "id": "katsura", "name": "桂", "directConnections": ["烏丸御池", "京都駅"] }
+  ]
+}
