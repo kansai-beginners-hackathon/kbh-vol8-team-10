@@ -126,6 +126,25 @@ export function usesShinkansen(journey: TransitJourney): boolean {
   return journey.legs.some(isShinkansenLeg);
 }
 
+const SUBWAY_FEED_ID = "scrape-kyoto-subway";
+
+function isSubwayLeg(leg: TransitLeg): boolean {
+  if (leg.kind !== "transit") return false;
+  return [leg.from?.id, leg.to?.id, leg.tripId].some((id) => typeof id === "string" && id.split(":")[0] === SUBWAY_FEED_ID);
+}
+
+/**
+ * 地下鉄の区間を含む乗換あり経路か。
+ * 京都市営地下鉄 feed の所要時間は壊れている（四条→京都 5 分が 67 分、ガイド 6-3）ので、
+ * 地下鉄で他社線に乗り継ぐ経路は「乗り継げない便を乗り継げる」「乗り継げる便を落とす」の両方が起きる
+ * （烏丸御池→桂 が 23:06、四条→中書島 が乗れない 23:55）。乗換なしの地下鉄はローカル JSON が解くので、
+ * Transit の地下鉄は使わない。
+ */
+export function hasSubwayTransfer(journey: TransitJourney): boolean {
+  const transit = journey.legs.filter((l) => l.kind === "transit");
+  return transit.length >= 2 && transit.some(isSubwayLeg);
+}
+
 /**
  * 同名駅が複数事業者にあるときの優先順（feed ID の前方一致）。
  * 京都近郊で使う事業者を先に。新幹線は除外（自宅駅にならない。宛先が新幹線駅だと経路も新幹線になる）。
@@ -223,7 +242,7 @@ export interface PlanOptions {
  * plan の結果の種別。呼び出し側が「別の出発駅でやり直す価値があるか」を判断するのに使う。
  *  - found      : 採用できる経路があった
  *  - noJourneys : サーバーは 200 で答えたが経路が 0 件（この目的地へは出せない。やり直しても出ない）
- *  - rejected   : 経路はあったが isSane / 出発駅チェック / 新幹線除外で全部弾いた（出発駅を変えれば出るかもしれない）
+ *  - rejected   : 経路はあったが isSane / 出発駅チェック / 新幹線・地下鉄乗換の除外で全部弾いた（出発駅を変えれば出るかもしれない）
  *  - error      : HTTP エラー（422 searchWindowTooDense など）・通信失敗・JSON 不正
  */
 export type PlanOutcome = "found" | "noJourneys" | "rejected" | "error";
@@ -269,6 +288,7 @@ export async function planLastArrivalDetailed(
     if (!isJourneyShape(j) || !isSane(j)) continue;
     if (!startsAt(j, opts.originNames ?? [])) continue;
     if (usesShinkansen(j)) continue; // 帰りの終電に新幹線は出さない
+    if (hasSubwayTransfer(j)) continue; // 地下鉄 feed の所要時間が壊れているので、地下鉄を挟む乗換は信用しない
     if (best === null || boardingSecs(j) > boardingSecs(best)) best = j;
   }
   return best ? { journey: best, outcome: "found" } : { journey: null, outcome: "rejected" };

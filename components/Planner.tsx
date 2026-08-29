@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ChatImport, { type ParsedChat } from "@/components/ChatImport";
-import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "@/data/network";
+import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES, venuesFor } from "@/data/network";
 import subwayLastTrains from "@/data/subway-last-trains.json";
 import { buildStations, todayType } from "@/lib/buildStations";
 import { bestRoute, rankVenues } from "@/lib/calc";
@@ -132,10 +132,10 @@ export default function Planner() {
   const unavailable = members.filter((m) => statusOf(m) === "unavailable");
 
   const ranking = useMemo(
-    () => rankVenues(VENUES.filter((v) => venueIds.includes(v.id)), ranked, stations, walk),
+    () => rankVenues(venuesFor(dayType).filter((v) => venueIds.includes(v.id)), ranked, stations, walk),
     // ranked は members/stations から決まる
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [venueIds, members, stations, unavailableStations, walk],
+    [venueIds, members, stations, unavailableStations, walk, dayType],
   );
   const alive = ranking.filter((r) => r.ok);
   const dead = ranking.filter((r) => !r.ok);
