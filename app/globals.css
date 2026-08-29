@@ -148,10 +148,18 @@ footer {
 /* .add-error: 駅の存在チェックを外したので現在未使用 */
 
 /* 駅の状態（対応予定・確認中）と参考値のラベル */
-.station-cell { display: grid; gap: 4px; min-width: 0; }
+.station-cell { position: relative; display: block; min-width: 0; }
+.station-cell input { width: 100%; }
+.station-cell.has-state input { padding-right: 76px; }
+/* 入力欄の中（右端）に出す状態ラベル。行の高さを変えない */
+.state {
+  position: absolute; right: 7px; top: 50%; transform: translateY(-50%);
+  font: 500 11px var(--hand); line-height: 1.3; padding: 2px 7px; border-radius: 3px; white-space: nowrap;
+}
+.state-unavailable { color: #8a6b1f; background: var(--cream); border: 1px solid #ead9bd; cursor: help; }
+.state-pending { color: var(--muted); background: #fff; border: 1px dashed var(--line); pointer-events: none; }
+.member.is-unavailable input { border-color: #ead9bd; }
 .badge { display: inline-block; font: 500 11px var(--hand); line-height: 1.3; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
-.badge-unavailable { color: #8a6b1f; background: var(--cream); border: 1px solid #ead9bd; white-space: normal; }
-.badge-pending { color: var(--muted); background: transparent; border: 1px dashed var(--line); }
 .badge-ref { color: #8a6b1f; background: var(--cream); border: 1px solid #ead9bd; margin-left: 8px; vertical-align: middle; }
 .member.is-unavailable .avatar { background: #eee9dc; color: #8a6b1f; }
 .status-building i { background: #d9a441; animation: pulse 1.2s ease-in-out infinite; }
@@ -229,24 +237,52 @@ footer {
 
 /* ---------- スマホ ---------- */
 @media (max-width: 760px) {
-  .shell { padding: 18px 16px 32px; }
-  .topbar { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .shell { padding: 14px 16px calc(32px + env(safe-area-inset-bottom)); }
+  /* ヘッダー: 1 行目にブランド、2 行目にダイヤ表示と「リンクをコピー」（右上のまま） */
+  .topbar { align-items: flex-start; flex-direction: column; gap: 10px; padding-bottom: 14px; }
   .back span { display: none; }
   .back { padding: 0 10px; }
-  .topbar-nav { width: 100%; justify-content: space-between; }
-  .hero { padding: 44px 0 36px; }
+  .topbar-nav { width: 100%; justify-content: space-between; gap: 10px; }
+  .topbar-nav .status-building { margin-left: auto; }
+  .topbar-nav .btn { min-height: 40px; padding: 0 14px; }
+
+  /* 押せるものは 44px。入力欄は 16px（iOS がフォーカス時に拡大しないように） */
+  .btn { min-height: 44px; }
+  input, select, textarea { font-size: 16px; }
+  .member input, .cond input[type="time"] { min-height: 44px; padding: 0 10px; }
+  .pill { min-height: 44px; padding: 0 16px; font-size: 15px; }
+  .remove { width: 32px; height: 44px; }
+  .cond label { flex-wrap: wrap; }
+  .cond input[type="range"] { max-width: none; flex-basis: 100%; height: 44px; }
+
+  .hero { padding: 40px 0 32px; }
+  .hero h1 { font-size: clamp(32px, 9vw, 44px); }
+  .hero-actions .btn-lg { min-height: 52px; }
   .steps, .workspace { grid-template-columns: 1fr; }
   .step-card { border-left: 0; border-top: 1px solid var(--line); padding: 20px 0; }
   .step-card:first-child { border-top: 0; }
   .insight { grid-template-columns: 1fr; gap: 22px; padding: 22px 20px; }
   .truth { padding: 16px 0 0; border-left: 0; border-top: 1px solid #709082; }
-  .member { grid-template-columns: 29px 1fr 1.2fr 20px; }
-  .add { grid-template-columns: 29px 1fr 1.2fr auto; }
-  .ranking { padding: 22px 18px; }
-  .rank-row, .rank-dead { gap: 10px; padding: 12px 8px; }
-  .rank-main small { white-space: nowrap; }
-  .rank-right b { font-size: 18px; }
-  .winner { grid-template-columns: 1fr; gap: 18px; align-items: start; }
+
+  .pad { padding: 18px 16px; }
+  .heading { margin-bottom: 16px; }
+  .member-head { display: none; }
+  .member { grid-template-columns: 29px minmax(0, .8fr) minmax(0, 1.2fr) 32px; gap: 8px; }
+  .station-cell.has-state input { padding-right: 68px; }
+  .add { grid-template-columns: 29px minmax(0, .8fr) minmax(0, 1.2fr) auto; gap: 8px; }
+  .add .btn { min-height: 44px; padding: 0 12px; }
+
+  .ranking { padding: 20px 16px; }
+  .winner { grid-template-columns: 1fr; gap: 16px; align-items: start; padding-bottom: 20px; }
+  .winner-name { font-size: clamp(44px, 14vw, 64px); letter-spacing: 2px; }
+  .winner-time strong { font-size: clamp(36px, 11vw, 44px); }
   .winner-side { justify-items: start; text-align: left; }
+  .reason br { display: none; }
+  .rank-row, .rank-dead { gap: 10px; padding: 12px 8px; min-height: 56px; }
+  .rank-main b { font-size: 15px; }
+  .rank-main small { white-space: normal; }
+  .rank-right b { font-size: 18px; }
+  .tl-row { grid-template-columns: 60px 1fr 44px; gap: 8px; }
+
   footer { flex-direction: column; gap: 6px; }
 }

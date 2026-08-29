@@ -12,6 +12,7 @@
     "build:static": "next build",
     "data:export": "node scripts/main.js --export-static",
     "data:lines": "node scripts/main.js --export-lines",
+    "data:prebuilt": "node scripts/export-prebuilt-stations.ts",
     "data:import:kyoto-bus": "node scripts/import-kyoto-city-bus.mjs",
     "data:import:kyoto-bus-timetables": "node scripts/import-kyoto-city-bus-timetables.mjs",
     "test": "node --test tests/*.test.ts",

@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "@/data/network";
+import prebuiltJson from "@/data/prebuilt-stations.json";
 import subwayLastTrains from "@/data/subway-last-trains.json";
 import { buildStations, todayType } from "@/lib/buildStations";
+import type { DayType } from "@/lib/lastTrain";
 import { bestRoute, rankVenues } from "@/lib/calc";
 import { isHHMM, toMin, toStr } from "@/lib/time";
 import type { Member, Station, VenueResult } from "@/lib/types";
@@ -18,6 +20,24 @@ const STATION_CANDIDATES = [
 ];
 
 const normalizeStation = (raw: string) => raw.trim().replace(/駅$/, "");
+
+/**
+ * 事前に解いておいた自宅駅（scripts/export-prebuilt-stations.ts）。
+ * デモ／既定メンバーの駅はここから即表示して、Transit を待たない。無い駅だけ buildStations に回す。
+ */
+const PREBUILT = prebuiltJson as unknown as { stations: Record<DayType, Record<string, Station>>; unavailable: Record<DayType, string[]> };
+function prebuiltFor(members: Member[], dayType: DayType) {
+  const stations: Record<string, Station> = {};
+  const unavailable = new Set<string>();
+  const remaining: Member[] = [];
+  for (const m of members) {
+    const hit = PREBUILT.stations[dayType][m.station];
+    if (hit) stations[m.station] = hit;
+    else if (PREBUILT.unavailable[dayType].includes(m.station)) unavailable.add(m.station);
+    else remaining.push(m);
+  }
+  return { stations, unavailable, remaining };
+}
 
 /**
  * URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる。駅の存在チェックはしない（無い駅は「対応予定」表示で受ける）。
@@ -79,12 +99,17 @@ export default function Planner() {
 
   // ハブ → 自宅駅の終電（実データ）。計算中は前回の結果を表示したまま building だけ立てる
   const [dayType] = useState(() => todayType());
-  const [stations, setStations] = useState<Record<string, Station>>({});
-  const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => new Set());
-  const [building, setBuilding] = useState(true);
+  // 初期値は事前計算ぶん。デモ URL はこれだけで全員揃うので、開いた瞬間に答えが出る
+  const [stations, setStations] = useState<Record<string, Station>>(() => prebuiltFor(members, dayType).stations);
+  const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => prebuiltFor(members, dayType).unavailable);
+  const [building, setBuilding] = useState(() => prebuiltFor(members, dayType).remaining.length > 0);
 
   useEffect(() => {
     let cancelled = false;
+    const pre = prebuiltFor(members, dayType);
+    setStations((prev) => ({ ...prev, ...pre.stations }));
+    setUnavailableStations((prev) => new Set([...prev, ...pre.unavailable]));
+    if (pre.remaining.length === 0) { setBuilding(false); return; }
     setBuilding(true);
     // 自宅駅ごとに解けた順で画面に足していく。全員揃うのを待たない
     const onProgress = (home: string, station: Station | null) => {
@@ -97,10 +122,10 @@ export default function Planner() {
         setUnavailableStations((prev) => new Set(prev).add(home));
       }
     };
-    buildStations(members, dayType, undefined, undefined, onProgress).then((r) => {
+    buildStations(pre.remaining, dayType, undefined, undefined, onProgress).then((r) => {
       if (cancelled) return;
-      setStations(r.stations);
-      setUnavailableStations(new Set(r.unavailable.map((m) => m.station)));
+      setStations((prev) => ({ ...prev, ...r.stations }));
+      setUnavailableStations((prev) => new Set([...prev, ...r.unavailable.map((m) => m.station)]));
       setBuilding(false);
     });
     return () => { cancelled = true; };
@@ -204,12 +229,13 @@ export default function Planner() {
                 <div className={`member${isBottleneck ? " is-bottleneck" : ""}${status !== "ready" ? " is-unavailable" : ""}`} key={index}>
                   <span className="avatar">{member.name.slice(0, 1)}</span>
                   <input aria-label="名前" placeholder="名前" value={member.name} onChange={(e) => updateMember(index, { name: e.target.value || member.station })} />
-                  <span className="station-cell">
+                  <span className={`station-cell${status !== "ready" ? " has-state" : ""}`}>
                     <StationInput value={member.station} onCommit={(station) => updateMember(index, { station, name: member.name === member.station ? station : member.name })} />
+                    {/* 状態は入力欄の中（右端）に出す。下に出すと行の高さが変わって画面がずれる */}
                     {status === "unavailable" && (
-                      <small className="badge badge-unavailable" title="この駅の終電データはまだ入っていません。順位計算には入れていません">この駅は対応予定・順位に含めていません</small>
+                      <small className="state state-unavailable" title="この駅の終電データはまだ入っていません。順位計算には入れていません">対応予定</small>
                     )}
-                    {status === "pending" && <small className="badge badge-pending">確認中…</small>}
+                    {status === "pending" && <small className="state state-pending" aria-live="polite">確認中…</small>}
                   </span>
                   <button className="remove" aria-label="削除" onClick={() => setMembers(members.filter((_, i) => i !== index))}>×</button>
                 </div>
