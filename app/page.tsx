@@ -11,10 +11,6 @@ const DEMO_HREF = "/app?m=田中:鞍馬,佐藤:びわ湖浜大津,鈴木:大阪�
 export default function LandingPage() {
   return (
     <main className="shell">
-      <header className="topbar">
-        <Link href="/" className="brand">もうちょっと</Link>
-      </header>
-
       <section className="hero">
         <p className="eyebrow">今夜、どこで飲む？</p>
         <h1>みんなでいられる時間を、<em>もうちょっと<span className="maru">。</span></em></h1>

@@ -246,7 +246,7 @@ export default function Planner() {
           <Link href="/" className="brand">もうちょっと</Link>
         </div>
         <nav className="topbar-nav">
-          <span className="status"><i />京都・{dayType === "weekend" ? "土休日" : "平日"}ダイヤ</span>
+          <span className="status"><i />京都・{dayType === "weekend" ? "土日" : "平日"}ダイヤ</span>
           {building && <span className="status status-building" aria-live="polite"><i />更新中…</span>}
           <button className="btn btn-ghost" onClick={share}>{copied ? "コピーしました" : "リンクをコピー"}</button>
         </nav>
@@ -311,7 +311,7 @@ export default function Planner() {
               <span>ダイヤ</span>
               <div className="pills">
                 <button type="button" className="pill" aria-pressed={dayType === "weekday"} onClick={() => setDayType("weekday")}>平日</button>
-                <button type="button" className="pill" aria-pressed={dayType === "weekend"} onClick={() => setDayType("weekend")}>土休日</button>
+                <button type="button" className="pill" aria-pressed={dayType === "weekend"} onClick={() => setDayType("weekend")}>土日</button>
               </div>
             </div>
             <label><span>集合</span><input type="time" value={meetAt} onChange={(e) => setMeetAt(e.target.value || "19:00")} /></label>
