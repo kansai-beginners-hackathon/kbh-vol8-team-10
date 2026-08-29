@@ -29,7 +29,7 @@ body {
   font-size: 15px;
   line-height: 1.7;
 }
-button, input, select { font: inherit; color: inherit; }
+button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 a { color: inherit; text-decoration: none; }
 h1, h2, h3, p, ul, ol { margin: 0; }
@@ -250,3 +250,21 @@ footer {
   .winner-side { justify-items: start; text-align: left; }
   footer { flex-direction: column; gap: 6px; }
 }
+
+/* LINE の会話から自動入力（仮 UI）。①メンバーの下に折りたたみで置く */
+.chat-import { margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); }
+.chat-import summary { cursor: pointer; color: var(--moss); font: 600 14px var(--hand); list-style: none; display: flex; align-items: center; gap: 8px; }
+.chat-import summary::-webkit-details-marker { display: none; }
+.chat-import summary::before { content: "▸"; font-size: 12px; transition: transform .15s; }
+.chat-import[open] summary::before { transform: rotate(90deg); }
+.chat-import form { display: grid; gap: 10px; margin-top: 12px; }
+.chat-import textarea {
+  width: 100%; min-height: 110px; padding: 10px 12px; resize: vertical;
+  background: #fff; border: 1px solid var(--line); border-radius: 3px; line-height: 1.6;
+}
+.chat-import textarea:focus { outline: none; border-color: var(--moss); }
+.chat-import textarea:disabled { opacity: .6; }
+.chat-import-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.chat-import-actions .btn { min-height: 38px; padding: 0 14px; }
+.chat-import-error { color: var(--coral); font-size: 13px; }
+.chat-import-done { color: var(--moss); font-size: 13px; }

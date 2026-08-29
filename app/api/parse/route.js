@@ -5,7 +5,9 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 // APIキーは .env.local の OPENAI_API_KEY から自動で読まれる（コードに書かない）
-const client = new OpenAI();
+// モジュール直下で new すると next build の時点でキーが無いと落ちるので、最初のリクエストで作る
+let client;
+const getClient = () => (client ??= new OpenAI());
 
 // AIへの指示。ここの質が出力の質を決める
 const SYSTEM_PROMPT = `
@@ -100,7 +102,7 @@ export async function POST(request) {
       );
     }
 
-    const response = await client.chat.completions.parse({
+    const response = await getClient().chat.completions.parse({
       model: "gpt-4o-mini",
       temperature: 0,
       messages: [
