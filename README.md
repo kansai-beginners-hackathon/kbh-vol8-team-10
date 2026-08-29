@@ -31,14 +31,14 @@ npm run dev
 
 公式時刻表から静的データを更新する場合は `npm run data:export` を実行してください。これはビルド時・実行時には外部サイトへアクセスしません。
 
-静的ファイルとして生成・確認する場合：
+本番ビルドの確認：
 
 ```bash
-npm run build:static
-npm run serve:static
+npm run build
+npm run start
 ```
 
-生成先は `out/` です。静的ホスティングサービスへは、このフォルダーの内容をデプロイします。
+`/api/parse`（LINE の会話の読み取り）と `/api/return-home` はサーバー側で動く Route Handler のため、静的エクスポート（`output: "export"`）は使えません。デプロイ先は Vercel（Next.js サーバー実行）で、`OPENAI_API_KEY` を Environment Variables に設定します。ローカルは `.env.local` に同じキーを置きます（`.env.example` 参照）。
 
 ## チーム
 | 役割 | 名前 | GitHub |
