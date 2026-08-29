@@ -3,31 +3,65 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, STATIONS, STATION_NAMES, VENUES } from "@/data/network";
-import { rankVenues } from "@/lib/calc";
+import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "@/data/network";
+import subwayLastTrains from "@/data/subway-last-trains.json";
+import { buildStations, todayType } from "@/lib/buildStations";
+import { bestRoute, rankVenues } from "@/lib/calc";
 import { isHHMM, toMin, toStr } from "@/lib/time";
-import type { Member } from "@/lib/types";
+import type { Member, Station, VenueResult } from "@/lib/types";
 
 const MAX_MEMBERS = 8;
 
-/** URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる */
+/** 自宅駅の入力候補。ローカル JSON に入っている駅 + デモ用の駅。候補に無い駅名も入力できる（Transit に回る） */
+const STATION_CANDIDATES = [
+  ...new Set([...subwayLastTrains.stations.map((s) => s.name), ...DEFAULT_MEMBERS.map((m) => m.station)]),
+];
+
+const normalizeStation = (raw: string) => raw.trim().replace(/駅$/, "");
+
+/** URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる。駅の存在チェックはしない（無い駅は「対応予定」表示で受ける） */
 function parseMembers(raw: string | null): Member[] {
   if (!raw) return DEFAULT_MEMBERS;
   const members = raw
     .split(",")
     .map((token) => {
       const [a, b] = token.split(":");
-      const station = (b ?? a).trim();
+      const station = normalizeStation(b ?? a);
       const name = b ? a.trim() : station;
-      return { name, station };
+      return { name: name || station, station };
     })
-    .filter((m) => STATIONS[m.station]);
+    .filter((m) => m.station);
   return members.length ? members : DEFAULT_MEMBERS;
 }
 
 function parseVenueIds(raw: string | null): string[] {
   const ids = (raw ?? "").split(",").filter((id) => VENUES.some((v) => v.id === id));
   return ids.length ? ids : DEFAULT_VENUE_IDS;
+}
+
+/** 分 → 表示。Infinity（終電の制約なし）は "—" */
+const fmt = (min: number) => (Number.isFinite(min) ? toStr(min) : "—");
+
+/** 自宅駅の入力。1 文字ごとに再計算しないよう、確定（blur / Enter）でだけ親に返す */
+function StationInput({ value, onCommit }: { value: string; onCommit: (station: string) => void }) {
+  const [draft, setDraft] = useState(value);
+  useEffect(() => setDraft(value), [value]);
+  const commit = () => {
+    const station = normalizeStation(draft);
+    if (!station) { setDraft(value); return; }
+    if (station !== value) onCommit(station);
+    else setDraft(station);
+  };
+  return (
+    <input
+      aria-label="最寄り駅"
+      list="station-list"
+      value={draft}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); (e.target as HTMLInputElement).blur(); } }}
+    />
+  );
 }
 
 export default function Planner() {
@@ -39,8 +73,25 @@ export default function Planner() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [newStation, setNewStation] = useState("");
-  const [addError, setAddError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+
+  // ハブ → 自宅駅の終電（実データ）。計算中は前回の結果を表示したまま building だけ立てる
+  const [dayType] = useState(() => todayType());
+  const [stations, setStations] = useState<Record<string, Station>>({});
+  const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => new Set());
+  const [building, setBuilding] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setBuilding(true);
+    buildStations(members, dayType).then((r) => {
+      if (cancelled) return;
+      setStations(r.stations);
+      setUnavailableStations(new Set(r.unavailable.map((m) => m.station)));
+      setBuilding(false);
+    });
+    return () => { cancelled = true; };
+  }, [members, dayType]);
 
   // 状態は全部 URL に入れる。共有・再訪・ブックマークがこれで済む
   useEffect(() => {
@@ -52,32 +103,43 @@ export default function Planner() {
     window.history.replaceState(null, "", `${location.pathname}?${q}`);
   }, [members, venueIds, meetAt, walk]);
 
+  /** メンバーの状態: ready = 順位に入る / unavailable = 対応予定 / pending = 計算中（まだ結果が無い） */
+  const statusOf = (m: Member): "ready" | "unavailable" | "pending" =>
+    stations[m.station] ? "ready" : unavailableStations.has(m.station) ? "unavailable" : "pending";
+  const ranked = members.filter((m) => statusOf(m) === "ready");
+  const unavailable = members.filter((m) => statusOf(m) === "unavailable");
+
   const ranking = useMemo(
-    () => rankVenues(VENUES.filter((v) => venueIds.includes(v.id)), members, STATIONS, walk),
-    [venueIds, members, walk],
+    () => rankVenues(VENUES.filter((v) => venueIds.includes(v.id)), ranked, stations, walk),
+    // ranked は members/stations から決まる
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [venueIds, members, stations, unavailableStations, walk],
   );
   const alive = ranking.filter((r) => r.ok);
   const dead = ranking.filter((r) => !r.ok);
   const top = alive[0];
   const worst = alive[alive.length - 1];
-  const spread = top && worst && top.ok && worst.ok ? top.dissolve - worst.dissolve : 0;
+  const spread = top && worst && top.ok && worst.ok && Number.isFinite(top.dissolve - worst.dissolve) ? top.dissolve - worst.dissolve : 0;
   const selected = alive.find((r) => r.venue.id === selectedId) ?? top;
+
+  /** その候補地のボトルネックが Transit の乗換 2 回以上の経路で決まっている → 参考値 */
+  const isReference = (r: VenueResult) => {
+    if (!r.ok) return false;
+    const station = stations[r.bottleneck.station];
+    const route = station ? bestRoute(station, r.venue)?.route : undefined;
+    return route?.via === "transit" && route.transferCount >= 2;
+  };
 
   function updateMember(index: number, patch: Partial<Member>) {
     setMembers(members.map((m, i) => (i === index ? { ...m, ...patch } : m)));
   }
   function addMember(event: React.FormEvent) {
     event.preventDefault();
-    const station = newStation.trim().replace(/駅$/, "");
+    const station = normalizeStation(newStation);
     if (!station || members.length >= MAX_MEMBERS) return;
-    if (!STATIONS[station]) {
-      setAddError(`「${station}」はまだ入っていません（モックは主要 ${STATION_NAMES.length} 駅のみ）`);
-      return;
-    }
     setMembers([...members, { name: newName.trim() || station, station }]);
     setNewName("");
     setNewStation("");
-    setAddError(null);
   }
   function toggleVenue(id: string) {
     setVenueIds(venueIds.includes(id) ? venueIds.filter((v) => v !== id) : [...venueIds, id]);
@@ -92,6 +154,8 @@ export default function Planner() {
     }
   }
 
+  const stayMin = top?.ok && Number.isFinite(top.dissolve) ? top.dissolve - toMin(meetAt) : null;
+
   return (
     <main className="shell">
       <header className="topbar">
@@ -100,7 +164,8 @@ export default function Planner() {
           <Link href="/" className="brand">もうちょっと</Link>
         </div>
         <nav className="topbar-nav">
-          <span className="status"><i />京都・平日ダイヤ</span>
+          <span className="status"><i />京都・{dayType === "weekend" ? "土休日" : "平日"}ダイヤ</span>
+          {building && <span className="status status-building" aria-live="polite"><i />更新中…</span>}
           <button className="btn btn-ghost" onClick={share}>{copied ? "コピーしました" : "リンクをコピー"}</button>
         </nav>
       </header>
@@ -121,13 +186,18 @@ export default function Planner() {
             </div>
             {members.map((member, index) => {
               const isBottleneck = selected?.ok && selected.bottleneck === member;
+              const status = statusOf(member);
               return (
-                <div className={`member${isBottleneck ? " is-bottleneck" : ""}`} key={index}>
+                <div className={`member${isBottleneck ? " is-bottleneck" : ""}${status !== "ready" ? " is-unavailable" : ""}`} key={index}>
                   <span className="avatar">{member.name.slice(0, 1)}</span>
                   <input aria-label="名前" placeholder="名前" value={member.name} onChange={(e) => updateMember(index, { name: e.target.value || member.station })} />
-                  <select aria-label="最寄り駅" value={member.station} onChange={(e) => updateMember(index, { station: e.target.value })}>
-                    {STATION_NAMES.map((name) => <option key={name}>{name}</option>)}
-                  </select>
+                  <span className="station-cell">
+                    <StationInput value={member.station} onCommit={(station) => updateMember(index, { station, name: member.name === member.station ? station : member.name })} />
+                    {status === "unavailable" && (
+                      <small className="badge badge-unavailable" title="この駅の終電データはまだ入っていません。順位計算には入れていません">この駅は対応予定・順位に含めていません</small>
+                    )}
+                    {status === "pending" && <small className="badge badge-pending">確認中…</small>}
+                  </span>
                   <button className="remove" aria-label="削除" onClick={() => setMembers(members.filter((_, i) => i !== index))}>×</button>
                 </div>
               );
@@ -137,11 +207,10 @@ export default function Planner() {
             <span className="avatar avatar-add">＋</span>
             <input aria-label="追加する人の名前" placeholder="名前（省略可）" value={newName} onChange={(e) => setNewName(e.target.value)} />
             <input aria-label="追加する人の最寄り駅" placeholder="駅名を入力" list="station-list" value={newStation}
-              onChange={(e) => { setNewStation(e.target.value); setAddError(null); }} />
-            <datalist id="station-list">{STATION_NAMES.map((name) => <option key={name} value={name} />)}</datalist>
+              onChange={(e) => setNewStation(e.target.value)} />
             <button type="submit" className="btn btn-primary" disabled={!newStation.trim() || members.length >= MAX_MEMBERS}>追加</button>
           </form>
-          {addError && <p className="add-error">{addError}</p>}
+          <datalist id="station-list">{STATION_CANDIDATES.map((name) => <option key={name} value={name} />)}</datalist>
         </div>
 
         {/* 02 候補地 ＋ 03 条件 */}
@@ -163,46 +232,58 @@ export default function Planner() {
       {/* 主役：候補地ランキング */}
       <section className="panel ranking">
         {!top || !top.ok ? (
-          <p className="lede">メンバーと候補地を選ぶと、一番長くいられる場所が出ます。</p>
+          <p className="lede">
+            {building && ranked.length === 0
+              ? "終電を調べています…"
+              : ranked.length === 0 && members.length > 0
+                ? "終電データのある駅のメンバーがいません。駅名を変えてみてください。"
+                : "メンバーと候補地を選ぶと、一番長くいられる場所が出ます。"}
+          </p>
         ) : (
           <>
             <div className="heading">
-              <div><span className="step">結果</span><h2>この<b>{members.length}人</b>が一番長くいられる場所</h2></div>
-              <span className="num note">全員の最終列車から計算</span>
+              <div><span className="step">結果</span><h2>この<b>{ranked.length}人</b>が一番長くいられる場所</h2></div>
+              <span className="num note">全員の最終列車から計算{unavailable.length > 0 && `（対応予定 ${unavailable.length}人を除く）`}</span>
             </div>
 
             <div className="winner">
               <div>
-                <p className="eyebrow">1位</p>
+                <p className="eyebrow">1位{isReference(top) && <small className="badge badge-ref">参考値</small>}</p>
                 <p className="winner-name">{top.venue.name}</p>
                 <p className="winner-time">
-                  <strong className="num">{toStr(top.dissolve)}</strong><small>までに出れば、全員帰れます</small>
+                  {Number.isFinite(top.dissolve)
+                    ? <><strong className="num">{toStr(top.dissolve)}</strong><small>までに出れば、全員帰れます</small></>
+                    : <><strong>終電の制約なし</strong><small>全員この駅が最寄りです</small></>}
                 </p>
-                <p className="note">
-                  <span className="num">{meetAt}</span> 集合なら <span className="num">{Math.floor((top.dissolve - toMin(meetAt)) / 60)}時間{(top.dissolve - toMin(meetAt)) % 60}分</span> いられる
-                </p>
+                {stayMin !== null && (
+                  <p className="note">
+                    <span className="num">{meetAt}</span> 集合なら <span className="num">{Math.floor(stayMin / 60)}時間{stayMin % 60}分</span> いられる
+                  </p>
+                )}
               </div>
               <div className="winner-side">
-                {alive.length > 1 && worst.ok && (
+                {alive.length > 1 && worst.ok && spread > 0 && (
                   <p className="reason">{worst.venue.name}より<strong className="num">+{spread}</strong>分<br />長くいられます</p>
                 )}
-                <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="num">{toStr(top.dissolve)}</span> です。</span></div>
+                {Number.isFinite(top.dissolve) && (
+                  <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="num">{toStr(top.dissolve)}</span> です。</span></div>
+                )}
               </div>
             </div>
 
-            {alive.length > 1 && (
+            {(alive.length > 1 || dead.length > 0) && (
               <ol className="rank-list">
                 {alive.slice(1).map((r, i) => r.ok && (
                   <li key={r.venue.id}>
                     <button className="rank-row" aria-pressed={selected?.venue.id === r.venue.id} onClick={() => setSelectedId(r.venue.id)}>
                       <span className="rank-no num">{i + 2}</span>
                       <span className="rank-main">
-                        <b>{r.venue.name}</b>
-                        <small><span className="num">{toStr(r.dissolve)}</span> までに出れば、全員帰れます</small>
+                        <b>{r.venue.name}{isReference(r) && <small className="badge badge-ref">参考値</small>}</b>
+                        <small><span className="num">{fmt(r.dissolve)}</span> までに出れば、全員帰れます</small>
                       </span>
                       <span className="rank-right">
-                        <b className="num">{toStr(r.dissolve)}</b>
-                        <small className="num diff">−{top.dissolve - r.dissolve}分</small>
+                        <b className="num">{fmt(r.dissolve)}</b>
+                        {Number.isFinite(top.dissolve - r.dissolve) && <small className="num diff">−{top.dissolve - r.dissolve}分</small>}
                       </span>
                     </button>
                   </li>
@@ -223,22 +304,23 @@ export default function Planner() {
         )}
       </section>
 
-      {selected?.ok && (
+      {selected?.ok && selected.rows.some((row) => Number.isFinite(row.leave)) && (
         <section className="detail">
           {/* タイムライン */}
           <div className="panel pad">
             <div className="heading"><div><h2>{selected.venue.name}なら、誰が何時まで</h2></div></div>
             {(() => {
-              const t0 = Math.floor((selected.rows[0].leave - 20) / 30) * 30;
-              const t1 = Math.ceil((selected.rows[selected.rows.length - 1].leave + 20) / 30) * 30;
+              const finite = selected.rows.filter((row) => Number.isFinite(row.leave));
+              const t0 = Math.floor((finite[0].leave - 20) / 30) * 30;
+              const t1 = Math.ceil((finite[finite.length - 1].leave + 20) / 30) * 30;
               return (
                 <>
                   <div className="tl">
                     {selected.rows.map((row) => (
                       <div className={`tl-row${row.member === selected.bottleneck ? " is-bottleneck" : ""}`} key={row.member.station + row.member.name}>
                         <span className="tl-name">{row.member.name}</span>
-                        <span className="tl-track"><i style={{ width: `${Math.max(2, ((row.leave - t0) / (t1 - t0)) * 100)}%` }} /></span>
-                        <span className="tl-time num">{toStr(row.leave)}</span>
+                        <span className="tl-track"><i style={{ width: `${Number.isFinite(row.leave) ? Math.max(2, ((row.leave - t0) / (t1 - t0)) * 100) : 100}%` }} /></span>
+                        <span className="tl-time num">{fmt(row.leave)}</span>
                       </div>
                     ))}
                   </div>
@@ -251,7 +333,7 @@ export default function Planner() {
       )}
 
       <footer>
-        <span>⚠️ モック：時刻はダミー値です。本番では各社の公開時刻表の URL と取得日をここに出します</span>
+        <span>時刻データは非公式APIおよび公式時刻表による参考値です。実際の乗車前に各交通事業者の公式情報をご確認ください。</span>
         <span>徒歩・乗換は概算で安全側（早め）に倒しています。遅延・臨時ダイヤは対象外</span>
       </footer>
     </main>

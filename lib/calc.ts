@@ -1,5 +1,5 @@
-import { toMin } from "./time";
-import type { Member, MemberLeave, Route, Station, Venue, VenueResult } from "./types";
+import { toMin } from "./time.ts";
+import type { Member, MemberLeave, Route, Station, Venue, VenueResult } from "./types.ts";
 
 /**
  * 要件定義 §6 の式。
@@ -12,18 +12,26 @@ import type { Member, MemberLeave, Route, Station, Venue, VenueResult } from "./
  *
  * 端数は切り捨て。結果は必ず安全側（早め）に倒れる。
  */
-export function latestLeave(station: Station, venue: Venue, walkMin: number): number | null {
-  let best: number | null = null;
+
+/** 候補地 venue から station へ帰るとき、一番遅くなる経路とその値（徒歩を引く前・分） */
+export function bestRoute(station: Station, venue: Venue): { route: Route; value: number } | null {
+  let best: { route: Route; value: number } | null = null;
   for (const route of station.routes) {
     const cell = venue.toHub[route.hub];
     if (!cell) continue; // この候補地からそのハブへ行けない → 経路を除外
-    const viaBranch = toMin(route.last) - cell.transitMin - route.transferMin;
+    // last === null は電車不要（自宅駅がハブそのもの）。支線は縛らず、候補地→ハブの最終だけが効く
+    const viaBranch = route.last === null ? Infinity : toMin(route.last) - cell.transitMin - route.transferMin;
     const viaTrunk = cell.lastDepart ? toMin(cell.lastDepart) : Infinity;
     const value = Math.min(viaBranch, viaTrunk);
-    if (best === null || value > best) best = value;
+    if (best === null || value > best.value) best = { route, value };
   }
+  return best;
+}
+
+export function latestLeave(station: Station, venue: Venue, walkMin: number): number | null {
+  const best = bestRoute(station, venue);
   if (best === null) return null; // 全経路が除外 → この候補地からは帰れない
-  return Math.floor(best - walkMin);
+  return Math.floor(best.value - walkMin);
 }
 
 export function resultFor(
@@ -50,23 +58,13 @@ export function rankVenues(
   stations: Record<string, Station>,
   walkMin: number,
 ): VenueResult[] {
+  if (members.length === 0) return []; // 順位に入れる人がいない（計算中・全員対応予定）
   return venues
     .map((venue) => resultFor(venue, members, stations, walkMin))
     .sort((a, b) => {
       if (a.ok && b.ok) return b.dissolve - a.dissolve;
       return a.ok ? -1 : b.ok ? 1 : 0;
     });
-}
-
-/** 掲示されている最終と、自宅駅に着く本当の最終の差 */
-export function lieOf(station: Station) {
-  const route = station.routes.reduce<Route>((a, b) => (toMin(b.last) > toMin(a.last) ? b : a), station.routes[0]);
-  return {
-    posted: route.posted,
-    postedTo: route.postedTo,
-    real: route.last,
-    gapMin: toMin(route.posted) - toMin(route.last),
-  };
 }
 
 /**
