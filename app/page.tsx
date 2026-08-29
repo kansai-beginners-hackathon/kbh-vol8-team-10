@@ -13,9 +13,6 @@ export default function LandingPage() {
     <main className="shell">
       <header className="topbar">
         <Link href="/" className="brand">もうちょっと</Link>
-        <nav className="topbar-nav">
-          <Link href="/app" className="btn btn-primary">始める</Link>
-        </nav>
       </header>
 
       <section className="hero">
