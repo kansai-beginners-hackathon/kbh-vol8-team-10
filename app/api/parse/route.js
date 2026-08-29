@@ -83,6 +83,15 @@ const ParsedSchema = z.object({
 
 export async function POST(request) {
   try {
+    // ⓪ サーバー側の設定漏れ。原因が分かるメッセージで返す（catch に落ちると「サーバー側でエラー」しか出ない）
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("parse API: OPENAI_API_KEY が未設定です（.env.local か Vercel の環境変数に設定してください）");
+      return Response.json(
+        { error: "AI の設定が完了していません（OPENAI_API_KEY 未設定）。管理者に連絡してください" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const text = body.text;
 

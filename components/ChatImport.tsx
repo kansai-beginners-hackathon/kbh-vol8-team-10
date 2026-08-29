@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 /** /api/parse の成功レスポンス（app/api/parse/route.js の契約） */
 export interface ParsedChat {
@@ -24,6 +24,9 @@ export default function ChatImport({ onApply }: { onApply: (parsed: ParsedChat) 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  // API の応答を待つ数秒の間に親の state（メンバー等）が変わっても、反映は最新の onApply で行う
+  const onApplyRef = useRef(onApply);
+  onApplyRef.current = onApply;
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
@@ -43,7 +46,7 @@ export default function ChatImport({ onApply }: { onApply: (parsed: ParsedChat) 
         setError(data?.error ?? `読み取りに失敗しました（${res.status}）。少し待ってもう一度試してください`);
         return;
       }
-      const note = onApply({ venue: data.venue ?? null, meetAt: data.meetAt ?? null, members: data.members });
+      const note = onApplyRef.current({ venue: data.venue ?? null, meetAt: data.meetAt ?? null, members: data.members });
       setDone(note);
       setText("");
     } catch {
