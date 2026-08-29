@@ -66,7 +66,7 @@ export default function LandingPage() {
       </section>
 
       <footer>
-        <span>データ: 京都市交通局ほか各社公開時刻表（モック段階ではダミー値）</span>
+        <span>時刻データは各交通事業者の公式時刻表と非公式 API による参考値です。実際の乗車前に公式情報をご確認ください。</span>
         <span>※ 遅延・運休・臨時ダイヤには対応しません</span>
       </footer>
     </main>
