@@ -15,7 +15,7 @@ import type { DayType } from "../lib/lastTrain.ts";
 import type { Station } from "../lib/types.ts";
 
 /** LP の「例を見る」リンク（app/page.tsx DEMO_HREF）に入っている駅 */
-const DEMO_STATIONS = ["鞍馬", "びわ湖浜大津", "大阪梅田", "国際会館"];
+const DEMO_STATIONS = ["鞍馬", "びわ湖浜大津", "枚方市", "国際会館"];
 
 const homes = [...new Set([...DEMO_STATIONS, ...DEFAULT_MEMBERS.map((m) => m.station)])];
 const members = homes.map((station) => ({ name: station, station }));
