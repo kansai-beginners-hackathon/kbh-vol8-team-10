@@ -6,8 +6,13 @@ const STEPS = [
   { no: "すると", title: "いちばん長くいられる場所が出る", body: "全員が終電で帰れる中で、解散がいちばん遅くなる場所から順に並ぶ。" },
 ];
 
-// デモ。駅は data/prebuilt-stations.json に終電が焼いてあるものだけ（開いた瞬間に答えが出る）。d= を付けないとダイヤ未選択で計算されない
-const DEMO_HREF = "/app?m=田中:鞍馬,佐藤:びわ湖浜大津,鈴木:枚方市,高橋:国際会館&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi&d=weekend";
+/**
+ * デモ。乗換なし（ローカル時刻表で確定）が 3 人 + 乗換 1 回で精度の揃う人が 1 人。乗換 2 回以上（参考値）の人は入れない。
+ *   嵐山=嵐電（四条大宮） / 桂=阪急（京都河原町） / 国際会館=地下鉄 / びわ湖浜大津=全候補地で乗換 1 回
+ * 駅は data/prebuilt-stations.json に終電が焼いてあるものだけ（開いた瞬間に答えが出る）。d= を付けないとダイヤ未選択で計算されない。
+ * 駅を変えたら scripts/export-prebuilt-stations.ts の DEMO_STATIONS も合わせて npm run data:prebuilt
+ */
+const DEMO_HREF = "/app?m=田中:嵐山,佐藤:桂,鈴木:国際会館,高橋:びわ湖浜大津&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi&d=weekend";
 
 export default function LandingPage() {
   return (
