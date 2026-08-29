@@ -14,8 +14,8 @@ import { buildStations } from "../lib/buildStations.ts";
 import type { DayType } from "../lib/lastTrain.ts";
 import type { Station } from "../lib/types.ts";
 
-/** LP の「例を見る」リンク（app/page.tsx DEMO_HREF）に入っている駅 */
-const DEMO_STATIONS = ["鞍馬", "びわ湖浜大津", "大阪梅田", "国際会館"];
+/** LP の「例を見る」リンク（app/page.tsx DEMO_HREF）に入っている駅。乗換なし 3 + 乗換 1 回 1 */
+const DEMO_STATIONS = ["嵐山", "桂", "国際会館", "びわ湖浜大津"];
 
 const homes = [...new Set([...DEMO_STATIONS, ...DEFAULT_MEMBERS.map((m) => m.station)])];
 const members = homes.map((station) => ({ name: station, station }));
@@ -33,7 +33,12 @@ for (const dayType of ["weekday", "weekend"] as DayType[]) {
     console.log(`  ${station ? "ok " : "-- "} ${home}${station ? ` (${station.routes.length} routes)` : ""}`);
   });
   out.stations[dayType] = r.stations;
-  out.unavailable[dayType] = [...new Set(r.unavailable.map((m) => m.station))];
+  // 対応予定は焼かない。焼くと、その駅を後で入力した人が再検索されずに即「対応予定」になる（Transit の一時的な失敗が固定される）
+  out.unavailable[dayType] = [];
+  const missing = [...new Set(r.unavailable.map((m) => m.station))];
+  if (missing.length) console.warn(`  ⚠ 解けなかった駅（焼かない・実行時に再検索される）: ${missing.join(", ")}`);
+  const demoMissing = DEMO_STATIONS.filter((s) => missing.includes(s));
+  if (demoMissing.length) throw new Error(`デモの駅が解けていない: ${demoMissing.join(", ")}。DEMO_HREF を見直す`);
 }
 
 writeFileSync(new URL("../data/prebuilt-stations.json", import.meta.url), JSON.stringify(out, null, 2) + "\n");

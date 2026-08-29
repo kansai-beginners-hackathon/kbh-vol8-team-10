@@ -53,6 +53,7 @@ ul, ol { padding: 0; list-style: none; }
 .brand { color: var(--moss); font: 900 24px var(--serif); letter-spacing: 2px; }
 .status { color: var(--muted); font: 12px var(--hand); display: inline-flex; align-items: center; gap: 7px; }
 .status i { width: 7px; height: 7px; border-radius: 50%; background: #70a575; }
+.status-unset i { background: #c3c9c3; }
 
 .eyebrow { color: var(--coral); font: 600 17px var(--hand); margin-bottom: 10px; }
 .step { color: var(--coral); font: 600 16px var(--hand); white-space: nowrap; flex-shrink: 0; }
