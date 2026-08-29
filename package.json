@@ -8,6 +8,8 @@
     "build": "next build",
     "build:static": "next build",
     "data:export": "node scripts/main.js --export-static",
+    "data:import:kyoto-bus": "node scripts/import-kyoto-city-bus.mjs",
+    "data:import:kyoto-bus-timetables": "node scripts/import-kyoto-city-bus-timetables.mjs",
     "serve:static": "npx serve out",
     "start": "next start"
   },
