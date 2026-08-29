@@ -5,7 +5,9 @@ import { z } from "zod";
 import { zodResponseFormat } from "openai/helpers/zod";
 
 // APIキーは .env.local の OPENAI_API_KEY から自動で読まれる（コードに書かない）
-const client = new OpenAI();
+// モジュール直下で new すると next build の時点でキーが無いと落ちるので、最初のリクエストで作る
+let client;
+const getClient = () => (client ??= new OpenAI());
 
 // AIへの指示。ここの質が出力の質を決める
 const SYSTEM_PROMPT = `
@@ -81,6 +83,15 @@ const ParsedSchema = z.object({
 
 export async function POST(request) {
   try {
+    // ⓪ サーバー側の設定漏れ。原因が分かるメッセージで返す（catch に落ちると「サーバー側でエラー」しか出ない）
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("parse API: OPENAI_API_KEY が未設定です（.env.local か Vercel の環境変数に設定してください）");
+      return Response.json(
+        { error: "AI の設定が完了していません（OPENAI_API_KEY 未設定）。管理者に連絡してください" },
+        { status: 503 }
+      );
+    }
+
     const body = await request.json();
     const text = body.text;
 
@@ -100,7 +111,7 @@ export async function POST(request) {
       );
     }
 
-    const response = await client.chat.completions.parse({
+    const response = await getClient().chat.completions.parse({
       model: "gpt-4o-mini",
       temperature: 0,
       messages: [
