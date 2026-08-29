@@ -292,6 +292,7 @@ for (const [hub, home] of [["sanjo","宇治"],["shijo","五条"],["kyoto","三�
 | `Hub` に `stationIds: string[]`（Transit の駅 ID）を追加し、`geo:` が null なら駅 ID を from にして順にリトライ | `geo:四条` → 桂 が **422 searchWindowTooDense**（近くに地下鉄四条・阪急烏丸・烏丸御池が密集）。阪急烏丸の ID を指名すれば 23:52 正雀行きが返る |
 | `needsTransfer` かつ `hub.subwayOnly` → `unavailable`（Transit を呼ばない） | 地下鉄同士の乗換（四条→山科）は地下鉄 feed の経路検索が壊れている（ガイド 6-3）。**対応予定**で出す |
 | `time` は `journey.departureSecs` ではなく**最初の乗車区間の発時刻**（`boardingSecs`） | 先頭に徒歩 leg があると徒歩開始時刻になる。徒歩分は `Hub.transferMin` が持つ |
+| `ResolveDeps.today()` → `dateFor(dayType)`（既定 `dateForDayType`）。Transit に渡す日付を **dayType のダイヤが走る直近の日**にする（土曜に weekday なら次の月曜） | 以前は常に今日の日付だったので、土曜に `weekday` を聞いてもローカル JSON は平日・Transit は土休日ダイヤ、と層がズレていた。Transit は日付でカレンダーを選ぶ（京阪の tripId が `weekday_*` / `holiday_*` に変わる）。ダイヤ区分は Planner の「平日 / 土休日」トグルでユーザーが選ぶ（祝日判定は持たない） |
 | `unavailable` は **メモリのみ**キャッシュ（localStorage には書かない） | Transit の一時障害でその日一日「対応予定」に固定されないように |
 | 駅 ID キャッシュに `null` は残さない | suggest の一時失敗を同セッションの他ハブに波及させない |
 

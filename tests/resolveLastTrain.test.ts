@@ -6,7 +6,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { HUB_BY_ID } from "../data/hubs.ts";
 import { lastTrainBetween, type LastTrainsData, type LinesData } from "../lib/lastTrain.ts";
-import { clearResolveCache, resolveLastTrain, todayYYYYMMDD, type ResolveDeps } from "../lib/resolveLastTrain.ts";
+import {
+  clearResolveCache,
+  dateForDayType,
+  dayTypeOf,
+  resolveLastTrain,
+  todayYYYYMMDD,
+  type ResolveDeps,
+} from "../lib/resolveLastTrain.ts";
 import type { TransitJourney } from "../lib/transit.ts";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -31,7 +38,7 @@ const makeDeps = (over: Partial<ResolveDeps> = {}) => {
     lastTrains,
     planLastArrival: neverCalled("planLastArrival"),
     suggestStationId: neverCalled("suggestStationId"),
-    today: () => "20260829",
+    dateFor: () => "20260829",
     minIntervalMs: 0,
     ...over,
   };
@@ -358,4 +365,41 @@ test("geo: の経路が全部弾かれた（rejected）ときも駅 ID でやり
   const r = await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
   assert.equal(r.kind, "found");
   assert.equal(calls.plan, 1 + HUB_BY_ID.sanjo.stationIds.length);
+});
+
+// ---- dayType → Transit に渡す日付
+test("dayTypeOf: 土日は weekend、月〜金は weekday", () => {
+  assert.equal(dayTypeOf(new Date(2026, 7, 29)), "weekend"); // 土
+  assert.equal(dayTypeOf(new Date(2026, 7, 30)), "weekend"); // 日
+  assert.equal(dayTypeOf(new Date(2026, 7, 31)), "weekday"); // 月
+  assert.equal(dayTypeOf(new Date(2026, 8, 4)), "weekday"); // 金
+});
+
+test("dateForDayType: 今日が該当すれば今日", () => {
+  assert.equal(dateForDayType("weekend", new Date(2026, 7, 29, 23, 50)), "20260829"); // 土に土休日
+  assert.equal(dateForDayType("weekday", new Date(2026, 7, 31, 9, 0)), "20260831"); // 月に平日
+});
+
+test("dateForDayType: 土曜に weekday → 次の月曜、日曜に weekday → 翌日の月曜", () => {
+  assert.equal(dateForDayType("weekday", new Date(2026, 7, 29)), "20260831");
+  assert.equal(dateForDayType("weekday", new Date(2026, 7, 30)), "20260831");
+});
+
+test("dateForDayType: 平日に weekend → 次の土曜（月末・月跨ぎも正しい）", () => {
+  assert.equal(dateForDayType("weekend", new Date(2026, 7, 31)), "20260905"); // 月 → 土
+  assert.equal(dateForDayType("weekend", new Date(2026, 8, 4)), "20260905"); // 金 → 翌日の土
+  assert.equal(dateForDayType("weekend", new Date(2026, 9, 26)), "20261031"); // 10/26(月) → 10/31(土)
+  assert.equal(dateForDayType("weekend", new Date(2026, 11, 28)), "20270102"); // 12/28(月) → 1/2(土)
+});
+
+test("Transit には dayType に対応する日付が渡る（土曜に weekday を聞いたら月曜の日付）", async () => {
+  const seen: string[] = [];
+  const { deps } = makeDeps({
+    dateFor: (dayType) => dateForDayType(dayType, new Date(2026, 7, 29)),
+    suggestStationId: async () => "scrape-keihan:京阪電気鉄道-宇治線-宇治",
+    planLastArrival: async (_from, _to, date) => (seen.push(date), ujiJourney),
+  });
+  await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
+  await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekend", deps);
+  assert.deepEqual(seen, ["20260831", "20260829"]);
 });

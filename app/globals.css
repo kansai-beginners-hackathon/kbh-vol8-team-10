@@ -166,7 +166,7 @@ footer {
 .pill:hover { border-color: var(--moss); color: var(--moss); }
 .pill[aria-pressed="true"] { background: var(--moss); border-color: var(--moss); color: #fff; }
 .cond { display: grid; gap: 12px; }
-.cond label { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; }
+.cond label, .cond-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 13px; }
 .cond input[type="time"] { padding: 7px 10px; background: #fff; border: 1px solid var(--line); border-radius: 3px; }
 .cond label > span { white-space: nowrap; }
 .cond input[type="range"] { accent-color: var(--moss); flex: 1; min-width: 80px; max-width: 140px; margin-left: auto; }
