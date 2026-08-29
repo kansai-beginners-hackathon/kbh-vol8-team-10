@@ -15,7 +15,7 @@ const PLACEHOLDER = `今日19時に三条集合ー
 鈴木: ごめん今日いけない`;
 
 /**
- * LINE のグループ会話を貼り付けて、参加者・最寄り駅・集合時刻・集合場所を自動で埋める（仮 UI）。
+ * グループチャットなどのテキストを貼り付けて、参加者・最寄り駅・集合時刻・集合場所を自動で埋める（仮 UI）。
  * 読み取り自体はサーバー側 /api/parse（gpt-4o-mini）。ここは投げて結果を親に渡すだけ。
  * onApply は反映した内容の一言（"2人を追加" など）を返す。
  */
@@ -58,10 +58,10 @@ export default function ChatImport({ onApply }: { onApply: (parsed: ParsedChat) 
 
   return (
     <details className="chat-import">
-      <summary>LINE の会話を貼り付けて、まとめて入れる</summary>
+      <summary>テキストを貼り付けて、まとめて入れる</summary>
       <form onSubmit={submit}>
         <textarea
-          aria-label="LINE の会話"
+          aria-label="貼り付けるテキスト"
           rows={5}
           placeholder={PLACEHOLDER}
           value={text}
