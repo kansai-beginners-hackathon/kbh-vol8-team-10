@@ -164,6 +164,20 @@ export interface PlanOptions {
  * @param to    駅 ID
  * @param date  "YYYYMMDD"
  */
+/**
+ * plan の結果の種別。呼び出し側が「別の出発駅でやり直す価値があるか」を判断するのに使う。
+ *  - found      : 採用できる経路があった
+ *  - noJourneys : サーバーは 200 で答えたが経路が 0 件（この目的地へは出せない。やり直しても出ない）
+ *  - rejected   : 経路はあったが isSane / 出発駅チェックで全部弾いた（出発駅を変えれば出るかもしれない）
+ *  - error      : HTTP エラー（422 searchWindowTooDense など）・通信失敗・JSON 不正
+ */
+export type PlanOutcome = "found" | "noJourneys" | "rejected" | "error";
+
+export interface PlanResult {
+  journey: TransitJourney | null;
+  outcome: PlanOutcome;
+}
+
 export async function planLastArrival(
   from: string,
   to: string,
@@ -171,6 +185,17 @@ export async function planLastArrival(
   fetcher: Fetcher = fetch,
   opts: PlanOptions = {},
 ): Promise<TransitJourney | null> {
+  return (await planLastArrivalDetailed(from, to, date, fetcher, opts)).journey;
+}
+
+/** planLastArrival と同じ問い合わせをして、結果の種別（PlanOutcome）も返す */
+export async function planLastArrivalDetailed(
+  from: string,
+  to: string,
+  date: string,
+  fetcher: Fetcher = fetch,
+  opts: PlanOptions = {},
+): Promise<PlanResult> {
   const url = new URL(`${TRANSIT_BASE}/plan`);
   url.searchParams.set("from", from);
   url.searchParams.set("to", to);
@@ -180,7 +205,9 @@ export async function planLastArrival(
   url.searchParams.set("numItineraries", "6");
 
   const data = (await getJson(url.toString(), fetcher)) as { journeys?: unknown } | null;
-  const journeys = Array.isArray(data?.journeys) ? (data!.journeys as TransitJourney[]) : [];
+  if (data === null) return { journey: null, outcome: "error" };
+  const journeys = Array.isArray(data.journeys) ? (data.journeys as TransitJourney[]) : [];
+  if (journeys.length === 0) return { journey: null, outcome: "noJourneys" };
 
   let best: TransitJourney | null = null;
   for (const j of journeys) {
@@ -188,7 +215,7 @@ export async function planLastArrival(
     if (!startsAt(j, opts.originNames ?? [])) continue;
     if (best === null || boardingSecs(j) > boardingSecs(best)) best = j;
   }
-  return best;
+  return best ? { journey: best, outcome: "found" } : { journey: null, outcome: "rejected" };
 }
 
 function isJourneyShape(j: unknown): j is TransitJourney {

@@ -84,7 +84,18 @@ export default function Planner() {
   useEffect(() => {
     let cancelled = false;
     setBuilding(true);
-    buildStations(members, dayType).then((r) => {
+    // 自宅駅ごとに解けた順で画面に足していく。全員揃うのを待たない
+    const onProgress = (home: string, station: Station | null) => {
+      if (cancelled) return;
+      if (station) {
+        setStations((prev) => ({ ...prev, [home]: station }));
+        setUnavailableStations((prev) => { if (!prev.has(home)) return prev; const next = new Set(prev); next.delete(home); return next; });
+      } else {
+        setStations((prev) => { if (!(home in prev)) return prev; const next = { ...prev }; delete next[home]; return next; });
+        setUnavailableStations((prev) => new Set(prev).add(home));
+      }
+    };
+    buildStations(members, dayType, undefined, undefined, onProgress).then((r) => {
       if (cancelled) return;
       setStations(r.stations);
       setUnavailableStations(new Set(r.unavailable.map((m) => m.station)));
