@@ -5,11 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ChatImport, { type ParsedChat } from "@/components/ChatImport";
 import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES, venuesFor } from "@/data/network";
+import prebuiltJson from "@/data/prebuilt-stations.json";
 import subwayLastTrains from "@/data/subway-last-trains.json";
-import { buildStations, todayType } from "@/lib/buildStations";
+import { buildStations } from "@/lib/buildStations";
+import type { DayType } from "@/lib/lastTrain";
+import { HUB_BY_ID } from "@/data/hubs";
 import { bestRoute, rankVenues } from "@/lib/calc";
 import { isHHMM, toMin, toStr } from "@/lib/time";
-import type { DayType } from "@/lib/lastTrain";
 import type { Member, Station, VenueResult } from "@/lib/types";
 
 const MAX_MEMBERS = 8;
@@ -20,6 +22,24 @@ const STATION_CANDIDATES = [
 ];
 
 const normalizeStation = (raw: string) => raw.trim().replace(/駅$/, "");
+
+/**
+ * 事前に解いておいた自宅駅（scripts/export-prebuilt-stations.ts）。
+ * デモ／既定メンバーの駅はここから即表示して、Transit を待たない。無い駅だけ buildStations に回す。
+ */
+const PREBUILT = prebuiltJson as unknown as { stations: Record<DayType, Record<string, Station>>; unavailable: Record<DayType, string[]> };
+function prebuiltFor(members: Member[], dayType: DayType) {
+  const stations: Record<string, Station> = {};
+  const unavailable = new Set<string>();
+  const remaining: Member[] = [];
+  for (const m of members) {
+    const hit = PREBUILT.stations[dayType][m.station];
+    if (hit) stations[m.station] = hit;
+    else if (PREBUILT.unavailable[dayType].includes(m.station)) unavailable.add(m.station);
+    else remaining.push(m);
+  }
+  return { stations, unavailable, remaining };
+}
 
 /**
  * URL の m= は "名前:駅,名前:駅"。名前を省くと駅名が名前になる。駅の存在チェックはしない（無い駅は「対応予定」表示で受ける）。
@@ -38,15 +58,19 @@ function parseMembers(raw: string | null): Member[] {
     .filter((m) => m.station);
 }
 
-/** URL の d= は "weekday" | "weekend"。無ければ今日の曜日から（祝日は見ない。ユーザーが切り替える） */
-function parseDayType(raw: string | null): DayType {
-  return raw === "weekday" || raw === "weekend" ? raw : todayType();
+/** URL の d= は "weekday" | "weekend"。無ければ未選択（null）。③条件でユーザーが選ぶまで計算しない */
+function parseDayType(raw: string | null): DayType | null {
+  return raw === "weekday" || raw === "weekend" ? raw : null;
 }
 
+/** URL の v= 。無ければ候補地は未選択で始める（「始める」から来た人は自分で選ぶ）。デモは LP が URL に載せる */
 function parseVenueIds(raw: string | null): string[] {
-  const ids = (raw ?? "").split(",").filter((id) => VENUES.some((v) => v.id === id));
-  return ids.length ? ids : DEFAULT_VENUE_IDS;
+  return (raw ?? "").split(",").filter((id) => VENUES.some((v) => v.id === id));
 }
+
+const EMPTY_PREBUILT = { stations: {} as Record<string, Station>, unavailable: new Set<string>(), remaining: [] as Member[] };
+/** dayType 未選択のときは何も無い扱い */
+const prebuiltOrEmpty = (members: Member[], dayType: DayType | null) => (dayType ? prebuiltFor(members, dayType) : EMPTY_PREBUILT);
 
 /** 分 → 表示。Infinity（終電の制約なし）は "—" */
 const fmt = (min: number) => (Number.isFinite(min) ? toStr(min) : "—");
@@ -85,14 +109,20 @@ export default function Planner() {
   const [copied, setCopied] = useState(false);
 
   // ハブ → 自宅駅の終電（実データ）。計算中は前回の結果を表示したまま building だけ立てる
-  // ダイヤ区分は平日 / 土休日の 2 択。初期値は今日の曜日、③条件で切り替えられる（祝日・前日に計画するとき用）
-  const [dayType, setDayType] = useState<DayType>(() => parseDayType(params.get("d")));
-  const [stations, setStations] = useState<Record<string, Station>>({});
-  const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => new Set());
-  const [building, setBuilding] = useState(true);
+  // ダイヤ区分は平日 / 土日の 2 択。初期値は URL の d、無ければ未選択（null）。③条件で選ぶまで終電は調べない
+  const [dayType, setDayType] = useState<DayType | null>(() => parseDayType(params.get("d")));
+  // 初期値は事前計算ぶん。デモ URL はこれだけで全員揃うので、開いた瞬間に答えが出る
+  const [stations, setStations] = useState<Record<string, Station>>(() => prebuiltOrEmpty(members, dayType).stations);
+  const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => prebuiltOrEmpty(members, dayType).unavailable);
+  const [building, setBuilding] = useState(() => prebuiltOrEmpty(members, dayType).remaining.length > 0);
 
   useEffect(() => {
     let cancelled = false;
+    if (!dayType) { setBuilding(false); return; }
+    const pre = prebuiltFor(members, dayType);
+    setStations((prev) => ({ ...prev, ...pre.stations }));
+    setUnavailableStations((prev) => new Set([...prev, ...pre.unavailable]));
+    if (pre.remaining.length === 0) { setBuilding(false); return; }
     setBuilding(true);
     // 自宅駅ごとに解けた順で画面に足していく。全員揃うのを待たない
     const onProgress = (home: string, station: Station | null) => {
@@ -105,10 +135,10 @@ export default function Planner() {
         setUnavailableStations((prev) => new Set(prev).add(home));
       }
     };
-    buildStations(members, dayType, undefined, undefined, onProgress).then((r) => {
+    buildStations(pre.remaining, dayType, undefined, undefined, onProgress).then((r) => {
       if (cancelled) return;
-      setStations(r.stations);
-      setUnavailableStations(new Set(r.unavailable.map((m) => m.station)));
+      setStations((prev) => ({ ...prev, ...r.stations }));
+      setUnavailableStations((prev) => new Set([...prev, ...r.unavailable.map((m) => m.station)]));
       setBuilding(false);
     });
     return () => { cancelled = true; };
@@ -121,18 +151,18 @@ export default function Planner() {
     q.set("v", venueIds.join(","));
     q.set("t", meetAt);
     q.set("w", String(walk));
-    q.set("d", dayType);
+    if (dayType) q.set("d", dayType);
     window.history.replaceState(null, "", `${location.pathname}?${q}`);
   }, [members, venueIds, meetAt, walk, dayType]);
 
-  /** メンバーの状態: ready = 順位に入る / unavailable = 対応予定 / pending = 計算中（まだ結果が無い） */
-  const statusOf = (m: Member): "ready" | "unavailable" | "pending" =>
-    stations[m.station] ? "ready" : unavailableStations.has(m.station) ? "unavailable" : "pending";
+  /** メンバーの状態: ready = 順位に入る / unavailable = 対応予定 / pending = 計算中（まだ結果が無い） / waiting = ダイヤ未選択で未計算 */
+  const statusOf = (m: Member): "ready" | "unavailable" | "pending" | "waiting" =>
+    !dayType ? "waiting" : stations[m.station] ? "ready" : unavailableStations.has(m.station) ? "unavailable" : "pending";
   const ranked = members.filter((m) => statusOf(m) === "ready");
   const unavailable = members.filter((m) => statusOf(m) === "unavailable");
 
   const ranking = useMemo(
-    () => rankVenues(venuesFor(dayType).filter((v) => venueIds.includes(v.id)), ranked, stations, walk),
+    () => rankVenues(venuesFor(dayType ?? "weekday").filter((v) => venueIds.includes(v.id)), ranked, stations, walk),
     // ranked は members/stations から決まる
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [venueIds, members, stations, unavailableStations, walk, dayType],
@@ -143,6 +173,26 @@ export default function Planner() {
   const worst = alive[alive.length - 1];
   const spread = top && worst && top.ok && worst.ok && Number.isFinite(top.dissolve - worst.dissolve) ? top.dissolve - worst.dissolve : 0;
   const selected = alive.find((r) => r.venue.id === selectedId) ?? top;
+
+  /**
+   * その候補地で最初に詰む人の「終電」そのもの（固定値。徒歩スライダーで動かない）。
+   * 経路の値は min(ハブ発の最終 − 移動 − 乗換, 候補地発の最終) なので、縛っている側を出す。
+   *   - 支線側が縛る → 「京都 23:37 発」（ハブ発・自宅駅方面の最終）
+   *   - 幹線側が縛る → 「四条 23:55 発」（候補地の駅を出る、ハブ行きの最終）
+   */
+  const lastTrainOf = (r: VenueResult): { at: string; time: string } | null => {
+    if (!r.ok) return null;
+    const station = stations[r.bottleneck.station];
+    const best = station ? bestRoute(station, r.venue) : null;
+    if (!best) return null;
+    const cell = r.venue.toHub[best.route.hub];
+    const hubName = HUB_BY_ID[best.route.hub]?.name ?? best.route.hub;
+    const viaBranch = best.route.last === null ? Infinity : toMin(best.route.last) - (cell?.transitMin ?? 0) - best.route.transferMin;
+    const viaTrunk = cell?.lastDepart ? toMin(cell.lastDepart) : Infinity;
+    if (viaBranch <= viaTrunk && best.route.last !== null) return { at: hubName, time: best.route.last };
+    if (cell?.lastDepart) return { at: r.venue.name, time: cell.lastDepart };
+    return null;
+  };
 
   /** その候補地のボトルネックが Transit の乗換 2 回以上の経路で決まっている → 参考値 */
   const isReference = (r: VenueResult) => {
@@ -222,7 +272,9 @@ export default function Planner() {
           <Link href="/" className="brand">もうちょっと</Link>
         </div>
         <nav className="topbar-nav">
-          <span className="status"><i />京都・{dayType === "weekend" ? "土休日" : "平日"}ダイヤ</span>
+          {dayType
+            ? <span className="status"><i />京都・{dayType === "weekend" ? "土日" : "平日"}ダイヤ</span>
+            : <span className="status status-unset"><i />ダイヤ未選択</span>}
           {building && <span className="status status-building" aria-live="polite"><i />更新中…</span>}
           <button className="btn btn-ghost" onClick={share}>{copied ? "コピーしました" : "リンクをコピー"}</button>
         </nav>
@@ -246,15 +298,16 @@ export default function Planner() {
               const isBottleneck = selected?.ok && selected.bottleneck === member;
               const status = statusOf(member);
               return (
-                <div className={`member${isBottleneck ? " is-bottleneck" : ""}${status !== "ready" ? " is-unavailable" : ""}`} key={index}>
+                <div className={`member${isBottleneck ? " is-bottleneck" : ""}${status === "unavailable" || status === "pending" ? " is-unavailable" : ""}`} key={index}>
                   <span className="avatar">{member.name.slice(0, 1)}</span>
                   <input aria-label="名前" placeholder="名前" value={member.name} onChange={(e) => updateMember(index, { name: e.target.value || member.station })} />
-                  <span className="station-cell">
+                  <span className={`station-cell${status !== "ready" ? " has-state" : ""}`}>
                     <StationInput value={member.station} onCommit={(station) => updateMember(index, { station, name: member.name === member.station ? station : member.name })} />
+                    {/* 状態は入力欄の中（右端）に出す。下に出すと行の高さが変わって画面がずれる */}
                     {status === "unavailable" && (
-                      <small className="badge badge-unavailable" title="この駅の終電データはまだ入っていません。順位計算には入れていません">この駅は対応予定・順位に含めていません</small>
+                      <small className="state state-unavailable" title="この駅の終電データはまだ入っていません。順位計算には入れていません">対応予定</small>
                     )}
-                    {status === "pending" && <small className="badge badge-pending">確認中…</small>}
+                    {status === "pending" && <small className="state state-pending" aria-live="polite">確認中…</small>}
                   </span>
                   <button className="remove" aria-label="削除" onClick={() => setMembers(members.filter((_, i) => i !== index))}>×</button>
                 </div>
@@ -286,7 +339,7 @@ export default function Planner() {
               <span>ダイヤ</span>
               <div className="pills">
                 <button type="button" className="pill" aria-pressed={dayType === "weekday"} onClick={() => setDayType("weekday")}>平日</button>
-                <button type="button" className="pill" aria-pressed={dayType === "weekend"} onClick={() => setDayType("weekend")}>土休日</button>
+                <button type="button" className="pill" aria-pressed={dayType === "weekend"} onClick={() => setDayType("weekend")}>土日</button>
               </div>
             </div>
             <label><span>集合</span><input type="time" value={meetAt} onChange={(e) => setMeetAt(e.target.value || "19:00")} /></label>
@@ -299,13 +352,17 @@ export default function Planner() {
       <section className="panel ranking">
         {!top || !top.ok ? (
           <p className="lede">
-            {building && ranked.length === 0
-              ? "終電を調べています…"
-              : ranked.length === 0 && members.length > 0
-                ? "終電データのある駅のメンバーがいません。駅名を変えてみてください。"
-                : members.length === 0
-                  ? "①でメンバーの最寄り駅を追加すると、一番長くいられる場所が出ます。"
-                  : "メンバーと候補地を選ぶと、一番長くいられる場所が出ます。"}
+            {members.length === 0
+              ? "①でメンバーの最寄り駅を追加すると、一番長くいられる場所が出ます。"
+              : !dayType
+                ? "③で平日か土日を選ぶと、終電を調べます。"
+                : building && ranked.length === 0
+                  ? "終電を調べています…"
+                  : ranked.length === 0
+                    ? "終電データのある駅のメンバーがいません。駅名を変えてみてください。"
+                    : venueIds.length === 0
+                      ? "②で候補地を選ぶと、一番長くいられる場所が出ます。"
+                      : "メンバーと候補地を選ぶと、一番長くいられる場所が出ます。"}
           </p>
         ) : (
           <>
@@ -334,7 +391,10 @@ export default function Planner() {
                   <p className="reason">{worst.venue.name}より<strong className="num">+{spread}</strong>分<br />長くいられます</p>
                 )}
                 {Number.isFinite(top.dissolve) && (
-                  <div className="bottleneck"><span className="alert" /><span><b>{top.bottleneck.name}</b>さんの終電時間は <span className="num">{toStr(top.dissolve)}</span> です。</span></div>
+                  <div className="bottleneck"><span className="alert" /><span>
+                    <b>{top.bottleneck.name}</b>さんの終電は{(() => { const lt = lastTrainOf(top); return lt ? <> {lt.at} <span className="num">{lt.time}</span> 発</> : null; })()}。
+                    店を <span className="num">{toStr(top.dissolve)}</span> に出れば間に合います。
+                  </span></div>
                 )}
               </div>
             </div>
