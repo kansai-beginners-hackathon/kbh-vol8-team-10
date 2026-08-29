@@ -13,3 +13,5 @@ data/kyoto-city-bus-last-two-timetables.json
 # TypeScript / Next
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+data/kyoto-city-bus-last-two-timetables.json

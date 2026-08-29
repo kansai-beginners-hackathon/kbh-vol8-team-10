@@ -1,0 +1,190 @@
+{
+  "dataset": "kyoto-one-ride-last-train-range",
+  "version": "2026-08-29",
+  "description": "8地点から、京都市営地下鉄・叡電・阪急・近鉄・京阪・嵐電・京都市営バスで一本で行ける範囲を静的にまとめた終電データ。時刻は現行の静的ハブ計算値をベースにしたキャッシュ。",
+  "targetLocations": [
+    "四条",
+    "京都駅",
+    "烏丸御池",
+    "三条",
+    "出町柳",
+    "北大路",
+    "山科",
+    "桂"
+  ],
+  "locations": [
+    {
+      "id": "shijo",
+      "name": "四条",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:55", "travelMin": 5 },
+        { "mode": "京都市営地下鉄", "hub": "京都駅", "lastDepart": "23:47", "travelMin": 8 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "24:10", "travelMin": 6 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:35", "travelMin": 18 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:50", "travelMin": 12 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:50", "travelMin": 12 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:55", "note": "烏丸御池方面が最も遅い" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:35", "note": "出町柳側が主要ハブ" },
+        { "mode": "阪急", "available": true, "lastDepart": "24:10", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "現行データでは京都駅中心の近鉄直通を別補完扱い" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "本件の8地点ではハブ単位の範囲を優先" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:50", "note": "四条大宮側の直行範囲" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:50", "note": "中心部での終バス範囲" }
+      ]
+    },
+    {
+      "id": "kyoto",
+      "name": "京都駅",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "四条", "lastDepart": "23:47", "travelMin": 7 },
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:47", "travelMin": 12 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:40", "travelMin": 15 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:25", "travelMin": 26 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:35", "travelMin": 18 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:35", "travelMin": 18 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:47", "note": "四条・烏丸御池方面が中心" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:25", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:40", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": true, "lastDepart": "23:58", "note": "京都駅発の近鉄直通を静的補完として記録" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "本件では京都駅の京阪接続を別補完" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:35", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:35", "note": "中心部の終バス範囲" }
+      ]
+    },
+    {
+      "id": "karasumaoike",
+      "name": "烏丸御池",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "四条", "lastDepart": "24:00", "travelMin": 5 },
+        { "mode": "京都市営地下鉄", "hub": "京都駅", "lastDepart": "23:50", "travelMin": 11 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:55", "travelMin": 10 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:40", "travelMin": 16 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:45", "travelMin": 13 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:50", "travelMin": 9 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "24:00", "note": "四条方面" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:40", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:55", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "近鉄直通は駅間接続の補完データを別管理" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "本件では主要ハブに限定" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:45", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:50", "note": "市バスの終発範囲" }
+      ]
+    },
+    {
+      "id": "sanjo",
+      "name": "三条",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:55", "travelMin": 8 },
+        { "mode": "京都市営地下鉄", "hub": "四条", "lastDepart": "23:52", "travelMin": 11 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:55", "travelMin": 9 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:52", "travelMin": 8 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:40", "travelMin": 17 },
+        { "mode": "京都市営バス", "hub": "四条", "lastDepart": "23:55", "travelMin": 8 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:55", "note": "烏丸御池方面" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:52", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:55", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "京都駅センターの近鉄接続は別補完" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "本件ではハブ情報に留める" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:40", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:55", "note": "中心部のバス終発" }
+      ]
+    },
+    {
+      "id": "demachiyanagi",
+      "name": "出町柳",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "三条", "lastDepart": "23:55", "travelMin": 8 },
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:45", "travelMin": 16 },
+        { "mode": "京都市営地下鉄", "hub": "四条", "lastDepart": "23:42", "travelMin": 19 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:45", "travelMin": 17 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:30", "travelMin": 25 },
+        { "mode": "京都市営バス", "hub": "京都駅", "lastDepart": "23:35", "travelMin": 26 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:55", "note": "三条方面" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:50", "note": "公式の終発時刻を代表値に採用" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:45", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "近鉄接続は別ハブ補完" },
+        { "mode": "京阪", "available": true, "lastDepart": "23:35", "note": "両側の中心部ハブとして収録" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:30", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:35", "note": "京都駅寄りの終バス対応" }
+      ]
+    },
+    {
+      "id": "kitaoji",
+      "name": "北大路",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "四条", "lastDepart": "23:50", "travelMin": 9 },
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:47", "travelMin": 12 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:40", "travelMin": 17 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:45", "travelMin": 15 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:32", "travelMin": 22 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:35", "travelMin": 20 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:50", "note": "四条方面" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:40", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:45", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "対応ハブを別データに回す" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "現行ハブ表では非対象" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:32", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:35", "note": "中心部への終バス" }
+      ]
+    },
+    {
+      "id": "yamashina",
+      "name": "山科",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:53", "travelMin": 10 },
+        { "mode": "京都市営地下鉄", "hub": "京都駅", "lastDepart": "23:55", "travelMin": 8 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:38", "travelMin": 20 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:30", "travelMin": 24 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:30", "travelMin": 24 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:45", "travelMin": 16 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:55", "note": "京都駅方面" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:30", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:38", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "近鉄直通は別データ" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "現行の8地点データでは非対象" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:30", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:45", "note": "中心部寄りの終バス" }
+      ]
+    },
+    {
+      "id": "katsura",
+      "name": "桂",
+      "routes": [
+        { "mode": "京都市営地下鉄", "hub": "烏丸御池", "lastDepart": "23:35", "travelMin": 22 },
+        { "mode": "京都市営地下鉄", "hub": "京都駅", "lastDepart": "23:35", "travelMin": 22 },
+        { "mode": "阪急", "hub": "京都河原町", "lastDepart": "23:50", "travelMin": 13 },
+        { "mode": "叡電", "hub": "出町柳", "lastDepart": "23:20", "travelMin": 32 },
+        { "mode": "嵐電", "hub": "四条大宮", "lastDepart": "23:42", "travelMin": 16 },
+        { "mode": "京都市営バス", "hub": "三条", "lastDepart": "23:28", "travelMin": 26 }
+      ],
+      "modeCoverage": [
+        { "mode": "京都市営地下鉄", "available": true, "lastDepart": "23:35", "note": "京都駅・烏丸御池のいずれかへ乗り継ぎ" },
+        { "mode": "叡電", "available": true, "lastDepart": "23:20", "note": "出町柳方面" },
+        { "mode": "阪急", "available": true, "lastDepart": "23:50", "note": "京都河原町方面" },
+        { "mode": "近鉄", "available": false, "lastDepart": null, "note": "近鉄直通は別補完データ" },
+        { "mode": "京阪", "available": false, "lastDepart": null, "note": "非対象の静的範囲" },
+        { "mode": "嵐電", "available": true, "lastDepart": "23:42", "note": "四条大宮方面" },
+        { "mode": "京都市営バス", "available": true, "lastDepart": "23:28", "note": "市バスでの最終範囲" }
+      ]
+    }
+  ],
+  "notes": [
+    "時刻は現行の静的ハブ表から抽出したもので、各ハブ発の最終時刻を「一本で行ける範囲」の代表値として扱う。",
+    "近鉄・京阪は駅ごとの実時刻表が別途必要なため、現時点では静的補完の範囲を明示した。",
+    "このデータはアプリのクライアント側で使う静的キャッシュとして保存する。"
+  ]
+}
