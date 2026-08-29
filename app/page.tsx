@@ -14,7 +14,6 @@ export default function LandingPage() {
       <header className="topbar">
         <Link href="/" className="brand">もうちょっと</Link>
         <nav className="topbar-nav">
-          <span className="status"><i />京都・平日ダイヤ</span>
           <Link href="/app" className="btn btn-primary">始める</Link>
         </nav>
       </header>
@@ -24,7 +23,7 @@ export default function LandingPage() {
         <h1>みんなでいられる時間を、<em>もうちょっと<span className="maru">。</span></em></h1>
         <p className="lede">
           最寄り駅と候補地を入れるだけで、この人数が<b>一番長く一緒にいられる場所</b>がわかります。<br />
-          ログイン不要、30秒。
+          ログイン不要。
         </p>
         <div className="hero-actions">
           <Link href="/app" className="btn btn-primary btn-lg">始める</Link>
@@ -49,7 +48,7 @@ export default function LandingPage() {
           <p>
             駅に掲示されている最終列車は、途中の駅までしか行かないことがある。
             出町柳の掲示は 23:50 でも、鞍馬まで帰る人の本当の最終は 22:30。
-            <b>80分</b> の差がある。乗換案内は行き先を入れれば正しく答えるが、人は「終電」を駅単位で覚えている。
+            <b>80分</b> の差がある。
           </p>
         </div>
         <div className="truth">
@@ -62,7 +61,7 @@ export default function LandingPage() {
       </section>
 
       <section className="closing">
-        <h2>もうちょっといたいなら、<br />終電が遅くなる場所で遊べばいいやん。</h2>
+        <h2>もうちょっといたいなら、<br />終電が遅い場所で遊べばええやん。</h2>
         <p>誰かの終電に合わせて解散するんじゃなくて、今日のメンツでいちばん長くいられる場所を選ぶ。それだけで、あと30分。</p>
         <Link href="/app" className="btn btn-primary btn-lg">始める</Link>
       </section>
