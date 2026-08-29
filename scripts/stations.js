@@ -4,6 +4,8 @@ export const LINES = [
   {
     lineId: "karasuma",
     lineName: "烏丸線",
+    /** 路線外の行き先 → この路線上ではどの駅まで通るか（近鉄直通は竹田まで） */
+    through: { 新田辺: "竹田", 近鉄奈良: "竹田" },
     stations: [
       { seq: 1, stationId: "kokusaikaikan", name: "国際会館", up: null, down: "021100" },
       { seq: 2, stationId: "matsugasaki", name: "松ヶ崎", up: "021201", down: "021200" },
@@ -25,6 +27,8 @@ export const LINES = [
   {
     lineId: "tozai",
     lineName: "東西線",
+    /** びわ湖浜大津行きは御陵で京津線へ分岐する。山科・六地蔵側は通らない */
+    through: { びわ湖浜大津: "御陵" },
     stations: [
       { seq: 1, stationId: "rokujizo", name: "六地蔵", up: null, down: "012300" },
       { seq: 2, stationId: "ishida", name: "石田", up: "012401", down: "012400" },
