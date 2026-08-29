@@ -1,12 +1,12 @@
-// 実行: npm test （= node --test tests/*.test.ts）
+// 実行: npm test（tests/unit と tests/integration を node --test で回す）
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { lastTrainBetween, type LastTrainsData, type LinesData } from "../lib/lastTrain.ts";
-import { toMin } from "../lib/time.ts";
+import { lastTrainBetween, type LastTrainsData, type LinesData } from "../../lib/lastTrain.ts";
+import { toMin } from "../../lib/time.ts";
 
-const root = path.resolve(import.meta.dirname, "..");
+const root = path.resolve(import.meta.dirname, "../..");
 const lines = JSON.parse(fs.readFileSync(path.join(root, "data/subway-lines.json"), "utf8")) as LinesData;
 const lastTrains = JSON.parse(
   fs.readFileSync(path.join(root, "data/subway-last-trains.json"), "utf8"),

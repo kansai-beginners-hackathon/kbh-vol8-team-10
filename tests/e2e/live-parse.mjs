@@ -1,3 +1,7 @@
+// 実 API を叩くスモークテスト（Playwright には拾わせない: *.spec.ts ではない）。
+// 起動中のサーバー（既定 http://localhost:3000/api/parse/、TEST_URL で変更）に本物の OPENAI_API_KEY が要る。
+// gpt-4o-mini の読み取り精度を確認する用途。決定的な検証は tests/integration/api-parse.test.ts と tests/e2e/chat-import.spec.ts。
+// 実行: npm run test:parse
 import process from 'node:process';
 
 const API_URL = process.env.TEST_URL || 'http://localhost:3000/api/parse/';

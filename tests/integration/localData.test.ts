@@ -1,9 +1,9 @@
-// 実行: npm test （= node --test tests/*.test.ts）
+// 実行: npm test（tests/unit と tests/integration を node --test で回す）
 // 地下鉄 + 私鉄 5 社の merge と、叡電の直通統合（出町柳〜鞍馬）を検証する。
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { lastTrainBetween, type LastTrainsData, type LinesData } from "../lib/lastTrain.ts";
-import { ALL_LAST_TRAINS, ALL_LINES, isSubwayStation, mergeLastTrains, mergeLines } from "../lib/localData.ts";
+import { lastTrainBetween, type LastTrainsData, type LinesData } from "../../lib/lastTrain.ts";
+import { ALL_LAST_TRAINS, ALL_LINES, isSubwayStation, mergeLastTrains, mergeLines } from "../../lib/localData.ts";
 
 const q = (from: string, to: string, day: "weekday" | "weekend" = "weekday") =>
   lastTrainBetween(ALL_LINES, ALL_LAST_TRAINS, from, to, day);

@@ -1,15 +1,15 @@
-// 実行: npm test （= node --test tests/*.test.ts）
+// 実行: npm test（tests/unit と tests/integration を node --test で回す）
 // deps を差し替えて Transit を叩かずに振り分けを検証する。
 import { test, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { HUB_BY_ID } from "../data/hubs.ts";
-import { lastTrainBetween, type LastTrainsData, type LinesData } from "../lib/lastTrain.ts";
-import { clearResolveCache, resolveLastTrain, todayYYYYMMDD, type ResolveDeps } from "../lib/resolveLastTrain.ts";
-import type { TransitJourney } from "../lib/transit.ts";
+import { HUB_BY_ID } from "../../data/hubs.ts";
+import { lastTrainBetween, type LastTrainsData, type LinesData } from "../../lib/lastTrain.ts";
+import { clearResolveCache, resolveLastTrain, todayYYYYMMDD, type ResolveDeps } from "../../lib/resolveLastTrain.ts";
+import type { TransitJourney } from "../../lib/transit.ts";
 
-const root = path.resolve(import.meta.dirname, "..");
+const root = path.resolve(import.meta.dirname, "../..");
 const read = (p: string) => JSON.parse(fs.readFileSync(path.join(root, p), "utf8"));
 const lines = read("data/subway-lines.json") as LinesData;
 const lastTrains = read("data/subway-last-trains.json") as LastTrainsData;
