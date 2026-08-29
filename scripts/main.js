@@ -167,6 +167,26 @@ function createJobs() {
   ].filter(Boolean)));
 }
 
+/** 路線ごとの駅の並びと through を data/subway-lines.json に書く。ネットワーク不要 */
+export function createLinesDataset() {
+  return {
+    dataset: "kyoto-city-subway-lines",
+    updatedAt: new Date().toISOString().slice(0, 10),
+    note: "stations は路線の駅順（配列順が並び順）。through は路線外の行き先がこの路線上でどの駅まで通るか。",
+    lines: LINES.map((line) => ({
+      lineId: line.lineId,
+      lineName: line.lineName,
+      stations: line.stations.map((station) => station.name),
+      through: line.through ?? {},
+    })),
+  };
+}
+
+function exportLines() {
+  fs.writeFileSync("data/subway-lines.json", `${JSON.stringify(createLinesDataset(), null, 2)}\n`);
+  console.log("路線データを書き出しました: data/subway-lines.json");
+}
+
 async function exportStatic() {
   const jobs = createJobs();
   const rows = [];
@@ -179,11 +199,17 @@ async function exportStatic() {
   }
   fs.writeFileSync("data/subway-last-trains.json", `${JSON.stringify(createStaticDataset(rows), null, 2)}\n`);
   console.log(`静的データを書き出しました: ${rows.length}件`);
+  exportLines();
 }
 
 async function main() {
   if (process.argv.includes("--export-static")) {
     await exportStatic();
+    return;
+  }
+
+  if (process.argv.includes("--export-lines")) {
+    exportLines();
     return;
   }
 
