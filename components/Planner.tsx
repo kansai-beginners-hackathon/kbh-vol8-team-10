@@ -57,6 +57,11 @@ function parseMembers(raw: string | null): Member[] {
     .filter((m) => m.station);
 }
 
+/** URL の d= は "weekday" | "weekend"。無ければ今日の曜日から（祝日は見ない。ユーザーが切り替える） */
+function parseDayType(raw: string | null): DayType {
+  return raw === "weekday" || raw === "weekend" ? raw : todayType();
+}
+
 function parseVenueIds(raw: string | null): string[] {
   const ids = (raw ?? "").split(",").filter((id) => VENUES.some((v) => v.id === id));
   return ids.length ? ids : DEFAULT_VENUE_IDS;
@@ -99,7 +104,8 @@ export default function Planner() {
   const [copied, setCopied] = useState(false);
 
   // ハブ → 自宅駅の終電（実データ）。計算中は前回の結果を表示したまま building だけ立てる
-  const [dayType] = useState(() => todayType());
+  // ダイヤ区分は平日 / 土休日の 2 択。初期値は URL の d、無ければ今日の曜日。③条件で切り替えられる（祝日・前日に計画するとき用）
+  const [dayType, setDayType] = useState<DayType>(() => parseDayType(params.get("d")));
   // 初期値は事前計算ぶん。デモ URL はこれだけで全員揃うので、開いた瞬間に答えが出る
   const [stations, setStations] = useState<Record<string, Station>>(() => prebuiltFor(members, dayType).stations);
   const [unavailableStations, setUnavailableStations] = useState<Set<string>>(() => prebuiltFor(members, dayType).unavailable);
@@ -139,8 +145,9 @@ export default function Planner() {
     q.set("v", venueIds.join(","));
     q.set("t", meetAt);
     q.set("w", String(walk));
+    q.set("d", dayType);
     window.history.replaceState(null, "", `${location.pathname}?${q}`);
-  }, [members, venueIds, meetAt, walk]);
+  }, [members, venueIds, meetAt, walk, dayType]);
 
   /** メンバーの状態: ready = 順位に入る / unavailable = 対応予定 / pending = 計算中（まだ結果が無い） */
   const statusOf = (m: Member): "ready" | "unavailable" | "pending" =>
@@ -300,6 +307,13 @@ export default function Planner() {
           </div>
           <div className="heading" style={{ marginTop: 28 }}><div><span className="step">③</span><h2>条件</h2></div></div>
           <div className="cond">
+            <div className="cond-row" role="group" aria-label="ダイヤ">
+              <span>ダイヤ</span>
+              <div className="pills">
+                <button type="button" className="pill" aria-pressed={dayType === "weekday"} onClick={() => setDayType("weekday")}>平日</button>
+                <button type="button" className="pill" aria-pressed={dayType === "weekend"} onClick={() => setDayType("weekend")}>土休日</button>
+              </div>
+            </div>
             <label><span>集合</span><input type="time" value={meetAt} onChange={(e) => setMeetAt(e.target.value || "19:00")} /></label>
             <label><span>店から駅までの距離（帰り）</span><input type="range" min={0} max={15} value={walk} onChange={(e) => setWalk(Number(e.target.value))} /><b className="num">{walk}分</b></label>
           </div>
