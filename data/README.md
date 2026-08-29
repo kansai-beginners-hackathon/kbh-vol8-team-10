@@ -76,6 +76,21 @@ npm run data:import:kyoto-bus-timetables
 
 `data/kyoto-city-bus-timetables.json` に、公式HTMLの出典URL、系統、停留所、行先、発車時刻、注記を保存します。
 
+### 叡電の終電・終電一本前（`eizan-last-two.json`）
+
+`eizan-last-two.json` は、叡電の駅について**行き先別の終電と終電一本前**を持つJSONです。`weekday` / `weekend` は `["終電一本前", "終電"]` の順で、1日1本しか無い行き先は1要素だけになります。`track` は終電の発車番線（時刻表の凡例「行先 / 発車番線」の丸数字）、`lastTwoDepartures` は行き先を問わないその駅の終発2本です。現在は**出町柳のみ**収録しています。
+
+更新・駅の追加は次のコマンドです（引数を省くと出町柳）。
+
+```bash
+npm run data:import:eizan-last-two
+node scripts/import-eizan-last-two.mjs 出町柳 岩倉 宝ケ池
+```
+
+公式ページ `https://eizandensha.co.jp/information/<slug>/?di=<n>` はHTMLではなく**PDFを直接返す**ため、スクリプト側でPDFを読んでいます（zlibでFlateDecodeを展開し、ToUnicode CMapで文字を復元して、描画位置で表のセルを組み直す）。時刻表の1セルは上段が行先の略号＋発車番線、下段が分で、「時」の数字はその間に置かれます。左半分が平日、右半分が土曜・休日です。
+
+収録した終電は `eizan-last-trains.json` の出町柳の値と全件一致することを確認済みです。
+
 ## アプリからの読み込み
 
 `lib/localData.ts` が地下鉄と私鉄5社のJSONを1組にまとめ、`lib/resolveLastTrain.ts` の既定データ（`defaultDeps`）として渡します。

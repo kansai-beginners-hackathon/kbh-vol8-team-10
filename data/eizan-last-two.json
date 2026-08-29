@@ -1,0 +1,96 @@
+{
+  "dataset": "eizan-last-two",
+  "updatedAt": "2026-08-29",
+  "source": {
+    "name": "叡山電鉄 標準発車時刻表（各駅ページの PDF）",
+    "url": "https://eizandensha.co.jp/guide/",
+    "retrievedAt": "2026-08-29",
+    "note": "各駅ページが返す PDF から、行き先別の終電と終電一本前を取り出したもの。weekday / weekend は [終電一本前, 終電] の順（1 日 1 本しか無い行き先は 1 要素）。track は終電の発車番線（時刻表の凡例「行先 / 発車番線」の丸数字）。lastTwoDepartures は行き先を問わないその駅の終発 2 本。"
+  },
+  "stations": [
+    {
+      "name": "出町柳",
+      "direction": "八瀬比叡山口・鞍馬方面",
+      "timetableEffectiveFrom": "2026年8月22日変更",
+      "count": {
+        "weekday": 146,
+        "weekend": 131
+      },
+      "byDestination": [
+        {
+          "name": "八瀬比叡山口",
+          "weekday": [
+            "22:39",
+            "23:02"
+          ],
+          "weekdayTrack": 2,
+          "weekend": [
+            "22:44",
+            "23:02"
+          ],
+          "weekendTrack": 2
+        },
+        {
+          "name": "鞍馬",
+          "weekday": [
+            "21:51",
+            "22:30"
+          ],
+          "weekdayTrack": 3,
+          "weekend": [
+            "21:48",
+            "22:30"
+          ],
+          "weekendTrack": 3
+        },
+        {
+          "name": "市原",
+          "weekday": [
+            "22:56",
+            "23:15"
+          ],
+          "weekdayTrack": 3,
+          "weekend": [
+            "22:56",
+            "23:15"
+          ],
+          "weekendTrack": 3
+        },
+        {
+          "name": "修学院",
+          "weekday": [
+            "20:10",
+            "23:50"
+          ],
+          "weekdayTrack": 2,
+          "weekend": [
+            "23:50"
+          ],
+          "weekendTrack": 2
+        },
+        {
+          "name": "二軒茶屋",
+          "weekday": [
+            "23:30"
+          ],
+          "weekdayTrack": 2,
+          "weekend": [
+            "23:30"
+          ],
+          "weekendTrack": 2
+        }
+      ],
+      "lastTwoDepartures": {
+        "weekday": [
+          "23:30",
+          "23:50"
+        ],
+        "weekend": [
+          "23:30",
+          "23:50"
+        ]
+      },
+      "sourceUrl": "https://eizandensha.co.jp/information/demachiyanagi/?di=2"
+    }
+  ]
+}
