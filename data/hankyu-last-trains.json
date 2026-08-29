@@ -1,0 +1,498 @@
+{
+  "dataset": "hankyu-last-trains",
+  "updatedAt": "2026-08-29",
+  "timetableEffectiveFrom": null,
+  "source": {
+    "name": "阪急電鉄 駅別時刻表",
+    "url": "https://www.hankyu.co.jp/station/",
+    "retrievedAt": "2026-08-29",
+    "note": "阪急公式サイトの駅別時刻表HTML（https://www.hankyu.co.jp/station/html/HK-<駅番号>_ky_<1=大阪梅田方面/2=京都河原町方面>_<w=平日/h=土休日>.html）から各方向の最終便を抽出。ページに改正日の明記なし。各方向の最終【普通】列車を行き先別に収録。深夜の区間便（平日=茨木市ゆき／土休日=高槻市ゆき）は後続の正雀ゆきに包含されるため省略。準特急・特急は各駅停車でないため不収録。京都河原町方面の深夜急行は桂〜烏丸間（桂・西京極・西院・大宮・烏丸）で各駅に停車するためその各駅のみ京都河原町ゆきとして収録。24時台は24時表記。"
+  },
+  "stations": [
+    {
+      "id": "kyoto-kawaramachi",
+      "name": "京都河原町",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:04",
+              "weekend": "23:04"
+            },
+            {
+              "name": "正雀",
+              "weekday": "23:50",
+              "weekend": "23:50"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:10",
+              "weekend": "24:10"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-86_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "karasuma",
+      "name": "烏丸",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:05",
+              "weekend": "23:06"
+            },
+            {
+              "name": "正雀",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:12",
+              "weekend": "24:12"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "24:32",
+              "weekend": "24:32"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-85_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "omiya",
+      "name": "大宮",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:07",
+              "weekend": "23:07"
+            },
+            {
+              "name": "正雀",
+              "weekday": "23:53",
+              "weekend": "23:53"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:13",
+              "weekend": "24:13"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "24:30",
+              "weekend": "24:30"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-84_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "saiin",
+      "name": "西院",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:09",
+              "weekend": "23:09"
+            },
+            {
+              "name": "正雀",
+              "weekday": "23:55",
+              "weekend": "23:55"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:15",
+              "weekend": "24:15"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "24:28",
+              "weekend": "24:28"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-83_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "nishikyogoku",
+      "name": "西京極",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:11",
+              "weekend": "23:12"
+            },
+            {
+              "name": "正雀",
+              "weekday": "23:58",
+              "weekend": "23:58"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:18",
+              "weekend": "24:18"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "24:26",
+              "weekend": "24:26"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-82_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "katsura",
+      "name": "桂",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:14",
+              "weekend": "23:14"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:02",
+              "weekend": "24:02"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "24:24",
+              "weekend": "24:24"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-81_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "rakusaiguchi",
+      "name": "洛西口",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:16",
+              "weekend": "23:16"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:04",
+              "weekend": "24:04"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:33",
+              "weekend": "24:33"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-80_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "higashi-muko",
+      "name": "東向日",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:18",
+              "weekend": "23:18"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:06",
+              "weekend": "24:06"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:35",
+              "weekend": "23:35"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:31",
+              "weekend": "24:31"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-79_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "nishi-muko",
+      "name": "西向日",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:20",
+              "weekend": "23:20"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:08",
+              "weekend": "24:08"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:29",
+              "weekend": "24:29"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-78_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "nagaoka-tenjin",
+      "name": "長岡天神",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:23",
+              "weekend": "23:23"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:10",
+              "weekend": "24:10"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:30",
+              "weekend": "23:30"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:27",
+              "weekend": "24:27"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-77_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "nishiyama-tennozan",
+      "name": "西山天王山",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:24",
+              "weekend": "23:24"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:12",
+              "weekend": "24:12"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:24",
+              "weekend": "23:21"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:25",
+              "weekend": "24:25"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-76_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "oyamazaki",
+      "name": "大山崎",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:27",
+              "weekend": "23:27"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:15",
+              "weekend": "24:15"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:21",
+              "weekend": "23:18"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:22",
+              "weekend": "24:22"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-75_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "minase",
+      "name": "水無瀬",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:29",
+              "weekend": "23:29"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:17",
+              "weekend": "24:17"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:19",
+              "weekend": "23:16"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:20",
+              "weekend": "24:20"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-74_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "kanmaki",
+      "name": "上牧",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:18",
+              "weekend": "24:18"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:17",
+              "weekend": "23:15"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:18",
+              "weekend": "24:18"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-73_ky_1_w.html"
+        }
+      ]
+    },
+    {
+      "id": "takatsuki-shi",
+      "name": "高槻市",
+      "lines": [
+        {
+          "lineId": "hankyu-kyoto",
+          "lineName": "阪急京都線",
+          "destinations": [
+            {
+              "name": "大阪梅田",
+              "weekday": "23:39",
+              "weekend": "23:39"
+            },
+            {
+              "name": "正雀",
+              "weekday": "24:22",
+              "weekend": "24:22"
+            },
+            {
+              "name": "京都河原町",
+              "weekday": "23:13",
+              "weekend": "23:11"
+            },
+            {
+              "name": "桂",
+              "weekday": "24:15",
+              "weekend": "24:15"
+            }
+          ],
+          "sourceUrl": "https://www.hankyu.co.jp/station/html/HK-72_ky_1_w.html"
+        }
+      ]
+    }
+  ]
+}

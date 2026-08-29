@@ -1,0 +1,535 @@
+{
+  "dataset": "keihan-last-trains",
+  "updatedAt": "2026-08-29",
+  "timetableEffectiveFrom": "2026年8月22日変更",
+  "source": {
+    "name": "京阪電車 駅別発車時刻表",
+    "url": "https://www.keihan.co.jp/traffic/station/",
+    "retrievedAt": "2026-08-29",
+    "note": "京阪公式サイトの駅別発車時刻表PDF（/traffic/station/assets/pdf/time/<3桁駅コード><1=出町柳方面/2=淀屋橋方面><1=平日/2=土休日>.pdf）から各方向の最終便を抽出。2026年8月22日ダイヤ変更版。深夜帯の時刻は平日・土休日で同一。各駅停車（普通）のみ収録：特急・快速急行・急行・準急・通勤準急・区間急行は途中駅を通過するため不収録（三条で普通〔出町柳ゆき〕に種別変更する列車を含む）。実際の最終列車はこれより遅い場合がある。行き先は、淀屋橋方面は『淀』（淀止まり）と『寝屋川市』（淀以南へ直通する最終普通、through で樟葉まで対応）、出町柳方面は『出町柳』を代表として収録。24時台は24時表記。"
+  },
+  "stations": [
+    {
+      "id": "demachiyanagi",
+      "name": "出町柳",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "23:57",
+              "weekend": "23:57"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:29",
+              "weekend": "23:29"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/18021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "jingu-marutamachi",
+      "name": "神宮丸太町",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "23:58",
+              "weekend": "23:58"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:24",
+              "weekend": "24:24"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/17121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "sanjo",
+      "name": "三条",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:01",
+              "weekend": "24:01"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:33",
+              "weekend": "23:33"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:23",
+              "weekend": "24:23"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/17021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "gion-shijo",
+      "name": "祇園四条",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:02",
+              "weekend": "24:02"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:34",
+              "weekend": "23:34"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:07",
+              "weekend": "24:07"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/16221.pdf"
+        }
+      ]
+    },
+    {
+      "id": "kiyomizu-gojo",
+      "name": "清水五条",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:04",
+              "weekend": "24:04"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:36",
+              "weekend": "23:36"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:05",
+              "weekend": "24:05"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/16121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "shichijo",
+      "name": "七条",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:05",
+              "weekend": "24:05"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:38",
+              "weekend": "23:38"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:04",
+              "weekend": "24:04"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/16021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tofukuji",
+      "name": "東福寺",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:07",
+              "weekend": "24:07"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:40",
+              "weekend": "23:40"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:02",
+              "weekend": "24:02"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/15321.pdf"
+        }
+      ]
+    },
+    {
+      "id": "toba-kaido",
+      "name": "鳥羽街道",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:09",
+              "weekend": "24:09"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:41",
+              "weekend": "23:41"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "24:00",
+              "weekend": "24:00"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/15221.pdf"
+        }
+      ]
+    },
+    {
+      "id": "fushimi-inari",
+      "name": "伏見稲荷",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:11",
+              "weekend": "24:11"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:43",
+              "weekend": "23:43"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:59",
+              "weekend": "23:59"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/15121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "ryukokudai-mae-fukakusa",
+      "name": "龍谷大前深草",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:13",
+              "weekend": "24:13"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:45",
+              "weekend": "23:45"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:58",
+              "weekend": "23:58"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/15021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "fujinomori",
+      "name": "藤森",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:14",
+              "weekend": "24:14"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:46",
+              "weekend": "23:46"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:56",
+              "weekend": "23:56"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/14221.pdf"
+        }
+      ]
+    },
+    {
+      "id": "sumizome",
+      "name": "墨染",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:15",
+              "weekend": "24:15"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:48",
+              "weekend": "23:48"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:54",
+              "weekend": "23:54"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/14121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "tanbabashi",
+      "name": "丹波橋",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:18",
+              "weekend": "24:18"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:50",
+              "weekend": "23:50"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/14021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "fushimi-momoyama",
+      "name": "伏見桃山",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:19",
+              "weekend": "24:19"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:52",
+              "weekend": "23:52"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:43",
+              "weekend": "23:43"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/13121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "chushojima",
+      "name": "中書島",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "淀",
+              "weekday": "24:21",
+              "weekend": "24:21"
+            },
+            {
+              "name": "寝屋川市",
+              "weekday": "23:54",
+              "weekend": "23:54"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:42",
+              "weekend": "23:42"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/13021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "yodo",
+      "name": "淀",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "寝屋川市",
+              "weekday": "24:02",
+              "weekend": "24:02"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:37",
+              "weekend": "23:37"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/12021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "iwashimizu-hachimangu",
+      "name": "石清水八幡宮",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "寝屋川市",
+              "weekday": "24:05",
+              "weekend": "24:05"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:31",
+              "weekend": "23:31"
+            },
+            {
+              "name": "淀",
+              "weekday": "24:11",
+              "weekend": "24:11"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/11021.pdf"
+        }
+      ]
+    },
+    {
+      "id": "hashimoto",
+      "name": "橋本",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "寝屋川市",
+              "weekday": "24:08",
+              "weekend": "24:08"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:28",
+              "weekend": "23:28"
+            },
+            {
+              "name": "淀",
+              "weekday": "24:09",
+              "weekend": "24:09"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/10121.pdf"
+        }
+      ]
+    },
+    {
+      "id": "kuzuha",
+      "name": "樟葉",
+      "lines": [
+        {
+          "lineId": "keihan-main",
+          "lineName": "京阪本線・鴨東線",
+          "destinations": [
+            {
+              "name": "寝屋川市",
+              "weekday": "24:11",
+              "weekend": "24:11"
+            },
+            {
+              "name": "出町柳",
+              "weekday": "23:26",
+              "weekend": "23:26"
+            },
+            {
+              "name": "淀",
+              "weekday": "24:06",
+              "weekend": "24:06"
+            }
+          ],
+          "sourceUrl": "https://www.keihan.co.jp/traffic/station/assets/pdf/time/10021.pdf"
+        }
+      ]
+    }
+  ]
+}

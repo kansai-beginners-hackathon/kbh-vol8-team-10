@@ -1,0 +1,359 @@
+{
+  "dataset": "arashiden-last-trains",
+  "updatedAt": "2026-08-29",
+  "timetableEffectiveFrom": null,
+  "source": {
+    "name": "京福電気鉄道 嵐電 駅別発車時刻表",
+    "url": "https://www.keifuku.co.jp/randen_timetable.php",
+    "retrievedAt": "2026-08-29",
+    "note": "各駅の発車時刻表（PNG画像 https://www.keifuku.co.jp/images/ ）から各方向・行き先別の最終便を抽出。凡例: 無印＝嵐山ゆき、「西」＝西院ゆき、「北」＝北野白梅町ゆき、緑セル＝2両編成、赤字＝帷子ノ辻で北野線に接続なし。24時台は24時表記を維持。平日と土休日で深夜帯の時刻は同一。公式ページにダイヤ改正日の記載なし。"
+  },
+  "stations": [
+    {
+      "id": "shijo-omiya",
+      "name": "四条大宮",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:40", "weekend": "23:40" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a1_t1b.png"
+        }
+      ]
+    },
+    {
+      "id": "sai",
+      "name": "西院",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:43", "weekend": "23:43" },
+            { "name": "四条大宮", "weekday": "23:36", "weekend": "23:36" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a2_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "nishioji-sanjo",
+      "name": "西大路三条",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:45", "weekend": "23:45" },
+            { "name": "四条大宮", "weekday": "23:33", "weekend": "23:33" },
+            { "name": "西院", "weekday": "24:23", "weekend": "24:23" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a3_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "yamanouchi",
+      "name": "山ノ内",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:47", "weekend": "23:47" },
+            { "name": "四条大宮", "weekday": "23:31", "weekend": "23:31" },
+            { "name": "西院", "weekday": "24:21", "weekend": "24:21" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a4_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "randen-tenjingawa",
+      "name": "嵐電天神川",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:50", "weekend": "23:50" },
+            { "name": "四条大宮", "weekday": "23:29", "weekend": "23:29" },
+            { "name": "西院", "weekday": "24:19", "weekend": "24:19" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a5_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "kaikonoyashiro",
+      "name": "蚕ノ社",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:51", "weekend": "23:51" },
+            { "name": "四条大宮", "weekday": "23:28", "weekend": "23:28" },
+            { "name": "西院", "weekday": "24:18", "weekend": "24:18" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a6_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "uzumasa-koryuji",
+      "name": "太秦広隆寺",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:53", "weekend": "23:53" },
+            { "name": "四条大宮", "weekday": "23:26", "weekend": "23:26" },
+            { "name": "西院", "weekday": "24:16", "weekend": "24:16" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a7_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "katabiranotsuji",
+      "name": "帷子ノ辻",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:56", "weekend": "23:56" },
+            { "name": "四条大宮", "weekday": "23:24", "weekend": "23:24" },
+            { "name": "西院", "weekday": "24:14", "weekend": "24:14" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a8_jikoku1b.png"
+        },
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:25", "weekend": "23:25" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a8_jikoku5b.png"
+        }
+      ]
+    },
+    {
+      "id": "arisugawa",
+      "name": "有栖川",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "23:58", "weekend": "23:58" },
+            { "name": "四条大宮", "weekday": "23:22", "weekend": "23:22" },
+            { "name": "西院", "weekday": "24:12", "weekend": "24:12" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a9_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "kurumazakijinja",
+      "name": "車折神社",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "24:00", "weekend": "24:00" },
+            { "name": "四条大宮", "weekday": "23:20", "weekend": "23:20" },
+            { "name": "西院", "weekday": "24:10", "weekend": "24:10" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a10_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "rokuoin",
+      "name": "鹿王院",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "24:01", "weekend": "24:01" },
+            { "name": "四条大宮", "weekday": "23:19", "weekend": "23:19" },
+            { "name": "西院", "weekday": "24:09", "weekend": "24:09" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a11_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "randen-saga",
+      "name": "嵐電嵯峨",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "嵐山", "weekday": "24:02", "weekend": "24:02" },
+            { "name": "四条大宮", "weekday": "23:18", "weekend": "23:18" },
+            { "name": "西院", "weekday": "24:08", "weekend": "24:08" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a12_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "arashiyama",
+      "name": "嵐山",
+      "lines": [
+        {
+          "lineId": "randen-arashiyama",
+          "lineName": "嵐山本線",
+          "destinations": [
+            { "name": "四条大宮", "weekday": "23:17", "weekend": "23:17" },
+            { "name": "西院", "weekday": "24:07", "weekend": "24:07" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/a13_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "satsueijomae",
+      "name": "撮影所前",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:26", "weekend": "23:26" },
+            { "name": "帷子ノ辻", "weekday": "23:20", "weekend": "23:20" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b1_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "tokiwa",
+      "name": "常盤",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:28", "weekend": "23:28" },
+            { "name": "帷子ノ辻", "weekday": "23:18", "weekend": "23:18" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b2_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "narutaki",
+      "name": "鳴滝",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:29", "weekend": "23:29" },
+            { "name": "帷子ノ辻", "weekday": "23:17", "weekend": "23:17" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b3_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "utano",
+      "name": "宇多野",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:31", "weekend": "23:31" },
+            { "name": "帷子ノ辻", "weekday": "23:16", "weekend": "23:16" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b4_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "omuro-ninnaji",
+      "name": "御室仁和寺",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:32", "weekend": "23:32" },
+            { "name": "帷子ノ辻", "weekday": "23:15", "weekend": "23:15" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b5_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "myoshinji",
+      "name": "妙心寺",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:33", "weekend": "23:33" },
+            { "name": "帷子ノ辻", "weekday": "23:13", "weekend": "23:13" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b6_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "ryoanji",
+      "name": "龍安寺",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:34", "weekend": "23:34" },
+            { "name": "帷子ノ辻", "weekday": "23:12", "weekend": "23:12" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b7_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "tojiin-ritsumeikan",
+      "name": "等持院・立命館大学衣笠キャンパス前",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "北野白梅町", "weekday": "23:35", "weekend": "23:35" },
+            { "name": "帷子ノ辻", "weekday": "23:11", "weekend": "23:11" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b8_jikoku1b.png"
+        }
+      ]
+    },
+    {
+      "id": "kitano-hakubaicho",
+      "name": "北野白梅町",
+      "lines": [
+        {
+          "lineId": "randen-kitano",
+          "lineName": "北野線",
+          "destinations": [
+            { "name": "帷子ノ辻", "weekday": "23:10", "weekend": "23:10" }
+          ],
+          "sourceUrl": "https://www.keifuku.co.jp/images/b9_jikoku1b.png"
+        }
+      ]
+    }
+  ]
+}
