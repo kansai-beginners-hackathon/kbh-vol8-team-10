@@ -6,18 +6,19 @@ export interface Route {
   hub: HubId;
   /** ハブに着いてから支線に乗るまでの乗換時間（分） */
   transferMin: number;
-  /** ハブ発・自宅駅まで行く最終列車の発時刻 "HH:MM"（24時台は "24:05"） */
-  last: string;
-  /** ハブの掲示上の最終（行き先問わず）。「終電の嘘」の比較用 */
-  posted: string;
-  postedTo: string;
+  /** ハブ発・自宅駅まで行く最終列車の発時刻 "HH:MM"（24時台は "24:05"）。null = 電車不要（制約なし） */
+  last: string | null;
+  /** どこから来た値か。UI のラベル用 */
+  via: "local" | "transit";
+  /** 乗換回数。2 以上は UI で「参考値」 */
+  transferCount: number;
 }
 
 export interface Station {
   name: string;
   /** 複数ある場合は一番遅くなる経路が採用される */
   routes: Route[];
-  /** タクシー概算用の直線距離（km） */
+  /** タクシー概算用の直線距離（km）。0 = 未計測（表示しない） */
   taxiKm: number;
 }
 

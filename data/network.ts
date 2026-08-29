@@ -1,59 +1,12 @@
 /**
- * ⚠️ モック用のダミーデータ。実際の時刻表とは一致しない。
+ * 候補地 → ハブ の所要・最終（VENUES）と、デモ用の既定値。
  *
- * 本番では
- *  - 地下鉄: data/subway-last-trains.json（京都市交通局・取得済み）
- *  - 私鉄:   ハブ駅 9 個 × 平日/休日の時刻表を人が転記
- *  - 候補地→ハブ: Yahoo!乗換案内の終電検索 54 セル
- * に置き換える。構造（型）はそのまま使える。
+ * - `VENUES[].toHub` は候補地発・各ハブ行きの「所要分（+3 分安全側）」と「最終の発時刻」。
+ *   ⚠️ まだ手打ちの暫定値。Yahoo!乗換案内の終電検索で実測値に置き換える予定（別メンバー担当）。
+ * - ハブ → 自宅駅の終電は lib/buildStations.ts（resolveLastTrain）で実データから組む。
+ *   ハブの定義は data/hubs.ts。
  */
-import type { Station, Venue } from "@/lib/types";
-
-export const HUBS: Record<string, string> = {
-  demachiyanagi: "出町柳",
-  sanjo: "三条",
-  kawaramachi: "京都河原町",
-  karasumaoike: "烏丸御池",
-  shijo: "四条",
-  kyoto: "京都",
-  shijoomiya: "四条大宮",
-};
-
-const s = (name: string, taxiKm: number, routes: Station["routes"]): Station => ({ name, taxiKm, routes });
-
-export const STATIONS: Record<string, Station> = Object.fromEntries(
-  [
-    s("鞍馬", 17, [{ hub: "demachiyanagi", transferMin: 5, last: "22:30", posted: "23:50", postedTo: "修学院" }]),
-    s("八瀬比叡山口", 11, [{ hub: "demachiyanagi", transferMin: 5, last: "23:02", posted: "23:50", postedTo: "修学院" }]),
-    s("市原", 13, [{ hub: "demachiyanagi", transferMin: 5, last: "23:15", posted: "23:50", postedTo: "修学院" }]),
-    s("宝ヶ池", 7, [{ hub: "demachiyanagi", transferMin: 5, last: "23:30", posted: "23:50", postedTo: "修学院" }]),
-    s("大阪梅田", 45, [
-      { hub: "kawaramachi", transferMin: 3, last: "23:15", posted: "23:50", postedTo: "正雀" },
-      { hub: "kyoto", transferMin: 8, last: "23:58", posted: "23:58", postedTo: "大阪" },
-    ]),
-    s("桂", 9, [{ hub: "kawaramachi", transferMin: 3, last: "23:40", posted: "23:50", postedTo: "正雀" }]),
-    s("長岡天神", 14, [{ hub: "kawaramachi", transferMin: 3, last: "23:28", posted: "23:50", postedTo: "正雀" }]),
-    s("びわ湖浜大津", 13, [{ hub: "karasumaoike", transferMin: 3, last: "23:12", posted: "23:55", postedTo: "六地蔵" }]),
-    s("太秦天神川", 6, [{ hub: "karasumaoike", transferMin: 3, last: "23:50", posted: "23:55", postedTo: "六地蔵" }]),
-    s("山科", 7, [
-      { hub: "karasumaoike", transferMin: 3, last: "23:47", posted: "23:55", postedTo: "六地蔵" },
-      { hub: "kyoto", transferMin: 8, last: "23:52", posted: "23:52", postedTo: "米原" },
-    ]),
-    s("国際会館", 9, [{ hub: "shijo", transferMin: 3, last: "23:47", posted: "23:59", postedTo: "竹田" }]),
-    s("北大路", 4, [{ hub: "shijo", transferMin: 3, last: "23:54", posted: "23:59", postedTo: "竹田" }]),
-    s("竹田", 7, [
-      { hub: "shijo", transferMin: 3, last: "23:59", posted: "23:59", postedTo: "竹田" },
-      { hub: "kyoto", transferMin: 8, last: "23:40", posted: "23:40", postedTo: "奈良" },
-    ]),
-    s("枚方市", 30, [{ hub: "sanjo", transferMin: 5, last: "23:47", posted: "24:05", postedTo: "樟葉" }]),
-    s("中書島", 9, [{ hub: "sanjo", transferMin: 5, last: "23:58", posted: "24:05", postedTo: "樟葉" }]),
-    s("嵐山", 13, [{ hub: "shijoomiya", transferMin: 5, last: "23:10", posted: "23:30", postedTo: "帷子ノ辻" }]),
-    s("亀岡", 22, [{ hub: "kyoto", transferMin: 8, last: "23:11", posted: "23:58", postedTo: "高槻" }]),
-    s("草津", 30, [{ hub: "kyoto", transferMin: 8, last: "23:34", posted: "24:00", postedTo: "野洲" }]),
-  ].map((station) => [station.name, station]),
-);
-
-export const STATION_NAMES = Object.keys(STATIONS);
+import type { Venue } from "@/lib/types";
 
 /** { ハブ: [所要分, 候補地発の最終] }。null = 候補地がハブそのもの */
 const cells = (table: Record<string, [number, string | null]>): Venue["toHub"] =>

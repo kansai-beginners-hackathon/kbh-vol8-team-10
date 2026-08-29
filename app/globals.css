@@ -145,7 +145,17 @@ footer {
 .add { grid-template-columns: 29px 1fr 1.15fr auto; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); }
 .add .btn { min-height: 38px; padding: 0 14px; }
 .avatar-add { background: transparent; border: 1px dashed var(--line); color: var(--muted); }
-.add-error { margin-top: 8px; color: var(--coral); font-size: 12px; }
+/* .add-error: 駅の存在チェックを外したので現在未使用 */
+
+/* 駅の状態（対応予定・確認中）と参考値のラベル */
+.station-cell { display: grid; gap: 4px; min-width: 0; }
+.badge { display: inline-block; font: 500 11px var(--hand); line-height: 1.3; padding: 2px 7px; border-radius: 3px; white-space: nowrap; }
+.badge-unavailable { color: #8a6b1f; background: var(--cream); border: 1px solid #ead9bd; white-space: normal; }
+.badge-pending { color: var(--muted); background: transparent; border: 1px dashed var(--line); }
+.badge-ref { color: #8a6b1f; background: var(--cream); border: 1px solid #ead9bd; margin-left: 8px; vertical-align: middle; }
+.member.is-unavailable .avatar { background: #eee9dc; color: #8a6b1f; }
+.status-building i { background: #d9a441; animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .3; } }
 
 /* 候補地・条件 */
 .pills { display: flex; flex-wrap: wrap; gap: 7px; }
