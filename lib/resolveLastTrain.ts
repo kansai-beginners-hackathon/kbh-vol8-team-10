@@ -17,6 +17,9 @@
  *  - Transit の結果はキャッシュする。found はメモリ + localStorage、unavailable はメモリのみ
  *    （一時障害でその日一日「対応予定」に固定されないように）
  *  - Transit の呼び出しは 300ms 以上空ける（7 ハブ × N 人を直列で回す前提）
+ *  - Transit に渡す日付は dayType から決める（deps.dateFor）。今日が dayType と一致すれば今日、
+ *    一致しなければ直近の該当日（土曜に weekday を聞かれたら次の月曜）。
+ *    ローカル JSON と Transit が同じダイヤ（平日 / 土休日）を見るための約束。祝日は見ない（UI でユーザーが選ぶ）
  */
 import { hubGeo, hubNames, type Hub } from "../data/hubs.ts";
 import { lastTrainBetween, type DayType, type LastTrainsData, type LinesData, type LocalLastTrain } from "./lastTrain.ts";
@@ -69,8 +72,11 @@ export interface ResolveDeps {
   ) => Promise<PlanResult | TransitJourney | null>;
   /** preferFeeds: 優先する feed ID（地下鉄収録駅なら地下鉄） */
   suggestStationId: (name: string, preferFeeds: readonly string[]) => Promise<string | null>;
-  /** "YYYYMMDD"（ローカル時刻） */
-  today: () => string;
+  /**
+   * Transit に問い合わせる日付 "YYYYMMDD"。dayType のダイヤが走る日を返す（既定は dateForDayType）。
+   * 今日が dayType と違うときに今日を返すと、ローカル JSON は平日・Transit は土休日 のように層がズレる
+   */
+  dateFor: (dayType: DayType) => string;
   /** Transit 呼び出しの最小間隔 ms。テストでは 0 にできる */
   minIntervalMs?: number;
 }
@@ -82,12 +88,31 @@ export function todayYYYYMMDD(now: Date = new Date()): string {
   return `${y}${m}${d}`;
 }
 
+/** その日のダイヤ区分。土日 → weekend（土休日ダイヤ）、月〜金 → weekday。祝日は見ない（UI でユーザーが選ぶ） */
+export function dayTypeOf(date: Date): DayType {
+  const day = date.getDay();
+  return day === 0 || day === 6 ? "weekend" : "weekday";
+}
+
+/**
+ * dayType のダイヤが走る直近の日付 "YYYYMMDD"。今日が該当すれば今日、そうでなければ次に該当する日。
+ * 例: 土曜に weekday → 次の月曜、月曜に weekend → 次の土曜。
+ */
+export function dateForDayType(dayType: DayType, now: Date = new Date()): string {
+  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  for (let i = 0; i < 7; i++) {
+    if (dayTypeOf(d) === dayType) return todayYYYYMMDD(d);
+    d.setDate(d.getDate() + 1);
+  }
+  return todayYYYYMMDD(now); // 到達しない（7 日以内に必ず両区分がある）
+}
+
 export const defaultDeps: ResolveDeps = {
   lines: ALL_LINES,
   lastTrains: ALL_LAST_TRAINS,
   planLastArrival: (from, to, date, originNames) => planLastArrivalDetailed(from, to, date, fetch, { originNames }),
   suggestStationId: (name, preferFeeds) => suggestStationId(name, fetch, { preferFeeds }),
-  today: () => todayYYYYMMDD(),
+  dateFor: (dayType) => dateForDayType(dayType),
   minIntervalMs: 300,
 };
 
@@ -215,7 +240,7 @@ export async function resolveLastTrain(
     }
 
     // 2. キャッシュ
-    const date = deps.today();
+    const date = deps.dateFor(dayType);
     const key = cacheKey(hub, homeName, dayType, date);
     const cached = readCache(key);
     if (cached) return cached;

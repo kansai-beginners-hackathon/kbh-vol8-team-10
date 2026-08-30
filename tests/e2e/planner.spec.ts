@@ -1,36 +1,38 @@
-// /app（components/Planner.tsx）: メンバー入力 → 終電解決 → 順位表示 → URL 共有。
-// Transit API は helpers.mockTransitOffline で偽装（ローカル JSON に無い駅は「対応予定」）。
+// /app（components/Planner.tsx）: メンバー入力 → ダイヤ選択 → 終電解決 → 順位表示 → URL 共有。
+// - ダイヤ（平日 / 土日）を選ぶまで終電は調べない。URL の d= で初期選択できる
+// - data/prebuilt-stations.json にある駅（鞍馬・桂・国際会館・嵐山・びわ湖浜大津・太秦天神川・枚方市）は Transit を待たず即表示
+// - それ以外で ローカル JSON に無い駅は Transit へ → helpers.mockTransitOffline で偽装（「対応予定」になる）
 import { expect, test } from "@playwright/test";
-import { memberRows, mockTransitFound, mockTransitOffline, pill, queryOf, waitForBuilt } from "./helpers";
+import { dayTypePill, memberRows, mockTransitFound, mockTransitOffline, pill, queryOf, unavailableBadge, waitForBuilt } from "./helpers";
 
 test.beforeEach(async ({ page }) => {
   await mockTransitOffline(page);
 });
 
 test.describe("初期状態", () => {
-  test("メンバー 0 人: 案内文が出て、候補地は既定の 5 つが選択済み", async ({ page }) => {
+  test("メンバー 0 人・候補地未選択・ダイヤ未選択で始まる", async ({ page }) => {
     await page.goto("/app");
     await waitForBuilt(page);
     await expect(page.locator(".ranking .lede")).toHaveText("①でメンバーの最寄り駅を追加すると、一番長くいられる場所が出ます。");
     await expect(memberRows(page)).toHaveCount(0);
     await expect(page.locator(".heading .num.note").first()).toHaveText("0 / 8人");
 
-    const pressed = page.locator("button.pill[aria-pressed='true']");
-    await expect(pressed).toHaveCount(5);
-    await expect(pressed).toHaveText(["四条", "京都駅", "烏丸御池", "三条", "出町柳"]);
-    await expect(page.locator("button.pill")).toHaveCount(8);
+    await expect(page.locator(".pills button.pill")).toHaveCount(8 + 2); // 候補地 8 + ダイヤ 2
+    await expect(page.locator("button.pill[aria-pressed='true']")).toHaveCount(0);
+    await expect(page.locator(".topbar .status-unset")).toHaveText("ダイヤ未選択");
 
     await expect(page.locator("input[type=time]")).toHaveValue("19:00");
     await expect(page.locator("input[type=range]")).toHaveValue("5");
     await expect(page.locator(".cond b.num")).toHaveText("5分");
   });
 
-  test("ヘッダーに今日のダイヤ種別（平日 / 土休日）が出る", async ({ page }) => {
-    // 時計を偽装すると SSR（実時刻）とクライアント（偽時刻）でずれてハイドレーション警告になるので、実際の曜日から期待値を出す
-    const dow = new Date().toLocaleDateString("en-US", { weekday: "short", timeZone: "Asia/Tokyo" });
-    const expected = dow === "Sat" || dow === "Sun" ? "京都・土休日ダイヤ" : "京都・平日ダイヤ";
-    await page.goto("/app");
-    await expect(page.locator(".topbar .status").first()).toContainText(expected);
+  test("d=weekday / d=weekend でヘッダーのダイヤ表示が変わる", async ({ page }) => {
+    await page.goto("/app?d=weekday");
+    await expect(page.locator(".topbar .status").first()).toContainText("京都・平日ダイヤ");
+    await page.goto("/app?d=weekend");
+    await expect(page.locator(".topbar .status").first()).toContainText("京都・土日ダイヤ");
+    await page.goto("/app?d=holiday");
+    await expect(page.locator(".topbar .status-unset")).toHaveText("ダイヤ未選択");
   });
 
   test("「戻る」で LP へ", async ({ page }) => {
@@ -41,9 +43,32 @@ test.describe("初期状態", () => {
   });
 });
 
+test.describe("ダイヤの選択", () => {
+  test("メンバーがいてもダイヤ未選択なら調べない。③で選ぶと調べて順位が出る", async ({ page }) => {
+    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi,shijo");
+    await expect(page.locator(".ranking .lede")).toHaveText("③で平日か土日を選ぶと、終電を調べます。");
+    await expect(page.locator(".state-pending")).toHaveCount(0, { timeout: 1000 });
+    expect(queryOf(page).d).toBeNull();
+
+    await dayTypePill(page, "平日").click();
+    await expect(dayTypePill(page, "平日")).toHaveAttribute("aria-pressed", "true");
+    await expect(dayTypePill(page, "土日")).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator(".topbar .status").first()).toContainText("京都・平日ダイヤ");
+    await expect.poll(() => queryOf(page).d).toBe("weekday");
+    await expect(page.locator(".winner-name")).toHaveText("出町柳");
+    await expect(page.locator(".winner-time strong")).toHaveText("22:20");
+
+    await dayTypePill(page, "土日").click();
+    await expect.poll(() => queryOf(page).d).toBe("weekend");
+    await expect(page.locator(".topbar .status").first()).toContainText("京都・土日ダイヤ");
+    // 叡電 鞍馬行きの最終は土日も 22:30 なので同じ
+    await expect(page.locator(".winner-time strong")).toHaveText("22:20");
+  });
+});
+
 test.describe("URL からの復元", () => {
-  test("m= / v= / t= / w= が画面に反映される", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬,国際会館&v=shijo,demachiyanagi&t=20:30&w=10");
+  test("m= / v= / t= / w= / d= が画面に反映される", async ({ page }) => {
+    await page.goto("/app?m=田中:鞍馬,国際会館&v=shijo,demachiyanagi&t=20:30&w=10&d=weekday");
     const rows = memberRows(page);
     await expect(rows).toHaveCount(2);
     await expect(rows.nth(0).getByLabel("名前")).toHaveValue("田中");
@@ -52,7 +77,8 @@ test.describe("URL からの復元", () => {
     await expect(rows.nth(1).getByLabel("名前")).toHaveValue("国際会館");
     await expect(rows.nth(1).getByLabel("最寄り駅")).toHaveValue("国際会館");
 
-    await expect(page.locator("button.pill[aria-pressed='true']")).toHaveText(["四条", "出町柳"]);
+    await expect(page.locator(".pills").first().locator("button.pill[aria-pressed='true']")).toHaveText(["四条", "出町柳"]);
+    await expect(dayTypePill(page, "平日")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("input[type=time]")).toHaveValue("20:30");
     await expect(page.locator("input[type=range]")).toHaveValue("10");
   });
@@ -70,9 +96,11 @@ test.describe("URL からの復元", () => {
     await expect(page.locator("input[type=range]")).toHaveValue("0");
   });
 
-  test("v= に未知の id だけなら既定の候補地に戻る", async ({ page }) => {
-    await page.goto("/app?v=nowhere,unknown");
-    await expect(page.locator("button.pill[aria-pressed='true']")).toHaveCount(5);
+  test("v= に未知の id だけなら候補地は未選択", async ({ page }) => {
+    await page.goto("/app?v=nowhere,unknown&m=五条&d=weekday");
+    await expect(page.locator("button.pill[aria-pressed='true']")).toHaveText(["平日"]);
+    await waitForBuilt(page);
+    await expect(page.locator(".ranking .lede")).toHaveText("②で候補地を選ぶと、一番長くいられる場所が出ます。");
   });
 
   test("「駅」付きの駅名は落として受ける（鞍馬駅 → 鞍馬）", async ({ page }) => {
@@ -170,14 +198,14 @@ test.describe("メンバーの追加・編集・削除", () => {
 
 test.describe("候補地・条件", () => {
   test("候補地の pill はトグルで aria-pressed と URL の v= が変わる", async ({ page }) => {
-    await page.goto("/app");
+    await page.goto("/app?v=shijo,kyoto");
     const kitaoji = pill(page, "北大路");
     await expect(kitaoji).toHaveAttribute("aria-pressed", "false");
     await kitaoji.click();
     await expect(kitaoji).toHaveAttribute("aria-pressed", "true");
-    await expect.poll(() => queryOf(page).v).toBe("shijo,kyoto,karasumaoike,sanjo,demachiyanagi,kitaoji");
+    await expect.poll(() => queryOf(page).v).toBe("shijo,kyoto,kitaoji");
     await pill(page, "四条").click();
-    await expect.poll(() => queryOf(page).v).toBe("kyoto,karasumaoike,sanjo,demachiyanagi,kitaoji");
+    await expect.poll(() => queryOf(page).v).toBe("kyoto,kitaoji");
   });
 
   test("集合時刻と徒歩分は URL の t= / w= に入る", async ({ page }) => {
@@ -190,9 +218,9 @@ test.describe("候補地・条件", () => {
   });
 });
 
-test.describe("順位（ローカル JSON で解ける駅）", () => {
-  test("田中(鞍馬)・高橋(国際会館): 1 位は出町柳、22:15 まで、ボトルネックは田中", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬,高橋:国際会館&v=shijo,demachiyanagi&t=19:00&w=10");
+test.describe("順位（事前計算済み・ローカル JSON で解ける駅）", () => {
+  test("田中(鞍馬)・高橋(国際会館): 1 位は出町柳、22:15 まで、ボトルネックは田中の 出町柳 22:30 発", async ({ page }) => {
+    await page.goto("/app?m=田中:鞍馬,高橋:国際会館&v=shijo,demachiyanagi&t=19:00&w=10&d=weekday");
     await waitForBuilt(page);
 
     await expect(page.locator(".ranking .heading h2")).toContainText("この2人が一番長くいられる場所");
@@ -200,11 +228,13 @@ test.describe("順位（ローカル JSON で解ける駅）", () => {
     // 鞍馬行き最終 22:30 − 乗換 5 分 − 徒歩 10 分 = 22:15
     await expect(page.locator(".winner-time strong")).toHaveText("22:15");
     await expect(page.locator(".winner-time small")).toContainText("までに出れば、全員帰れます");
-    await expect(page.locator(".bottleneck")).toContainText("田中さんの終電時間は 22:15 です。");
+    // 詰む人の枡には動かない「終電の発時刻」（支線側が縛る → ハブ発）と、店を出る時刻
+    await expect(page.locator(".bottleneck")).toContainText("田中さんの終電は 出町柳 22:30 発。");
+    await expect(page.locator(".bottleneck")).toContainText("店を 22:15 に出れば間に合います。");
     // 19:00 集合 → 3 時間 15 分
     await expect(page.locator(".winner .note")).toContainText("3時間15分");
 
-    // 2 位の四条: 22:30 − 18 − 5 − 10 = 21:57、差 18 分
+    // 2 位の四条: 22:30 − 出町柳まで 18 − 乗換 5 − 徒歩 10 = 21:57、差 18 分
     const rows = page.locator(".rank-list li");
     await expect(rows).toHaveCount(1);
     await expect(rows.first()).toContainText("四条");
@@ -218,8 +248,22 @@ test.describe("順位（ローカル JSON で解ける駅）", () => {
     await expect(memberRows(page).nth(1)).not.toHaveClass(/is-bottleneck/);
   });
 
+  test("詰む人の枡: 支線側が縛れば「ハブ発」、幹線側が縛れば「候補地発」の最終を出す", async ({ page }) => {
+    // 桂（阪急 京都河原町 24:10 発）× 出町柳: min(24:10 − 17 − 3 = 23:50, 出町柳→京都河原町 23:57) → 支線側 → 京都河原町 24:10 発
+    await page.goto("/app?m=佐藤:桂&v=demachiyanagi&w=5&d=weekday");
+    await waitForBuilt(page);
+    await expect(page.locator(".bottleneck")).toContainText("佐藤さんの終電は 京都河原町 24:10 発。");
+    await expect(page.locator(".bottleneck")).toContainText("店を 23:45 に出れば間に合います。");
+
+    // 桂 × 烏丸御池: min(24:10 − 10 − 3 = 23:57, 烏丸御池→京都河原町 23:55) → 幹線側 → 烏丸御池 23:55 発
+    await page.goto("/app?m=佐藤:桂&v=karasumaoike&w=5&d=weekday");
+    await waitForBuilt(page);
+    await expect(page.locator(".bottleneck")).toContainText("佐藤さんの終電は 烏丸御池 23:55 発。");
+    await expect(page.locator(".bottleneck")).toContainText("店を 23:50 に出れば間に合います。");
+  });
+
   test("タイムライン: 選んだ候補地で誰が何時まで", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬,高橋:国際会館&v=shijo,demachiyanagi&w=10");
+    await page.goto("/app?m=田中:鞍馬,高橋:国際会館&v=shijo,demachiyanagi&w=10&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".detail h2")).toHaveText("出町柳なら、誰が何時まで");
     const tl = page.locator(".tl-row");
@@ -236,15 +280,15 @@ test.describe("順位（ローカル JSON で解ける駅）", () => {
 
   test("差が 10 分以内なら「どこでもほぼ同じ」", async ({ page }) => {
     // 国際会館 1 人: 四条 (23:50−0−3−5=23:42) と 烏丸御池 (23:55−0−3−5=23:47) → 差 5 分
-    await page.goto("/app?m=高橋:国際会館&v=shijo,karasumaoike&w=5");
+    await page.goto("/app?m=高橋:国際会館&v=shijo,karasumaoike&w=5&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".winner-name")).toHaveText("烏丸御池");
     await expect(page.locator(".winner-time strong")).toHaveText("23:47");
     await expect(page.locator(".flat")).toContainText("差は 5分");
   });
 
-  test("自宅駅が候補地そのもの: 終電の制約なし", async ({ page }) => {
-    await page.goto("/app?m=四条&v=shijo");
+  test("自宅駅が候補地そのもの: 終電の制約なし（事前計算に無い駅は実行時に解く）", async ({ page }) => {
+    await page.goto("/app?m=四条&v=shijo&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".winner-name")).toHaveText("四条");
     await expect(page.locator(".winner-time strong")).toHaveText("終電の制約なし");
@@ -253,7 +297,7 @@ test.describe("順位（ローカル JSON で解ける駅）", () => {
   });
 
   test("徒歩を変えると時刻が動く（順位は同じ）", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi,shijo&w=5");
+    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi,shijo&w=5&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".winner-time strong")).toHaveText("22:20");
     await page.locator("input[type=range]").fill("0");
@@ -261,25 +305,45 @@ test.describe("順位（ローカル JSON で解ける駅）", () => {
     await expect(page.locator(".winner-name")).toHaveText("出町柳");
   });
 
-  test("候補地を外すと順位から消える。全部外すと案内文", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi,shijo");
+  test("候補地を外すと順位から消える。全部外すと②の案内文", async ({ page }) => {
+    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi,shijo&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".rank-list li")).toHaveCount(1);
     await pill(page, "四条").click();
     await expect(page.locator(".rank-list")).toHaveCount(0);
     await pill(page, "出町柳").click();
-    await expect(page.locator(".ranking .lede")).toHaveText("メンバーと候補地を選ぶと、一番長くいられる場所が出ます。");
+    await expect(page.locator(".ranking .lede")).toHaveText("②で候補地を選ぶと、一番長くいられる場所が出ます。");
+  });
+
+  test("LP の「例を見る」: 事前計算済みの 4 人が即表示され、土日ダイヤで 1 位は四条 23:16", async ({ page }) => {
+    const calls = await mockTransitOffline(page);
+    await page.goto("/");
+    await page.getByRole("link", { name: "例を見る" }).click();
+    await expect(page).toHaveURL(/\/app/);
+    await expect(memberRows(page)).toHaveCount(4);
+    await expect(page.locator(".topbar .status").first()).toContainText("京都・土日ダイヤ");
+    await expect(page.locator(".ranking .heading h2")).toContainText("この4人が一番長くいられる場所");
+    await expect(page.locator(".winner-name")).toHaveText("四条");
+    await expect(page.locator(".winner-time strong")).toHaveText("23:16");
+    await expect(page.locator(".bottleneck")).toContainText("高橋さんの終電は");
+    await expect(unavailableBadge(page)).toHaveCount(0);
+    await expect(page.locator(".rank-list li")).toHaveCount(4);
+    await expect(page.locator(".rank-list li").last()).toContainText("出町柳");
+    // 事前計算済みなので Transit は呼ばない
+    await waitForBuilt(page);
+    expect(calls.suggest).toEqual([]);
+    expect(calls.plan).toEqual([]);
   });
 });
 
-test.describe("対応予定（ローカルに無く Transit も出せない駅）", () => {
-  test("その人だけバッジが付き、順位計算から外れる", async ({ page }) => {
-    await page.goto("/app?m=田中:鞍馬,鈴木:大阪梅田&v=demachiyanagi,shijo&w=10");
+test.describe("対応予定（ローカルにも事前計算にも無く、Transit も出せない駅）", () => {
+  test("その人だけ「対応予定」が付き、順位計算から外れる", async ({ page }) => {
+    await page.goto("/app?m=田中:鞍馬,鈴木:大阪梅田&v=demachiyanagi,shijo&w=10&d=weekday");
     await waitForBuilt(page);
     const rows = memberRows(page);
     await expect(rows.nth(1)).toHaveClass(/is-unavailable/);
-    await expect(rows.nth(1).locator(".badge-unavailable")).toHaveText("この駅は対応予定・順位に含めていません");
-    await expect(rows.nth(0).locator(".badge-unavailable")).toHaveCount(0);
+    await expect(rows.nth(1).locator(".state-unavailable")).toHaveText("対応予定");
+    await expect(rows.nth(0).locator(".state-unavailable")).toHaveCount(0);
 
     await expect(page.locator(".ranking .heading h2")).toContainText("この1人が一番長くいられる場所");
     await expect(page.locator(".ranking .heading .note")).toContainText("対応予定 1人を除く");
@@ -288,22 +352,11 @@ test.describe("対応予定（ローカルに無く Transit も出せない駅�
 
   test("全員が対応予定なら、駅名を変える案内", async ({ page }) => {
     const calls = await mockTransitOffline(page);
-    await page.goto("/app?m=鈴木:大阪梅田");
+    await page.goto("/app?m=鈴木:大阪梅田&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".ranking .lede")).toHaveText("終電データのある駅のメンバーがいません。駅名を変えてみてください。");
     // 同じ駅の suggest はハブ 7 つ分でも 1 回にまとまる
     expect(calls.suggest.filter((q) => q === "大阪梅田").length).toBeLessThanOrEqual(1);
-  });
-
-  test("LP の「例を見る」: 4 人のうち Transit 頼みの 2 人が対応予定になる", async ({ page }) => {
-    await page.goto("/");
-    await page.getByRole("link", { name: "例を見る" }).click();
-    await expect(page).toHaveURL(/\/app/);
-    await expect(memberRows(page)).toHaveCount(4);
-    await waitForBuilt(page);
-    await expect(page.locator(".badge-unavailable")).toHaveCount(2);
-    await expect(page.locator(".ranking .heading .note")).toContainText("対応予定 2人を除く");
-    await expect(page.locator(".winner-name")).toHaveText("出町柳");
   });
 });
 
@@ -312,20 +365,22 @@ test.describe("Transit で解ける駅", () => {
     await page.unroute(/api\.transit\.ls8h\.com/);
     // 京都河原町 → 大阪梅田 23:20 発（84000 秒）
     await mockTransitFound(page, { stationName: "大阪梅田", stationId: "scrape-hankyu:阪急電鉄-京都線-大阪梅田", departureSecs: 84000, headsign: "大阪梅田", originName: "京都河原町" });
-    await page.goto("/app?m=鈴木:大阪梅田&v=shijo&w=5");
+    await page.goto("/app?m=鈴木:大阪梅田&v=shijo&w=5&d=weekday");
     await waitForBuilt(page);
-    await expect(page.locator(".badge-unavailable")).toHaveCount(0);
+    await expect(unavailableBadge(page)).toHaveCount(0);
     await expect(page.locator(".winner-name")).toHaveText("四条");
     // 四条 → 京都河原町 6 分・乗換 3 分・徒歩 5 分: 23:20 − 6 − 3 − 5 = 23:06
     // （他ハブへ返した同じ journey は出発駅名が京都河原町なので startsAt で弾かれ、経路は kawaramachi の 1 本）
     await expect(page.locator(".winner-time strong")).toHaveText("23:06");
+    await expect(page.locator(".bottleneck")).toContainText("鈴木さんの終電は 京都河原町 23:20 発。");
+    await expect(page.locator(".bottleneck")).toContainText("店を 23:06 に出れば間に合います。");
   });
 
   test("乗換 2 回以上の Transit 経路がボトルネックなら「参考値」バッジ", async ({ page }) => {
     await page.unroute(/api\.transit\.ls8h\.com/);
     await mockTransitFound(page, { stationName: "大阪梅田", stationId: "scrape-hankyu:阪急電鉄-京都線-大阪梅田", departureSecs: 84000, headsign: "大阪梅田", originName: "京都河原町", transferCount: 2 });
     // 鈴木（大阪梅田・乗換 2）が 23:06、高橋（国際会館・ローカル）は 23:4x → 鈴木がボトルネック
-    await page.goto("/app?m=鈴木:大阪梅田,高橋:国際会館&v=shijo,karasumaoike&w=5");
+    await page.goto("/app?m=鈴木:大阪梅田,高橋:国際会館&v=shijo,karasumaoike&w=5&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".winner .eyebrow .badge-ref")).toHaveText("参考値");
     await expect(page.locator(".bottleneck")).toContainText("鈴木");
@@ -336,7 +391,7 @@ test.describe("Transit で解ける駅", () => {
   test("乗換 0〜1 回、またはローカル経路がボトルネックなら「参考値」は出ない", async ({ page }) => {
     await page.unroute(/api\.transit\.ls8h\.com/);
     await mockTransitFound(page, { stationName: "大阪梅田", stationId: "scrape-hankyu:阪急電鉄-京都線-大阪梅田", departureSecs: 84000, headsign: "大阪梅田", originName: "京都河原町", transferCount: 1 });
-    await page.goto("/app?m=鈴木:大阪梅田&v=shijo&w=5");
+    await page.goto("/app?m=鈴木:大阪梅田&v=shijo&w=5&d=weekday");
     await waitForBuilt(page);
     await expect(page.locator(".winner-time strong")).toHaveText("23:06");
     await expect(page.locator(".badge-ref")).toHaveCount(0);
@@ -346,13 +401,14 @@ test.describe("Transit で解ける駅", () => {
 test.describe("共有", () => {
   test("「リンクをコピー」で現在の URL がクリップボードに入る", async ({ page, context }) => {
     await context.grantPermissions(["clipboard-read", "clipboard-write"]);
-    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi");
+    await page.goto("/app?m=田中:鞍馬&v=demachiyanagi&d=weekday");
     await waitForBuilt(page);
     await page.getByRole("button", { name: "リンクをコピー" }).click();
     await expect(page.getByRole("button", { name: "コピーしました" })).toBeVisible();
     const copied = await page.evaluate(() => navigator.clipboard.readText());
     expect(copied).toBe(page.url());
     expect(new URL(copied).searchParams.get("m")).toBe("田中:鞍馬");
+    expect(new URL(copied).searchParams.get("d")).toBe("weekday");
     // 1.8 秒で元の文言に戻る
     await expect(page.getByRole("button", { name: "リンクをコピー" })).toBeVisible({ timeout: 5000 });
   });
@@ -362,11 +418,13 @@ test.describe("共有", () => {
     await page.getByLabel("追加する人の最寄り駅").fill("鞍馬");
     await page.getByRole("button", { name: "追加" }).click();
     await pill(page, "北大路").click();
+    await dayTypePill(page, "土日").click();
     await page.locator("input[type=time]").fill("20:00");
-    await expect.poll(() => queryOf(page)).toEqual({ m: "鞍馬", v: "shijo,kyoto,karasumaoike,sanjo,demachiyanagi,kitaoji", t: "20:00", w: "5" });
+    await expect.poll(() => queryOf(page)).toEqual({ m: "鞍馬", v: "kitaoji", t: "20:00", w: "5", d: "weekend" });
     await page.reload();
     await expect(memberRows(page)).toHaveCount(1);
     await expect(pill(page, "北大路")).toHaveAttribute("aria-pressed", "true");
+    await expect(dayTypePill(page, "土日")).toHaveAttribute("aria-pressed", "true");
     await expect(page.locator("input[type=time]")).toHaveValue("20:00");
   });
 });

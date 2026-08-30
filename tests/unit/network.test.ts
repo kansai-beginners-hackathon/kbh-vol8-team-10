@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { HUBS } from "../../data/hubs.ts";
-import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "../../data/network.ts";
+import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES, derivedLastDepart, undeterminedCells, venuesFor } from "../../data/network.ts";
 import { isHHMM, toMin } from "../../lib/time.ts";
 
 const hubIds = new Set(HUBS.map((h) => h.id));
@@ -24,30 +24,56 @@ test("各候補地は 7 ハブ全部への行き方を持つ", () => {
   for (const v of VENUES) assert.equal(Object.keys(v.toHub).length, HUBS.length, v.name);
 });
 
-test("候補地がハブそのもののときだけ lastDepart null・transitMin 0（id がハブ id と一致）", () => {
+test("lastDepart が null なのは、候補地がハブそのもの か 徒歩接続（三条→京都河原町）だけ", () => {
+  const nulls: string[] = [];
+  for (const v of VENUES) {
+    for (const [hub, cell] of Object.entries(v.toHub)) {
+      if (cell && cell.lastDepart === null) nulls.push(`${v.id}→${hub}`);
+    }
+  }
+  assert.deepEqual(nulls.sort(), [
+    "demachiyanagi→demachiyanagi",
+    "karasumaoike→karasumaoike",
+    "kyoto→kyoto",
+    "sanjo→kawaramachi", // 四条大橋を渡って徒歩。電車の制約なし
+    "sanjo→sanjo",
+    "shijo→shijo",
+  ]);
+});
+
+test("候補地自身への所要は 0、それ以外は 0 より大きい（徒歩接続も所要は持つ）", () => {
   for (const v of VENUES) {
     for (const [hub, cell] of Object.entries(v.toHub)) {
       if (!cell) continue;
-      if (cell.lastDepart === null) {
-        assert.equal(hub, v.id, `${v.name} の ${hub} が null だが候補地自身ではない`);
-        assert.equal(cell.transitMin, 0, `${v.name} 自身への所要が 0 でない`);
-      } else {
-        assert.ok(cell.transitMin > 0, `${v.name} → ${hub} の所要が 0`);
-      }
+      if (hub === v.id) assert.equal(cell.transitMin, 0, `${v.name} 自身への所要が 0 でない`);
+      else assert.ok(cell.transitMin > 0, `${v.name} → ${hub} の所要が 0`);
     }
   }
 });
 
-test("ハブでもある候補地（四条・京都駅・烏丸御池・三条・出町柳）は自分自身のセルが null", () => {
-  for (const id of ["shijo", "kyoto", "karasumaoike", "sanjo", "demachiyanagi"]) {
-    const v = VENUES.find((x) => x.id === id)!;
-    assert.equal(v.toHub[id]?.lastDepart, null, id);
+test("venuesFor: 平日と土日で候補地の並び・id は同じ。導出セルはローカル JSON の値に一致する", () => {
+  const wd = venuesFor("weekday");
+  const we = venuesFor("weekend");
+  assert.deepEqual(wd.map((v) => v.id), we.map((v) => v.id));
+  assert.deepEqual(VENUES, wd, "VENUES は weekday の結果");
+  // 四条 → 烏丸御池（烏丸線 北行き）は導出される
+  assert.equal(wd.find((v) => v.id === "shijo")!.toHub.karasumaoike!.lastDepart, "23:50");
+});
+
+test("undeterminedCells: 暫定値のままのセルは null でも導出済みでもない", () => {
+  const undetermined = undeterminedCells("weekday");
+  assert.ok(undetermined.length > 0);
+  for (const c of undetermined) {
+    const cell = VENUES.find((v) => v.id === c.venue)!.toHub[c.hub]!;
+    assert.equal(cell.lastDepart, c.fallback, `${c.venue}→${c.hub} は暫定値のはず`);
+    assert.match(c.fallback, /^\d{2}:\d{2}$/);
   }
-  // ハブでない候補地（北大路・山科・桂）は null を持たない
-  for (const id of ["kitaoji", "yamashina", "katsura"]) {
-    const v = VENUES.find((x) => x.id === id)!;
-    assert.ok(Object.values(v.toHub).every((c) => c && c.lastDepart !== null), id);
-  }
+  // 導出できたセルは undetermined に入らない
+  assert.ok(!undetermined.some((c) => c.venue === "shijo" && c.hub === "karasumaoike"));
+});
+
+test("derivedLastDepart: 未知のハブ id は null", () => {
+  assert.equal(derivedLastDepart({ id: "x", name: "x", stations: ["四条"], toHub: {} }, "nowhere", "weekday"), null);
 });
 
 test("lastDepart は HH:MM で 22:00〜24:59 の範囲（終電として妥当）", () => {

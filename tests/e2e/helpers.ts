@@ -59,15 +59,21 @@ export async function mockParse(page: Page, body: unknown, status = 200) {
 /** Planner のメンバー行（見出し行は除く） */
 export const memberRows = (page: Page) => page.locator(".member-list .member:not(.member-head)");
 
-/** 「更新中…」が消えるまで待つ（終電の解決が終わった） */
+/** 「更新中…」が消えるまで待つ（終電の解決が終わった）。事前計算済みの駅だけなら最初から出ない */
 export async function waitForBuilt(page: Page) {
   await expect(page.locator(".status-building")).toHaveCount(0);
 }
 
-/** URL の m= / v= / t= / w= を読む */
+/** メンバー行の「対応予定」表示（ローカルにも Transit にも無い駅） */
+export const unavailableBadge = (page: Page) => page.locator(".state-unavailable");
+
+/** ③ のダイヤ切り替え（平日 / 土日） */
+export const dayTypePill = (page: Page, label: "平日" | "土日") => page.getByRole("group", { name: "ダイヤ" }).getByRole("button", { name: label });
+
+/** URL の m= / v= / t= / w= / d= を読む */
 export function queryOf(page: Page) {
   const q = new URL(page.url()).searchParams;
-  return { m: q.get("m"), v: q.get("v"), t: q.get("t"), w: q.get("w") };
+  return { m: q.get("m"), v: q.get("v"), t: q.get("t"), w: q.get("w"), d: q.get("d") };
 }
 
 /** 候補地の pill（②）。ランキング行のボタンにも候補地名が入るので、pill に限定して完全一致で引く */

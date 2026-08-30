@@ -5,7 +5,7 @@
 import { beforeEach, test } from "node:test";
 import assert from "node:assert/strict";
 import { HUBS } from "../../data/hubs.ts";
-import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, VENUES } from "../../data/network.ts";
+import { DEFAULT_MEMBERS, DEFAULT_VENUE_IDS, venuesFor } from "../../data/network.ts";
 import { buildStations, type Resolver } from "../../lib/buildStations.ts";
 import { bestRoute, rankVenues } from "../../lib/calc.ts";
 import { ALL_LAST_TRAINS, ALL_LINES } from "../../lib/localData.ts";
@@ -18,11 +18,12 @@ const offline: ResolveDeps = {
   lastTrains: ALL_LAST_TRAINS,
   planLastArrival: async () => ({ journey: null, outcome: "noJourneys" as const }),
   suggestStationId: async () => null,
-  today: () => "20260829",
+  dateFor: () => "20260829",
   minIntervalMs: 0,
 };
 const resolver: Resolver = (hub, home, dayType) => resolveLastTrain(hub, home, dayType, offline);
-const venues = VENUES.filter((v) => DEFAULT_VENUE_IDS.includes(v.id));
+// Planner と同じく、その日のダイヤで組んだ候補地（候補地→ハブの最終もローカル JSON から導出）
+const venues = venuesFor("weekday").filter((v) => DEFAULT_VENUE_IDS.includes(v.id));
 
 const 田中: Member = { name: "田中", station: "鞍馬" };
 const 高橋: Member = { name: "高橋", station: "国際会館" };

@@ -19,6 +19,11 @@
 - Node 22.6 以上（`.ts` をそのまま実行する。トランスパイル無し）
 - E2E は初回だけ `npx playwright install chromium`
 - E2E はネットワークも API キーも不要。`playwright.config.ts` が `next dev -p 3100` を自動起動し、`/api/parse` の入力検証に到達できるようダミーの `OPENAI_API_KEY` を入れる。3100 番で既に動いているサーバーがあればそれを使う（`CI=1` なら使わない）
+- E2E で使う駅の使い分け（`components/Planner.tsx` の 3 経路に対応）
+  - 事前計算済み（`data/prebuilt-stations.json`: 鞍馬・桂・国際会館・嵐山・びわ湖浜大津・太秦天神川・枚方市）→ Transit を待たず即表示。順位の期待値はここから
+  - ローカル JSON で解ける駅（五条・四条・山科 など）→ 実行時に解く。Transit は呼ばれない
+  - どちらにも無い駅（大阪梅田 など）→ Transit へ。`mockTransitOffline` で「対応予定」、`mockTransitFound` で見つかる経路を偽装
+  - ダイヤ（`d=weekday|weekend`）を選ぶまで終電は調べない。順位を見るテストは URL に `d=` を付ける
 
 ## `setup/alias-loader.mjs` がやっていること
 
@@ -44,7 +49,7 @@ Next のバンドラは解決してくれるが素の Node は解決しないも
 
 - メンバー行 `.member-list .member`（見出し行は `.member-head`）、`aria-label="名前"` / `"最寄り駅"` / `"削除"`
 - 追加フォーム `aria-label="追加する人の名前"` / `"追加する人の最寄り駅"`、ボタン「追加」
-- 候補地 `button.pill[aria-pressed]`
-- 順位 `.winner-name` `.winner-time` `.bottleneck` `.rank-list li` `.reason` `.flat`、案内文 `.ranking .lede`
-- 対応予定 `.badge-unavailable`、計算中 `.status-building`
+- 候補地 `button.pill[aria-pressed]`（ダイヤ切替も `.pill`。`role=group[aria-label=ダイヤ]` の中）
+- 順位 `.winner-name` `.winner-time` `.bottleneck` `.rank-list li` `.reason` `.flat` `.badge-ref`、案内文 `.ranking .lede`
+- 対応予定 `.state-unavailable`、確認中 `.state-pending`、計算中 `.status-building`、ダイヤ未選択 `.status-unset`
 - 貼り付け `details.chat-import`、`aria-label="貼り付けるテキスト"`、`.chat-import-done`、`.chat-import [role=alert]`

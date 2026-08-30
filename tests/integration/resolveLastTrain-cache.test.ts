@@ -45,7 +45,7 @@ const makeDeps = (over: Partial<ResolveDeps> = {}) => {
     lastTrains,
     planLastArrival: async () => { calls.plan++; return ujiJourney; },
     suggestStationId: async () => { calls.suggest++; return "x:y"; },
-    today: () => "20260829",
+    dateFor: () => "20260829",
     minIntervalMs: 0,
     ...over,
   };
@@ -145,7 +145,7 @@ test("キーは ハブ id・自宅駅・曜日・日付 で分かれる", async 
   await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", deps);
   await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekend", deps);
   await resolveLastTrain(HUB_BY_ID.demachiyanagi, "宇治", "weekday", deps);
-  await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", { ...deps, today: () => "20260830" });
+  await resolveLastTrain(HUB_BY_ID.sanjo, "宇治", "weekday", { ...deps, dateFor: () => "20260830" });
   assert.deepEqual(
     [...store.keys()].sort(),
     ["lt:demachiyanagi:宇治:weekday:20260829", "lt:sanjo:宇治:weekday:20260829", "lt:sanjo:宇治:weekday:20260830", "lt:sanjo:宇治:weekend:20260829"],

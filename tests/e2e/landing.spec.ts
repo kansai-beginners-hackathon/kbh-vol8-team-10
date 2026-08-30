@@ -30,19 +30,21 @@ test.describe("LP", () => {
     await expect(page.locator(".member-list .member:not(.member-head)")).toHaveCount(0);
   });
 
-  test("「例を見る」はサンプル 4 人と候補地 5 つを URL に載せる", async ({ page }) => {
+  test("「例を見る」は事前計算済みの 4 人・候補地 5 つ・土日ダイヤを URL に載せる", async ({ page }) => {
     await page.goto("/");
     const demo = page.getByRole("link", { name: "例を見る" });
     const href = await demo.getAttribute("href");
     expect(href).toBeTruthy();
     const q = new URL(href!, "http://x").searchParams;
-    expect(q.get("m")).toBe("田中:鞍馬,佐藤:びわ湖浜大津,鈴木:大阪梅田,高橋:国際会館");
+    expect(q.get("m")).toBe("田中:嵐山,佐藤:桂,鈴木:国際会館,高橋:びわ湖浜大津");
     expect(q.get("v")).toBe("shijo,kyoto,karasumaoike,sanjo,demachiyanagi");
+    expect(q.get("d")).toBe("weekend");
   });
 
-  test("「始める」リンクは topbar・hero・closing の 3 箇所", async ({ page }) => {
+  test("「始める」リンクは hero・closing の 2 箇所（ヘッダー行は無い）", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("link", { name: "始める" })).toHaveCount(3);
+    await expect(page.getByRole("link", { name: "始める" })).toHaveCount(2);
+    await expect(page.locator(".topbar")).toHaveCount(0);
   });
 
   test("フッターに免責が出る", async ({ page }) => {

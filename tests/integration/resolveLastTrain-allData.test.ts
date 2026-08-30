@@ -18,7 +18,7 @@ const localOnly = (): { deps: ResolveDeps; calls: { plan: number; suggest: numbe
       lastTrains: ALL_LAST_TRAINS,
       planLastArrival: async () => { calls.plan++; throw new Error("planLastArrival は呼ばれないはず"); },
       suggestStationId: async () => { calls.suggest++; throw new Error("suggestStationId は呼ばれないはず"); },
-      today: () => "20260829",
+      dateFor: () => "20260829",
       minIntervalMs: 0,
     },
   };
@@ -32,7 +32,7 @@ const transitOffline = () => {
     lastTrains: ALL_LAST_TRAINS,
     planLastArrival: async () => { calls.plan++; return { journey: null, outcome: "noJourneys" as const }; },
     suggestStationId: async () => { calls.suggest++; return null; },
-    today: () => "20260829",
+    dateFor: () => "20260829",
     minIntervalMs: 0,
   };
   return { deps, calls };
@@ -44,7 +44,8 @@ test("defaultDeps は全社 merge 後のデータを使う", () => {
   assert.equal(defaultDeps.lines, ALL_LINES);
   assert.equal(defaultDeps.lastTrains, ALL_LAST_TRAINS);
   assert.equal(defaultDeps.minIntervalMs, 300);
-  assert.match(defaultDeps.today(), /^\d{8}$/);
+  assert.match(defaultDeps.dateFor("weekday"), /^\d{8}$/);
+  assert.match(defaultDeps.dateFor("weekend"), /^\d{8}$/);
 });
 
 test("出町柳 → 鞍馬: 叡電をローカルで解く 22:30（LP の『掲示 23:50 / 本当は 22:30』の根拠）", async () => {
