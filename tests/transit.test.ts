@@ -6,6 +6,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {
   boardingSecs,
+  hasSubwayTransfer,
   isSane,
   isShinkansenLeg,
   usesShinkansen,
@@ -272,4 +273,25 @@ test("suggestStationId: 大阪梅田は阪神が先頭でも阪急を選ぶ", as
 test("suggestStationId: 新幹線の駅しか無ければ null", async () => {
   const { fetcher } = fakeFetch({ stations: [{ id: "tokaido-shinkansen:tokaido.station.Gifu-Hashima", name: "岐阜羽島", kind: "station" }] });
   assert.equal(await suggestStationId("岐阜羽島", fetcher), null);
+});
+
+// ---- 地下鉄を挟む乗換の除外
+test("hasSubwayTransfer: 地下鉄 leg + 他社 leg は true、地下鉄 1 本だけ・私鉄同士は false", () => {
+  const subwayLeg = { kind: "transit" as const, from: { id: "scrape-kyoto-subway:京都市-烏丸線-烏丸御池", name: "烏丸御池" }, to: { id: "scrape-kyoto-subway:京都市-烏丸線-四条", name: "四条" }, departureSecs: 82800, arrivalSecs: 82920 };
+  const hankyuLeg = { kind: "transit" as const, headsign: "正雀", from: { id: "scrape-hankyu:阪急電鉄-京都線-烏丸", name: "烏丸" }, to: { id: "scrape-hankyu:阪急電鉄-京都線-桂", name: "桂" }, departureSecs: 83160, arrivalSecs: 83700 };
+  assert.equal(hasSubwayTransfer(journey({ transferCount: 1, legs: [subwayLeg, { kind: "walk", departureSecs: 82920, arrivalSecs: 83040 }, hankyuLeg] })), true);
+  assert.equal(hasSubwayTransfer(journey({ transferCount: 0, legs: [subwayLeg] })), false);
+  assert.equal(hasSubwayTransfer(journey({})), false, "京阪同士の乗換（三条→宇治）は対象外");
+});
+
+test("planLastArrival: 地下鉄を挟む乗換経路は弾かれ、無ければ null", async () => {
+  const j = journey({
+    departureSecs: 82800,
+    transferCount: 1,
+    legs: [
+      { kind: "transit", from: { id: "scrape-kyoto-subway:京都市-烏丸線-烏丸御池", name: "烏丸御池" }, departureSecs: 82800, arrivalSecs: 82920 },
+      { kind: "transit", headsign: "正雀", from: { id: "scrape-hankyu:阪急電鉄-京都線-烏丸", name: "烏丸" }, departureSecs: 83160, arrivalSecs: 83700 },
+    ],
+  });
+  assert.equal(await planLastArrival("geo:x", "y", "20260829", fakeFetch({ journeys: [j] }).fetcher), null);
 });

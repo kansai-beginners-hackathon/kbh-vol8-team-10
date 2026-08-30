@@ -294,6 +294,8 @@ for (const [hub, home] of [["sanjo","宇治"],["shijo","五条"],["kyoto","三�
 | `time` は `journey.departureSecs` ではなく**最初の乗車区間の発時刻**（`boardingSecs`） | 先頭に徒歩 leg があると徒歩開始時刻になる。徒歩分は `Hub.transferMin` が持つ |
 | `ResolveDeps.today()` → `dateFor(dayType)`（既定 `dateForDayType`）。Transit に渡す日付を **dayType のダイヤが走る直近の日**にする（土曜に weekday なら次の月曜） | 以前は常に今日の日付だったので、土曜に `weekday` を聞いてもローカル JSON は平日・Transit は土休日ダイヤ、と層がズレていた。Transit は日付でカレンダーを選ぶ（京阪の tripId が `weekday_*` / `holiday_*` に変わる）。ダイヤ区分は Planner の「平日 / 土休日」トグルでユーザーが選ぶ（祝日判定は持たない） |
 | 新幹線の経路を弾く（`usesShinkansen`）。`suggestStationId` は新幹線の駅を除外し、同名駅は `FEED_PRIORITY`（京都近郊の事業者 → JR → 阪神・大阪メトロ）で選ぶ | 京都→姫路 が「23:05 のぞみ95号」、新大阪 が御堂筋線の駅ID（21:51 乗換2）になっていた。帰りの終電に新幹線は出さない。大阪梅田も阪神より阪急が先になる |
+| 地下鉄 leg を含む乗換あり経路を弾く（`hasSubwayTransfer`） | 地下鉄 feed の所要時間が壊れているため、烏丸御池→桂 23:06（本当は 23:45 頃）や 四条→中書島 23:55（乗り継げない）が出ていた。乗換なしの地下鉄はローカル JSON が解く |
+| 候補地→ハブの最終（`VENUES.toHub.lastDepart`）を、同じ路線ならローカル JSON から導出（`data/network.ts` `venuesFor(dayType)`） | 手打ち 30 セルのうち導出できた 13 セル中 11 がズレていた（四条→烏丸御池 23:55→23:50、烏丸御池→四条 24:00→23:55、三条→出町柳 23:52→24:23 など）。所要分は手打ちのまま |
 | `unavailable` は **メモリのみ**キャッシュ（localStorage には書かない） | Transit の一時障害でその日一日「対応予定」に固定されないように |
 | 駅 ID キャッシュに `null` は残さない | suggest の一時失敗を同セッションの他ハブに波及させない |
 
