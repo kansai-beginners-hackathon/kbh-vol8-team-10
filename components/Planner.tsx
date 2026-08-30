@@ -104,7 +104,7 @@ export default function Planner() {
   const [members, setMembers] = useState<Member[]>(() => parseMembers(params.get("m")));
   const [venueIds, setVenueIds] = useState<string[]>(() => parseVenueIds(params.get("v")));
   const [meetAt, setMeetAt] = useState(() => (isHHMM(params.get("t")) ? params.get("t")! : "19:00"));
-  const [walk, setWalk] = useState(() => Math.min(15, Math.max(0, Number(params.get("w")) || 5)));
+  const [walk, setWalk] = useState(() => Math.min(30, Math.max(0, Number(params.get("w")) || 5)));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newName, setNewName] = useState("");
   const [newStation, setNewStation] = useState("");
@@ -345,7 +345,7 @@ export default function Planner() {
               </div>
             </div>
             <label><span>集合</span><input type="time" value={meetAt} onChange={(e) => setMeetAt(e.target.value || "19:00")} /></label>
-            <label><span>店から駅までの距離（帰り）</span><input type="range" min={0} max={15} value={walk} onChange={(e) => setWalk(Number(e.target.value))} /><b className="num">{walk}分</b></label>
+            <label><span>店から駅までの距離（帰り）</span><input type="range" min={0} max={30} value={walk} onChange={(e) => setWalk(Number(e.target.value))} /><b className="num">{walk}分</b></label>
           </div>
         </div>
       </section>
