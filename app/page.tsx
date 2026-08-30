@@ -12,6 +12,7 @@ const STEPS = [
  * 駅は data/prebuilt-stations.json に終電が焼いてあるものだけ（開いた瞬間に答えが出る）。d= を付けないとダイヤ未選択で計算されない。
  * 駅を変えたら scripts/export-prebuilt-stations.ts の DEMO_STATIONS も合わせて npm run data:prebuilt
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- 「例を見る」停止中も URL は残す
 const DEMO_HREF = "/app?m=田中:嵐山,佐藤:桂,鈴木:国際会館,高橋:びわ湖浜大津&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi&d=weekend";
 
 export default function LandingPage() {
@@ -26,7 +27,9 @@ export default function LandingPage() {
         </p>
         <div className="hero-actions">
           <Link href="/app" className="btn btn-primary btn-lg">始める</Link>
+          {/* 「例を見る」は一時的に停止中。戻すときはこの行のコメントを外す
           <Link href={DEMO_HREF} className="btn btn-ghost btn-lg">例を見る</Link>
+          */}
         </div>
       </section>
 
