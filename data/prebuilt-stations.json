@@ -1,15 +1,15 @@
 {
-  "fetchedAt": "2026-08-29",
+  "fetchedAt": "2026-08-30",
   "note": "scripts/export-prebuilt-stations.ts の出力。Planner はここにある駅は Transit を待たずに使う",
   "stations": {
     "weekday": {
-      "嵐山": {
-        "name": "嵐山",
+      "鞍馬": {
+        "name": "鞍馬",
         "routes": [
           {
-            "hub": "shijoomiya",
+            "hub": "demachiyanagi",
             "transferMin": 5,
-            "last": "23:40",
+            "last": "22:30",
             "via": "local",
             "transferCount": 0
           }
@@ -84,13 +84,13 @@
         ],
         "taxiKm": 0
       },
-      "鞍馬": {
-        "name": "鞍馬",
+      "新田辺": {
+        "name": "新田辺",
         "routes": [
           {
-            "hub": "demachiyanagi",
-            "transferMin": 5,
-            "last": "22:30",
+            "hub": "kyoto",
+            "transferMin": 8,
+            "last": "24:00",
             "via": "local",
             "transferCount": 0
           }
@@ -229,13 +229,53 @@
       }
     },
     "weekend": {
-      "嵐山": {
-        "name": "嵐山",
+      "鞍馬": {
+        "name": "鞍馬",
         "routes": [
           {
-            "hub": "shijoomiya",
+            "hub": "demachiyanagi",
             "transferMin": 5,
-            "last": "23:40",
+            "last": "22:30",
+            "via": "local",
+            "transferCount": 0
+          }
+        ],
+        "taxiKm": 0
+      },
+      "国際会館": {
+        "name": "国際会館",
+        "routes": [
+          {
+            "hub": "karasumaoike",
+            "transferMin": 3,
+            "last": "23:55",
+            "via": "local",
+            "transferCount": 0
+          },
+          {
+            "hub": "shijo",
+            "transferMin": 3,
+            "last": "23:50",
+            "via": "local",
+            "transferCount": 0
+          },
+          {
+            "hub": "kyoto",
+            "transferMin": 8,
+            "last": "23:47",
+            "via": "local",
+            "transferCount": 0
+          }
+        ],
+        "taxiKm": 0
+      },
+      "新田辺": {
+        "name": "新田辺",
+        "routes": [
+          {
+            "hub": "kyoto",
+            "transferMin": 8,
+            "last": "24:00",
             "via": "local",
             "transferCount": 0
           }
@@ -283,9 +323,30 @@
         ],
         "taxiKm": 0
       },
-      "国際会館": {
-        "name": "国際会館",
+      "太秦天神川": {
+        "name": "太秦天神川",
         "routes": [
+          {
+            "hub": "demachiyanagi",
+            "transferMin": 5,
+            "last": "23:15",
+            "via": "transit",
+            "transferCount": 2
+          },
+          {
+            "hub": "sanjo",
+            "transferMin": 5,
+            "last": "23:49",
+            "via": "local",
+            "transferCount": 0
+          },
+          {
+            "hub": "kawaramachi",
+            "transferMin": 3,
+            "last": "23:04",
+            "via": "transit",
+            "transferCount": 1
+          },
           {
             "hub": "karasumaoike",
             "transferMin": 3,
@@ -294,30 +355,17 @@
             "transferCount": 0
           },
           {
-            "hub": "shijo",
-            "transferMin": 3,
-            "last": "23:50",
-            "via": "local",
-            "transferCount": 0
-          },
-          {
             "hub": "kyoto",
             "transferMin": 8,
-            "last": "23:47",
-            "via": "local",
-            "transferCount": 0
-          }
-        ],
-        "taxiKm": 0
-      },
-      "鞍馬": {
-        "name": "鞍馬",
-        "routes": [
+            "last": "23:46",
+            "via": "transit",
+            "transferCount": 1
+          },
           {
-            "hub": "demachiyanagi",
+            "hub": "shijoomiya",
             "transferMin": 5,
-            "last": "22:30",
-            "via": "local",
+            "last": "23:40",
+            "via": "transit",
             "transferCount": 0
           }
         ],
@@ -367,54 +415,6 @@
             "last": "22:52",
             "via": "transit",
             "transferCount": 2
-          }
-        ],
-        "taxiKm": 0
-      },
-      "太秦天神川": {
-        "name": "太秦天神川",
-        "routes": [
-          {
-            "hub": "demachiyanagi",
-            "transferMin": 5,
-            "last": "23:15",
-            "via": "transit",
-            "transferCount": 2
-          },
-          {
-            "hub": "sanjo",
-            "transferMin": 5,
-            "last": "23:49",
-            "via": "local",
-            "transferCount": 0
-          },
-          {
-            "hub": "kawaramachi",
-            "transferMin": 3,
-            "last": "23:04",
-            "via": "transit",
-            "transferCount": 1
-          },
-          {
-            "hub": "karasumaoike",
-            "transferMin": 3,
-            "last": "23:55",
-            "via": "local",
-            "transferCount": 0
-          },
-          {
-            "hub": "kyoto",
-            "transferMin": 8,
-            "last": "23:46",
-            "via": "transit",
-            "transferCount": 1
-          },
-          {
-            "hub": "shijoomiya",
-            "transferMin": 5,
-            "last": "23:40",
-            "via": "transit",
-            "transferCount": 0
           }
         ],
         "taxiKm": 0
