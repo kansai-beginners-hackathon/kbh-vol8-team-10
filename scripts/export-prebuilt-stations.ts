@@ -14,8 +14,8 @@ import { buildStations } from "../lib/buildStations.ts";
 import type { DayType } from "../lib/lastTrain.ts";
 import type { Station } from "../lib/types.ts";
 
-/** LP の「例を見る」リンク（app/page.tsx DEMO_HREF）に入っている駅。乗換なし 3 + 乗換 1 回 1 */
-const DEMO_STATIONS = ["嵐山", "桂", "国際会館", "びわ湖浜大津"];
+/** LP の「例を見る」リンク（app/page.tsx DEMO_HREF）に入っている駅。4 人とも乗換なし（ローカル時刻表） */
+const DEMO_STATIONS = ["鞍馬", "桂", "国際会館", "新田辺"];
 
 const homes = [...new Set([...DEMO_STATIONS, ...DEFAULT_MEMBERS.map((m) => m.station)])];
 const members = homes.map((station) => ({ name: station, station }));

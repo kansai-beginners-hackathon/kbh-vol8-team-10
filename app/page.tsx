@@ -7,12 +7,13 @@ const STEPS = [
 ];
 
 /**
- * デモ。乗換なし（ローカル時刻表で確定）が 3 人 + 乗換 1 回で精度の揃う人が 1 人。乗換 2 回以上（参考値）の人は入れない。
- *   嵐山=嵐電（四条大宮） / 桂=阪急（京都河原町） / 国際会館=地下鉄 / びわ湖浜大津=全候補地で乗換 1 回
+ * デモ。4 人とも乗換なしでローカル時刻表から確定する（Transit を使わない）。
+ *   鞍馬=叡電（出町柳） / 桂=阪急（京都河原町・烏丸） / 国際会館=地下鉄烏丸線 / 新田辺=近鉄（京都）
+ * 実測（2026-08-30）: 出町柳 22:20 → 三条 22:12 → 烏丸御池 22:04 → 四条 22:02 → 京都駅 21:54。全候補地で田中（鞍馬 22:30 発）が詰む。平日・土日とも同値
  * 駅は data/prebuilt-stations.json に終電が焼いてあるものだけ（開いた瞬間に答えが出る）。d= を付けないとダイヤ未選択で計算されない。
  * 駅を変えたら scripts/export-prebuilt-stations.ts の DEMO_STATIONS も合わせて npm run data:prebuilt
  */
-const DEMO_HREF = "/app?m=田中:嵐山,佐藤:桂,鈴木:国際会館,高橋:びわ湖浜大津&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi&d=weekend";
+const DEMO_HREF = "/app?m=田中:鞍馬,佐藤:桂,鈴木:国際会館,高橋:新田辺&v=shijo,kyoto,karasumaoike,sanjo,demachiyanagi&d=weekend";
 
 export default function LandingPage() {
   return (
