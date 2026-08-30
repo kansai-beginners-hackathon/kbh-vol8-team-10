@@ -1,10 +1,10 @@
-// 実行: npm test
+// 実行: npm run test:integration
 // 候補地 → ハブ の最終が、同じ路線ならローカル JSON から導出されていることを確認する
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { undeterminedCells, venuesFor, VENUES } from "../data/network.ts";
-import { lastTrainBetween } from "../lib/lastTrain.ts";
-import { ALL_LAST_TRAINS, ALL_LINES } from "../lib/localData.ts";
+import { undeterminedCells, venuesFor, VENUES } from "../../data/network.ts";
+import { lastTrainBetween } from "../../lib/lastTrain.ts";
+import { ALL_LAST_TRAINS, ALL_LINES } from "../../lib/localData.ts";
 
 const cell = (venueId: string, hub: string, dayType: "weekday" | "weekend" = "weekday") =>
   venuesFor(dayType).find((v) => v.id === venueId)!.toHub[hub]!;

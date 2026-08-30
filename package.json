@@ -15,9 +15,15 @@
     "data:import:kyoto-bus": "node scripts/import-kyoto-city-bus.mjs",
     "data:import:kyoto-bus-timetables": "node scripts/import-kyoto-city-bus-timetables.mjs",
     "data:import:eizan-last-two": "node scripts/import-eizan-last-two.mjs",
-    "test": "node --test tests/*.test.ts",
+    "test": "node --import ./tests/setup/register.mjs --test 'tests/unit/**/*.test.ts' 'tests/integration/**/*.test.ts'",
     "start": "next start",
-    "test:parse": "node scripts/test-parse.js"
+    "test:parse": "node tests/e2e/live-parse.mjs",
+    "test:unit": "node --import ./tests/setup/register.mjs --test 'tests/unit/**/*.test.ts'",
+    "test:integration": "node --import ./tests/setup/register.mjs --test 'tests/integration/**/*.test.ts'",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:coverage": "node --import ./tests/setup/register.mjs --test --experimental-test-coverage --test-coverage-include='lib/**' --test-coverage-include='data/**' --test-coverage-include='app/api/**' 'tests/unit/**/*.test.ts' 'tests/integration/**/*.test.ts'",
+    "test:all": "npm test && npm run test:e2e"
   },
   "dependencies": {
     "@supabase/supabase-js": "latest",
@@ -30,6 +36,7 @@
     "zod": "^4.5.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "@types/node": "26.4.0",
     "@types/react": "19.2.18",
     "@types/react-dom": "^19.2.5",

@@ -1,11 +1,11 @@
-// 実行: npm test （= node --test tests/*.test.ts）
+// 実行: npm test（tests/unit と tests/integration を node --test で回す）
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { HUBS, type Hub } from "../data/hubs.ts";
-import { buildStations, todayType, type Resolver } from "../lib/buildStations.ts";
-import { bestRoute, latestLeave, rankVenues, resultFor } from "../lib/calc.ts";
-import type { Resolved } from "../lib/resolveLastTrain.ts";
-import type { Member, Station, Venue } from "../lib/types.ts";
+import { HUBS, type Hub } from "../../data/hubs.ts";
+import { buildStations, todayType, type Resolver } from "../../lib/buildStations.ts";
+import { bestRoute, latestLeave, rankVenues, resultFor } from "../../lib/calc.ts";
+import type { Resolved } from "../../lib/resolveLastTrain.ts";
+import type { Member, Station, Venue } from "../../lib/types.ts";
 
 const found = (time: string, via: "local" | "transit" = "local", transferCount = 0): Resolved => ({
   kind: "found", time, via, transferCount, headsign: null,

@@ -1,4 +1,4 @@
-// 実行: npm test （= node --test tests/*.test.ts）
+// 実行: npm test（tests/unit と tests/integration を node --test で回す）
 // Transit API は叩かない。tests/fixtures/ に保存した実レスポンスを偽 fetch で返す。
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -16,9 +16,9 @@ import {
   startsAt,
   suggestStationId,
   type TransitJourney,
-} from "../lib/transit.ts";
+} from "../../lib/transit.ts";
 
-const fixtures = path.resolve(import.meta.dirname, "fixtures");
+const fixtures = path.resolve(import.meta.dirname, "../fixtures");
 const load = (name: string) => JSON.parse(fs.readFileSync(path.join(fixtures, name), "utf8"));
 
 /** fixture の JSON を返す偽 fetch。呼ばれた URL は calls に残す */
