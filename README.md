@@ -3,8 +3,8 @@
 > みんなの最寄り駅を入れると、全員が終電で帰れる中で「一番長くいられる場所」がわかる
 
 ## デモ
-- デモURL：（リクトさんに聞く。Vercel の本番 URL）
-- 動画：（あれば）
+- デモURL：https://kbh-vol8-team-10.vercel.app/
+- プレゼン資料：https://www.figma.com/deck/ozeUMVb0QGolKFuaJEWldO/%E3%82%82%E3%81%86%E3%81%A1%E3%82%87%E3%81%A3%E3%81%A8_%E7%99%BA%E8%A1%A8%E3%82%B9%E3%83%A9%E3%82%A4%E3%83%89?node-id=3-2&t=1d9jjfTMtshFIRyp-0&scaling=min-zoom&content-scaling=fixed&page-id=0%3A1
 
 ## 課題
 飲み会の終盤、誰かの終電に合わせて全員が解散している。でも実は、
